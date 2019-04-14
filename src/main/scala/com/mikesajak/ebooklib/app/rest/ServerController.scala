@@ -22,7 +22,7 @@ class ServerController(appSettings: AppSettings, serverRestTemplate: RestTemplat
   }
 
   def startMonitoring() {
-    executor.scheduleAtFixedRate(task, 0, 10, TimeUnit.SECONDS)
+    executor.scheduleAtFixedRate(task, 0, appSettings.server.connCheckPeriod, TimeUnit.SECONDS)
   }
 
   def updateServerStatus(): Unit = {

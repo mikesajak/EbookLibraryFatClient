@@ -7,12 +7,12 @@ case class AppSettings(var confirmExit: Boolean = true,
 
 object DefaultSettings {
   val window = WindowSettings(1200, 400)
-  val server = ServerSettings("http://localhost:8080")
+  val server = ServerSettings("http://localhost:8080", 30)
   val booksTable = BooksTableSettings(Array(100, 150, 100,  150, 100, 100, 100,  150))
 }
 
 case class WindowSettings(width: Int, height: Int)
 
-case class ServerSettings(address: String)
+case class ServerSettings(address: String, connCheckPeriod: Int)
 
 case class BooksTableSettings(columnWidths: Array[Int])
