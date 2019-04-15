@@ -7,8 +7,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.MainPanelController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.MainPanelController">
    <children>
       <fx:include source="menu_bar.fxml" />
       <fx:include maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="book_table.fxml" VBox.vgrow="ALWAYS" />

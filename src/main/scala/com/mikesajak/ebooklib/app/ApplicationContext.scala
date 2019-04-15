@@ -1,9 +1,9 @@
 package com.mikesajak.ebooklib.app
 
-import com.google.inject.{AbstractModule, Guice, Injector, Provides, Singleton}
+import com.google.inject._
 import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
 import com.mikesajak.ebooklib.app.rest.ServerController
-import com.mikesajak.ebooklib.app.ui.ResourceManager
+import com.mikesajak.ebooklib.app.ui.{ActionsController, ResourceManager}
 import com.mikesajak.ebooklib.app.util.EventBus
 import net.codingwell.scalaguice.ScalaModule
 import org.springframework.boot.web.client.RestTemplateBuilder
@@ -12,12 +12,9 @@ import org.springframework.web.client.RestTemplate
 
 class ApplicationContext extends AbstractModule with ScalaModule {
   def configure(): Unit = {
-//    install(new PanelContext(LeftPanel))
-//    install(new PanelContext(RightPanel))
-//
-//    install(new UIOperationControllersContext)
     install(new ConfigContext)
     install(new WebContext)
+    install(new UIContext)
   }
 
   @Provides
@@ -31,6 +28,17 @@ class ApplicationContext extends AbstractModule with ScalaModule {
   @Provides
   @Singleton
   def eventBus() = new EventBus
+}
+
+class UIContext extends AbstractModule with ScalaModule {
+  override def configure(): Unit = {
+
+  }
+
+  @Provides
+  @Singleton
+  def actionsController(resourcesMgr: ResourceManager, appController: AppController) =
+    new ActionsController(resourcesMgr, appController)
 }
 
 class WebContext extends AbstractModule with ScalaModule {

@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
@@ -14,10 +15,11 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="687.0" prefWidth="899.0" spacing="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.EditBookMetadataController">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="687.0" prefWidth="899.0" spacing="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.EditBookMetadataControllerImpl">
    <children>
       <GridPane hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" vgap="5.0" VBox.vgrow="NEVER">
         <columnConstraints>
@@ -40,24 +42,24 @@
             <Label text="Authors:" GridPane.rowIndex="1" />
             <Label text="Series:" GridPane.rowIndex="2" />
             <TextField fx:id="titleTextField" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
-            <ComboBox fx:id="authorsCombo" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <ComboBox fx:id="seriesCombo" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <ComboBox fx:id="authorsCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ComboBox fx:id="seriesCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Label text="Tags:" GridPane.columnIndex="3" />
             <Label text="Identifiers:" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <Label text="Creation Date:" GridPane.columnIndex="3" GridPane.rowIndex="2" />
             <Label text="Publication Date:" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             <Label text="Publisher:" GridPane.columnIndex="3" GridPane.rowIndex="4" />
             <Label text="Languages:" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-            <ComboBox fx:id="tagsCombo" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" />
-            <ComboBox fx:id="publisherCombo" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="4" />
-            <ComboBox fx:id="languagesButton" editable="true" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="5" />
+            <ComboBox fx:id="tagsCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4" />
+            <ComboBox fx:id="publisherCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+            <ComboBox fx:id="languagesCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4" GridPane.rowIndex="5" />
             <TextField fx:id="identifiersTextField" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="1" />
             <HBox alignment="CENTER_LEFT" GridPane.columnIndex="4" GridPane.rowIndex="2" GridPane.valignment="CENTER">
                <children>
                   <TextField fx:id="creationDateTextField" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                  <Button fx:id="creationDateSelectButton" mnemonicParsing="false">
+                  <Button fx:id="creationDateSelButton" mnemonicParsing="false">
                      <graphic>
-                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../images/icons8-calendar-date-48.png" />
                            </image>
@@ -68,9 +70,9 @@
             <HBox alignment="CENTER_LEFT" GridPane.columnIndex="4" GridPane.rowIndex="3" GridPane.valignment="CENTER">
                <children>
                   <TextField fx:id="publicationDateTextField" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                  <Button fx:id="publicationDateSelectButton" mnemonicParsing="false">
+                  <Button fx:id="publicationDateSelButton" mnemonicParsing="false">
                      <graphic>
-                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
                            <image>
                               <Image url="@../images/icons8-calendar-date-48.png" />
                            </image>
@@ -109,16 +111,17 @@
           <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <VBox spacing="5.0">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" GridPane.vgrow="ALWAYS">
                <children>
-                  <Label text="Book cover" />
+                  <Label text="Book cover" VBox.vgrow="NEVER" />
                   <ImageView fitHeight="400.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true" VBox.vgrow="ALWAYS">
                      <image>
                         <Image url="@../images/grungy-front-book-cover-3.jpg" />
                      </image>
                   </ImageView>
-                  <HBox spacing="5.0">
+                  <HBox spacing="5.0" VBox.vgrow="NEVER">
                      <children>
+                        <Pane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
                         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false">
                            <graphic>
                               <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
@@ -171,14 +174,14 @@
                   </HBox>
                </children>
             </VBox>
-            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS">
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                <children>
-                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0">
+                  <VBox spacing="5.0">
                      <children>
                         <Label text="Book formats" />
                         <GridPane hgap="5.0">
                            <columnConstraints>
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                              <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
                               <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                            </columnConstraints>
                            <rowConstraints>
@@ -248,6 +251,29 @@
             </VBox>
          </children>
       </GridPane>
+      <Separator prefWidth="200.0" />
+      <HBox>
+         <children>
+            <Pane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
+            <GridPane hgap="5.0" maxWidth="1.7976931348623157E308" HBox.hgrow="SOMETIMES">
+              <columnConstraints>
+                  <ColumnConstraints halignment="CENTER" hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" percentWidth="25.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="10.0" percentWidth="25.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="10.0" percentWidth="25.0" />
+                <ColumnConstraints halignment="CENTER" hgrow="NEVER" maxWidth="1.7976931348623157E308" minWidth="10.0" percentWidth="25.0" />
+              </columnConstraints>
+              <rowConstraints>
+                  <RowConstraints />
+              </rowConstraints>
+               <children>
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Next" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Cancel" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="OK" GridPane.columnIndex="3" GridPane.hgrow="ALWAYS" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Previous" GridPane.hgrow="ALWAYS" />
+               </children>
+            </GridPane>
+         </children>
+      </HBox>
    </children>
    <padding>
       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
