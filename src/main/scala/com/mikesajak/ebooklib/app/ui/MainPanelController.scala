@@ -2,10 +2,9 @@ package com.mikesajak.ebooklib.app.ui
 
 import com.google.common.eventbus.Subscribe
 import com.mikesajak.ebooklib.app.config.AppSettings
-import com.mikesajak.ebooklib.app.rest.{ServerController, ServerStatus}
+import com.mikesajak.ebooklib.app.rest.{ConnectionStatus, ServerConnectionController, ServerStatus}
 import com.mikesajak.ebooklib.app.util.EventBus
 import scalafx.application.Platform
-import scalafx.event.ActionEvent
 import scalafx.scene.control.Label
 import scalafx.scene.image.ImageView
 import scalafxml.core.macros.sfxml
@@ -15,22 +14,28 @@ class MainPanelController(serverStatusLabel: Label,
 
                           appSettings: AppSettings,
                           eventBus: EventBus,
-                          serverController: ServerController,
+                          serverConnectionController: ServerConnectionController,
                           resourceManager: ResourceManager) {
 
   eventBus.register(this)
 
-  serverController.startMonitoring()
+  serverConnectionController.startMonitoring()
 
   @Subscribe
   def serverStatusChange(status: ServerStatus): Unit = {
     Platform.runLater {
-      serverStatusLabel.text =
-          status.info.map(i => s"Connected to ${appSettings.server.address} (${i.getName}:${i.getVersion})")
-          .getOrElse("Disconnected...")
+      serverStatusLabel.text = status match {
+        case ServerStatus(ConnectionStatus.Disconnected, _) => s"Disconnected to ${appSettings.server.address}"
+        case ServerStatus(connStatus, Some(connInfo)) =>
+          s"Connected to ${appSettings.server.address} (${connInfo.serverInfo.getName}:${connInfo.serverInfo.getVersion})"
+      }
 
-      val iconName = status.info.map(_ => "icons8-connected-40.png")
-          .getOrElse("icons8-disconnected-40-png")
+      val iconName = status.connectionStatus match {
+        case ConnectionStatus.Connected => "icons8-connected-40.png"
+        case ConnectionStatus.Warning => "icons8-error-48.png"
+        case ConnectionStatus.Disconnected => "icons8-disconnected-40.png"
+      }
+
       val image = new ImageView(resourceManager.getImage(iconName))
       image.fitWidth = 16
       image.fitHeight = 16

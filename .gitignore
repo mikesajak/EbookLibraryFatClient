@@ -1,3 +1,4 @@
 .idea/*
 lib/
 config.yaml
+test/

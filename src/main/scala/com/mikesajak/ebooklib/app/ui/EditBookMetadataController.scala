@@ -2,15 +2,16 @@ package com.mikesajak.ebooklib.app.ui
 
 import java.time.LocalDate
 
-import com.mikesajak.ebooklibrary.payload.Book
+import com.mikesajak.ebooklibrary.payload.BookMetadata
 import scalafx.geometry.Insets
 import scalafx.scene.control.{Button, ComboBox, Spinner, TextField}
+import scalafx.scene.image.{Image, ImageView}
 import scalafxml.core.macros.sfxml
 
 import scala.collection.JavaConverters._
 
 trait EditBookMetadataController {
-  def initialize(book: Book): Unit
+  def initialize(book: BookMetadata, cover: Option[Image]): Unit
 }
 
 @sfxml
@@ -25,7 +26,8 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                                      publicationDateTextField: TextField,
                                      publicationDateSelButton: Button,
                                      publisherCombo: ComboBox[String],
-                                     languagesCombo: ComboBox[String])
+                                     languagesCombo: ComboBox[String],
+                                     coverImageView: ImageView)
     extends EditBookMetadataController {
 
   creationDateSelButton.margin = Insets(0,0,0,0)
@@ -33,18 +35,19 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
   publicationDateSelButton.margin = Insets(0,0,0,0)
   publicationDateSelButton.padding = Insets(0,0,0,0)
 
-  def initialize(book: Book): Unit = {
-    val meta = book.getMetadata
-    titleTextField.text = meta.getTitle
-    authorsCombo.value = strVal(meta.getAuthors, " & ")
+  def initialize(book: BookMetadata, cover: Option[Image]): Unit = {
+    titleTextField.text = book.getTitle
+    authorsCombo.value = strVal(book.getAuthors, " & ")
 //    seriesCombo.value = meta
 //    seriesNumSpinner.value =
-    tagsCombo.value = strVal(meta.getTags, ", ")
-    identifiersTextField.text = strVal(meta.getIdentifiers, ", ")
-    creationDateTextField.text = strVal(meta.getCreationDate)
-    publicationDateTextField.text = strVal(meta.getPublicationDate)
-    publisherCombo.value = meta.getPublisher
-    languagesCombo.value = strVal(meta.getLanguages, ", ")
+    tagsCombo.value = strVal(book.getTags, ", ")
+    identifiersTextField.text = strVal(book.getIdentifiers, ", ")
+    creationDateTextField.text = strVal(book.getCreationDate)
+    publicationDateTextField.text = strVal(book.getPublicationDate)
+    publisherCombo.value = book.getPublisher
+    languagesCombo.value = strVal(book.getLanguages, ", ")
+
+    for (image <- cover) coverImageView.image = image
   }
 
   private def strVal(date: LocalDate) =

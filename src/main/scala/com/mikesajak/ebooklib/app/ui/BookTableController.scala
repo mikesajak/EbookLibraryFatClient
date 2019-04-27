@@ -1,22 +1,24 @@
 package com.mikesajak.ebooklib.app.ui
 
+import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.config.AppSettings
-import com.mikesajak.ebooklib.app.rest.ServerController
-import com.mikesajak.ebooklibrary.payload.Book
+import com.mikesajak.ebooklib.app.rest.BookServerController
+import com.mikesajak.ebooklibrary.payload.{Book, BookMetadata}
 import com.typesafe.scalalogging.Logger
 import javafx.concurrent.Task
+import javafx.{concurrent => jfxc}
+import scalafx.Includes._
 import scalafx.beans.property.StringProperty
 import scalafx.collections.ObservableBuffer
 import scalafx.collections.transformation.{FilteredBuffer, SortedBuffer}
+import scalafx.concurrent.Service
 import scalafx.event.ActionEvent
 import scalafx.scene.control.{TableColumn, TableRow, TableView}
+import scalafx.scene.image.Image
 import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafxml.core.macros.sfxml
-import scalafx.Includes._
 
 import scala.collection.JavaConverters._
-import javafx.{concurrent => jfxc}
-import scalafx.concurrent.Service
 
 class BookRow(val book: Book) {
   val title = new StringProperty(book.getMetadata.getTitle)
@@ -42,8 +44,9 @@ class BookTableController(booksTableView: TableView[BookRow],
                           publisherColumn: TableColumn[BookRow, String],
                           languagesColumn: TableColumn[BookRow, String],
 
-                          serverController: ServerController,
                           appSettings: AppSettings,
+                          appController: AppController,
+                          bookServerController: BookServerController,
                           actionsController: ActionsController) {
   private val logger = Logger[BookTableController]
 
@@ -72,7 +75,11 @@ class BookTableController(booksTableView: TableView[BookRow],
       if (!row.isEmpty) {
         event.button match {
           case MouseButton.Primary if event.clickCount == 2 =>
-            openMetaDataDialog(row.item.value.book)
+
+            val book = row.item.value.book
+            val cover = bookServerController.getBookCover(book.getId)
+
+            openMetaDataDialog(book.getMetadata, cover) // FIXME: add cover
 
           case MouseButton.Secondary =>
           case MouseButton.Middle =>
@@ -88,7 +95,7 @@ class BookTableController(booksTableView: TableView[BookRow],
   readBooks()
 
   def readBooks2(): Unit = {
-    val books = serverController.listBooks()
+    val books = bookServerController.listBooks()
     bookRows.setAll(books.map(new BookRow(_)).asJava)
   }
 
@@ -98,7 +105,7 @@ class BookTableController(booksTableView: TableView[BookRow],
 
   class BooksService extends Service(new jfxc.Service[Seq[Book]]() {
     override def createTask(): Task[Seq[Book]] = () => {
-      serverController.listBooks()
+      bookServerController.listBooks()
     }
 
     override def succeeded(): Unit = {
@@ -108,12 +115,14 @@ class BookTableController(booksTableView: TableView[BookRow],
     }
   })
 
-  def onEditMetaButton(ae: ActionEvent): Unit = {
+  def onImportBookAction(ae: ActionEvent): Unit = {
     logger.debug("Edit meta button")
+
+    actionsController.handleImportBookAction()
   }
 
-  def openMetaDataDialog(book: Book): Unit = {
-    actionsController.openMetadataEditDialog(book)
+  def openMetaDataDialog(book: BookMetadata, coverImage: Option[Image]): Unit = {
+    actionsController.openMetadataEditDialog(book, coverImage)
   }
 }
 

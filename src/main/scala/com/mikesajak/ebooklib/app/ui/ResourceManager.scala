@@ -3,6 +3,7 @@ package com.mikesajak.ebooklib.app.ui
 import java.util.{Locale, ResourceBundle}
 
 import com.ibm.icu.text.MessageFormat
+import com.typesafe.scalalogging.Logger
 import scalafx.scene.image.Image
 
 class ResourceManager {
@@ -27,6 +28,12 @@ class ResourceManager {
 
   def getImage(name: String): Image = {
     val imagePath = s"/images/$name"
-    new Image(imagePath)
+    try {
+      new Image(imagePath)
+    } catch {
+      case e: Exception =>
+        Logger[ResourceManager].warn(s"Exception thrown during getting icon $imagePath", e)
+        throw e
+    }
   }
 }

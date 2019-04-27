@@ -1,10 +1,12 @@
 package com.mikesajak.ebooklib.app
 
 import com.google.inject._
+import com.mikesajak.ebooklib.app.bookformat.BookReadersRegistry
 import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
-import com.mikesajak.ebooklib.app.rest.ServerController
+import com.mikesajak.ebooklib.app.rest.{BookServerController, ServerConnectionController}
 import com.mikesajak.ebooklib.app.ui.{ActionsController, ResourceManager}
 import com.mikesajak.ebooklib.app.util.EventBus
+import com.mikesajak.ebooklibrary.bookformat.EpubBookMetadataReader
 import net.codingwell.scalaguice.ScalaModule
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.web.client.RestTemplate
@@ -15,6 +17,15 @@ class ApplicationContext extends AbstractModule with ScalaModule {
     install(new ConfigContext)
     install(new WebContext)
     install(new UIContext)
+  }
+
+  @Provides
+  @Singleton
+  def bookReadersRegistry(): BookReadersRegistry = {
+    val registry = new BookReadersRegistry
+    // TODO: add some autodiscovery of book formats
+    registry.register(new EpubBookMetadataReader)
+    registry
   }
 
   @Provides
@@ -32,13 +43,13 @@ class ApplicationContext extends AbstractModule with ScalaModule {
 
 class UIContext extends AbstractModule with ScalaModule {
   override def configure(): Unit = {
-
   }
 
   @Provides
   @Singleton
-  def actionsController(resourcesMgr: ResourceManager, appController: AppController) =
-    new ActionsController(resourcesMgr, appController)
+  def actionsController(resourcesMgr: ResourceManager, appController: AppController,
+                        bookReadersRegistry: BookReadersRegistry) =
+    new ActionsController(resourcesMgr, appController, bookReadersRegistry)
 }
 
 class WebContext extends AbstractModule with ScalaModule {
@@ -60,9 +71,15 @@ class WebContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def serverController(appSettings: AppSettings, serverRestTemplate: RestTemplate,
-                       eventBus: EventBus) =
-    new ServerController(appSettings, serverRestTemplate, eventBus)
+  def serverConnectionController(bookServerController: BookServerController,
+                                 appSettings: AppSettings,
+                                 eventBus: EventBus) =
+    new ServerConnectionController(bookServerController, appSettings, eventBus)
+
+  @Provides
+  @Singleton
+  def bookServerController(serverRestTemplate: RestTemplate, appSettings: AppSettings) =
+    new BookServerController(serverRestTemplate, appSettings)
 }
 
 class ConfigContext extends AbstractModule with ScalaModule {

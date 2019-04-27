@@ -11,6 +11,8 @@ scalacOptions += "-Ypartial-unification"
 
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
+//resolvers += "PSiegman repo with Epublib" at "https://github.com/psiegman/mvn-repo/raw/master/releases"
+
 //unmanagedBase := baseDirectory.value / "custom_lib"
 
 libraryDependencies ++= { // scalafx (and fxml)
@@ -63,6 +65,9 @@ libraryDependencies ++= { // spring boot
   )
 }
 
-libraryDependencies += "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.2.21"
+libraryDependencies += "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.21"
 
 libraryDependencies += "org.controlsfx" % "controlsfx" % "9.0.0"
+
+//libraryDependencies += "nl.siegmann.epublib" % "epublib-core" % "3.1"
+libraryDependencies += "com.positiondev.epublib" % "epublib-core" % "3.1"
