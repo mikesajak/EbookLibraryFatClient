@@ -4,7 +4,8 @@ import java.time.LocalDate
 
 import com.mikesajak.ebooklibrary.payload.BookMetadata
 import scalafx.geometry.Insets
-import scalafx.scene.control.{Button, ComboBox, Spinner, TextField}
+import scalafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory
+import scalafx.scene.control._
 import scalafx.scene.image.{Image, ImageView}
 import scalafxml.core.macros.sfxml
 
@@ -35,11 +36,22 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
   publicationDateSelButton.margin = Insets(0,0,0,0)
   publicationDateSelButton.padding = Insets(0,0,0,0)
 
+  seriesNumSpinner.valueFactory = new IntegerSpinnerValueFactory(0, 100, 0).asInstanceOf[SpinnerValueFactory[Int]]
+
   def initialize(book: BookMetadata, cover: Option[Image]): Unit = {
     titleTextField.text = book.getTitle
     authorsCombo.value = strVal(book.getAuthors, " & ")
-//    seriesCombo.value = meta
-//    seriesNumSpinner.value =
+
+    seriesNumSpinner.disable = true
+    seriesCombo.editor.value.textProperty().addListener{ (_, _, newValue) =>
+      seriesCombo.value = newValue
+      seriesNumSpinner.disable = Option(seriesCombo.value.value).forall(_.isEmpty)
+    }
+    Option(book.getSeries).foreach { series =>
+      seriesCombo.value = series.getTitle
+      seriesNumSpinner.valueFactory.value.setValue(series.getNumber)
+    }
+
     tagsCombo.value = strVal(book.getTags, ", ")
     identifiersTextField.text = strVal(book.getIdentifiers, ", ")
     creationDateTextField.text = strVal(book.getCreationDate)

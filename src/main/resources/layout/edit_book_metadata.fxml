@@ -78,7 +78,7 @@
             <HBox alignment="CENTER_RIGHT" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
                <children>
                   <Label text="Series number:" />
-                  <Spinner fx:id="seriesNumSpinner" prefWidth="60.0" />
+                  <Spinner fx:id="seriesNumSpinner" editable="true" prefWidth="60.0" />
                </children>
             </HBox>
          </children>
