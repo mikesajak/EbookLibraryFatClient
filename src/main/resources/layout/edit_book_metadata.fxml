@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?><?import javafx.scene.control.*?><?import javafx.scene.image.*?><?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?><?import javafx.scene.control.*?><?import javafx.scene.image.*?><?import javafx.scene.layout.*?><?import javafx.scene.text.Font?><?import javafx.scene.text.Text?>
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="687.0" prefWidth="899.0" spacing="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.EditBookMetadataControllerImpl">
    <children>
       <GridPane hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" vgap="5.0" VBox.vgrow="NEVER">
@@ -62,7 +62,7 @@
                      </graphic></Button>
                </children>
             </HBox>
-            <Button mnemonicParsing="false" GridPane.columnIndex="2" GridPane.rowSpan="2">
+            <Button fx:id="swapTitleAuthorsButton" mnemonicParsing="false" onAction="#handleSwapTitleAndAuthors" GridPane.columnIndex="2" GridPane.rowSpan="2">
                <graphic>
                   <ImageView fitHeight="13.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -71,7 +71,7 @@
                   </ImageView>
                </graphic>
                <tooltip>
-                  <Tooltip text="Swap title and authors fields" />
+                  <Tooltip text="%metadata_dialog.swap_title_authors.tooltip" />
                </tooltip>
             </Button>
             <Button fx:id="downloadMetadataButton" mnemonicParsing="false" text="%metadata_dialog.download_metadata.label" GridPane.columnIndex="1" GridPane.rowIndex="5" />
@@ -96,11 +96,20 @@
             <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" GridPane.vgrow="ALWAYS">
                <children>
                   <Label text="%metadata_dialog.book_cover.label" VBox.vgrow="NEVER" />
-                  <ImageView fx:id="coverImageView" fitHeight="400.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true" VBox.vgrow="ALWAYS">
-                     <image>
-                        <Image url="@../images/grungy-front-book-cover-3.jpg" />
-                     </image>
-                  </ImageView>
+                  <AnchorPane VBox.vgrow="ALWAYS">
+                     <children>
+                        <ImageView fx:id="coverImageView" fitHeight="400.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/grungy-front-book-cover-3.jpg" />
+                           </image>
+                        </ImageView>
+                        <Text fx:id="coverOverlayText" fill="#e1e1e1" fontSmoothingType="LCD" layoutX="267.0" layoutY="383.0" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="2.0" text="Text" textAlignment="RIGHT">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </AnchorPane>
                   <HBox spacing="5.0" VBox.vgrow="NEVER">
                      <children>
                         <Pane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
@@ -113,7 +122,7 @@
                               </ImageView>
                            </graphic>
                            <tooltip>
-                              <Tooltip text="%metadata_dialog.open_cover_image.tooltip.label" />
+                              <Tooltip text="%metadata_dialog.open_cover_image.tooltip" />
                            </tooltip>
                         </Button>
                         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false">
@@ -125,7 +134,7 @@
                               </ImageView>
                            </graphic>
                            <tooltip>
-                              <Tooltip text="%metadata_dialog.crop_cover_image.tooltip.label" />
+                              <Tooltip text="%metadata_dialog.crop_cover_image.tooltip" />
                            </tooltip>
                         </Button>
                         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false">
@@ -137,7 +146,7 @@
                               </ImageView>
                            </graphic>
                            <tooltip>
-                              <Tooltip text="%metadata_dialog.remove_cover_image.label" />
+                              <Tooltip text="%metadata_dialog.remove_cover_image.tooltip" />
                            </tooltip>
                         </Button>
                         <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false">
@@ -149,7 +158,7 @@
                               </ImageView>
                            </graphic>
                            <tooltip>
-                              <Tooltip text="%metadata_dialog.download_cover_image.label" />
+                              <Tooltip text="%metadata_dialog.download_cover_image.tooltip" />
                            </tooltip>
                         </Button>
                      </children>
@@ -182,7 +191,7 @@
                                           </ImageView>
                                        </graphic>
                                        <tooltip>
-                                          <Tooltip text="%metadata_dialog.add_book_format.tooltip.label" />
+                                          <Tooltip text="%metadata_dialog.add_book_format.tooltip" />
                                        </tooltip>
                                     </Button>
                                     <Button mnemonicParsing="false">
@@ -194,7 +203,7 @@
                                           </ImageView>
                                        </graphic>
                                        <tooltip>
-                                          <Tooltip text="%metadata_dialog.remove_book_format.tooltip.label" />
+                                          <Tooltip text="%metadata_dialog.remove_book_format.tooltip" />
                                        </tooltip>
                                     </Button>
                                     <Button mnemonicParsing="false">
@@ -206,7 +215,7 @@
                                           </ImageView>
                                        </graphic>
                                        <tooltip>
-                                          <Tooltip text="%metadata_dialog.extract_book_cover.tooltip.label" />
+                                          <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
                                        </tooltip>
                                     </Button>
                                     <Button mnemonicParsing="false">
@@ -218,7 +227,7 @@
                                           </ImageView>
                                        </graphic>
                                        <tooltip>
-                                          <Tooltip text="%metadata_dialog.extract_book_metadata.tooltip.label" />
+                                          <Tooltip text="%metadata_dialog.extract_book_metadata.tooltip" />
                                        </tooltip>
                                     </Button>
                                  </children>

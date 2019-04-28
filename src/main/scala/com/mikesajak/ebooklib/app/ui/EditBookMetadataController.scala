@@ -5,6 +5,7 @@ import scalafx.geometry.Insets
 import scalafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory
 import scalafx.scene.control._
 import scalafx.scene.image.{Image, ImageView}
+import scalafx.scene.text.Text
 import scalafxml.core.macros.sfxml
 
 import scala.collection.JavaConverters._
@@ -26,7 +27,8 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                                      publicationDateSelButton: Button,
                                      publisherCombo: ComboBox[String],
                                      languagesCombo: ComboBox[String],
-                                     coverImageView: ImageView)
+                                     coverImageView: ImageView,
+                                     coverOverlayText: Text)
     extends EditBookMetadataController {
 
   zeroMargins(creationDateSelButton, publicationDateSelButton)
@@ -61,7 +63,24 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     languagesCombo.value = strVal(book.getLanguages, ", ")
     initComboTooltip(languagesCombo, "\\s*,\\s*")
 
-    for (image <- cover) coverImageView.image = image
+    for (image <- cover) {
+      coverImageView.image = image
+      if (image.backgroundLoading)
+        image.progressProperty().addListener { (obs, o, progress) => if (progress == 1.0) updateCoverOverlay(image) }
+      else updateCoverOverlay(image)
+    }
+  }
+
+  private def updateCoverOverlay(image: Image): Unit = {
+    coverOverlayText.text = s"${image.width.toInt}x${image.height.toInt}"
+    coverOverlayText.layoutX = coverImageView.boundsInLocal.value.getWidth - coverOverlayText.boundsInLocal.value.getWidth - 4
+    coverOverlayText.layoutY = coverImageView.boundsInLocal.value.getHeight - 8
+  }
+
+  def handleSwapTitleAndAuthors() = {
+    val title = titleTextField.text.value
+    titleTextField.text = authorsCombo.value.value
+    authorsCombo.value = title
   }
 
   private def zeroMargins(buttons: Button*): Unit =
