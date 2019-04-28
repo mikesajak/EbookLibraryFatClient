@@ -1,7 +1,5 @@
 package com.mikesajak.ebooklib.app.ui
 
-import java.time.LocalDate
-
 import com.mikesajak.ebooklibrary.payload.BookMetadata
 import scalafx.geometry.Insets
 import scalafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory
@@ -17,17 +15,24 @@ trait EditBookMetadataController {
 
 @sfxml
 class EditBookMetadataControllerImpl(titleTextField: TextField,
+                                     titleTooltip: Tooltip,
                                      authorsCombo: ComboBox[String],
+                                     authorsTooltip: Tooltip,
                                      seriesCombo: ComboBox[String],
+                                     seriesTooltip: Tooltip,
                                      seriesNumSpinner: Spinner[Int],
                                      tagsCombo: ComboBox[String],
+                                     tagsTooltip: Tooltip,
                                      identifiersTextField: TextField,
+                                     identifiersTooltip: Tooltip,
                                      creationDateTextField: TextField,
                                      creationDateSelButton: Button,
                                      publicationDateTextField: TextField,
                                      publicationDateSelButton: Button,
                                      publisherCombo: ComboBox[String],
+                                     publisherTooltip: Tooltip,
                                      languagesCombo: ComboBox[String],
+                                     languagesTooltip: Tooltip,
                                      coverImageView: ImageView)
     extends EditBookMetadataController {
 
@@ -40,34 +45,49 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
   def initialize(book: BookMetadata, cover: Option[Image]): Unit = {
     titleTextField.text = book.getTitle
+    initTextFieldTooltip(titleTextField, titleTooltip)
     authorsCombo.value = strVal(book.getAuthors, " & ")
+    initComboTooltip(authorsCombo, authorsTooltip, "\\s*&\\s*")
 
     seriesNumSpinner.disable = true
     seriesCombo.editor.value.textProperty().addListener{ (_, _, newValue) =>
       seriesCombo.value = newValue
       seriesNumSpinner.disable = Option(seriesCombo.value.value).forall(_.isEmpty)
     }
+    initComboTooltip(seriesCombo, seriesTooltip)
     Option(book.getSeries).foreach { series =>
       seriesCombo.value = series.getTitle
       seriesNumSpinner.valueFactory.value.setValue(series.getNumber)
     }
 
     tagsCombo.value = strVal(book.getTags, ", ")
+    initComboTooltip(tagsCombo, tagsTooltip, "\\s*,\\s*")
     identifiersTextField.text = strVal(book.getIdentifiers, ", ")
+    initTextFieldTooltip(identifiersTextField, identifiersTooltip, "\\s*,\\s*")
     creationDateTextField.text = strVal(book.getCreationDate)
     publicationDateTextField.text = strVal(book.getPublicationDate)
     publisherCombo.value = book.getPublisher
+    initComboTooltip(publisherCombo, publisherTooltip )
     languagesCombo.value = strVal(book.getLanguages, ", ")
+    initComboTooltip(languagesCombo, languagesTooltip, "\\s*,\\s*")
 
     for (image <- cover) coverImageView.image = image
   }
 
-  private def strVal(date: LocalDate) =
-    if (date == null) "" else date.toString
+  private def initTextFieldTooltip(textControl: TextInputControl, tooltip: Tooltip, separator: String = "^"): Unit =
+    initTooltipImpl(() => strVal(textControl.text.value), tooltip, separator)
 
-  private def strVal[A](coll: java.util.Collection[A], sep: String) = {
-    if (coll == null) ""
-    else coll.asScala.mkString(sep)
+  private def initComboTooltip(combo: ComboBox[_], tooltip: Tooltip, separator: String = "^"): Unit =
+    initTooltipImpl(() => strVal(combo.value.value), tooltip, separator)
+
+  private def initTooltipImpl(textFun: () => String, tooltip: Tooltip, separator: String = "^"): Unit = {
+    val elements = textFun().split(separator)
+    tooltip.onShowing = _ => tooltip.text = elements.reduce{(elem1, elem2) => s"$elem1\n$elem2"}
   }
+
+  private def strVal(ob: Any) = if (ob == null) "" else ob.toString
+
+  private def strVal[A](coll: java.util.Collection[A], sep: String) =
+    if (coll == null) "" else coll.asScala.mkString(sep)
 
 }
