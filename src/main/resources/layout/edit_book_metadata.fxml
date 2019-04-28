@@ -23,40 +23,19 @@
             <Label text="Title:" />
             <Label text="Authors:" GridPane.rowIndex="1" />
             <Label text="Series:" GridPane.rowIndex="2" />
-            <TextField fx:id="titleTextField" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1">
-               <tooltip>
-                  <Tooltip fx:id="titleTooltip" text="Empty Tooltip" />
-               </tooltip></TextField>
-            <ComboBox fx:id="authorsCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="1">
-               <tooltip>
-                  <Tooltip fx:id="authorsTooltip" text="Empty Tooltip" />
-               </tooltip></ComboBox>
-            <ComboBox fx:id="seriesCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="2">
-               <tooltip>
-                  <Tooltip fx:id="seriesTooltip" text="Empty Tooltip" />
-               </tooltip></ComboBox>
+            <TextField fx:id="titleTextField" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+            <ComboBox fx:id="authorsCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ComboBox fx:id="seriesCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Label text="Tags:" GridPane.columnIndex="3" />
             <Label text="Identifiers:" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <Label text="Creation Date:" GridPane.columnIndex="3" GridPane.rowIndex="2" />
             <Label text="Publication Date:" GridPane.columnIndex="3" GridPane.rowIndex="3" />
             <Label text="Publisher:" GridPane.columnIndex="3" GridPane.rowIndex="4" />
             <Label text="Languages:" GridPane.columnIndex="3" GridPane.rowIndex="5" />
-            <ComboBox fx:id="tagsCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4">
-               <tooltip>
-                  <Tooltip fx:id="tagsTooltip" text="Empty Tooltip" />
-               </tooltip></ComboBox>
-            <ComboBox fx:id="publisherCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4" GridPane.rowIndex="4">
-               <tooltip>
-                  <Tooltip fx:id="publisherTooltip" text="Empty Tooltip" />
-               </tooltip></ComboBox>
-            <ComboBox fx:id="languagesCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4" GridPane.rowIndex="5">
-               <tooltip>
-                  <Tooltip fx:id="languagesTooltip" text="Empty Tooltip" />
-               </tooltip></ComboBox>
-            <TextField fx:id="identifiersTextField" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="1">
-               <tooltip>
-                  <Tooltip fx:id="identifiersTooltip" text="Empty Tooltip" />
-               </tooltip></TextField>
+            <ComboBox fx:id="tagsCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4" />
+            <ComboBox fx:id="publisherCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+            <ComboBox fx:id="languagesCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="4" GridPane.rowIndex="5" />
+            <TextField fx:id="identifiersTextField" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="1" />
             <HBox alignment="CENTER_LEFT" GridPane.columnIndex="4" GridPane.rowIndex="2" GridPane.valignment="CENTER">
                <children>
                   <TextField fx:id="creationDateTextField" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
