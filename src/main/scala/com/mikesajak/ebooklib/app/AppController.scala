@@ -1,6 +1,6 @@
 package com.mikesajak.ebooklib.app
 
-import com.mikesajak.ebooklib.app.config.{AppSettings, Config, WindowSettings}
+import com.mikesajak.ebooklib.app.config.{Config, WindowSettings}
 import scalafx.application.{JFXApp, Platform}
 import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.control.{Alert, ButtonType}
@@ -35,8 +35,10 @@ class AppController(config: Config) {
       config.settings.window = WindowSettings(mainStage.width.toInt, mainStage.height.toInt)
       config.save()
 
-      if (!exitAction())
+      if (!exitAction()) {
         Platform.exit()
+        System.exit(0)
+      }
     }
   }
 
