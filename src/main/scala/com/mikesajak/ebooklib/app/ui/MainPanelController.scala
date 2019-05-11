@@ -15,7 +15,7 @@ class MainPanelController(serverStatusLabel: Label,
                           appSettings: AppSettings,
                           eventBus: EventBus,
                           serverConnectionController: ServerConnectionController,
-                          resourceManager: ResourceManager) {
+                          resourceMgr: ResourceManager) {
 
   eventBus.register(this)
 
@@ -24,23 +24,41 @@ class MainPanelController(serverStatusLabel: Label,
   @Subscribe
   def serverStatusChange(status: ServerStatus): Unit = {
     Platform.runLater {
-      serverStatusLabel.text = status match {
-        case ServerStatus(ConnectionStatus.Disconnected, _) => s"Disconnected to ${appSettings.server.address}"
-        case ServerStatus(connStatus, Some(connInfo)) =>
-          s"Connected to ${appSettings.server.address} (${connInfo.serverInfo.getName}:${connInfo.serverInfo.getVersion})"
+      status match {
+        case ServerStatus(ConnectionStatus.Connected, Some(connInfo)) =>
+          setServerStatusIcon("icons8-connected-40.png")
+          serverStatusLabel.text = resourceMgr.getMessageWithArgs("main_panel.status.connected.label",
+                                                                  Seq(appSettings.server.address, connInfo.serverInfo))
+          serverStatusLabel.tooltip = resourceMgr.getMessageWithArgs("main_panel.status.connected.tooltip",
+                                                                     Seq(appSettings.server.address, connInfo.serverInfo, connInfo.timestamp))
+
+        case ServerStatus(ConnectionStatus.Warning, Some(connInfo)) =>
+          setServerStatusIcon("icons8-error-48.png")
+          serverStatusLabel.text = resourceMgr.getMessageWithArgs("main_panel.status.connected_warning.label",
+                                                                  Seq(appSettings.server.address, connInfo.serverInfo))
+          serverStatusLabel.tooltip = resourceMgr.getMessageWithArgs("main_panel.status.connected_warning.tooltip",
+                                                                     Seq(appSettings.server.address, connInfo.serverInfo, connInfo.timestamp))
+
+        case ServerStatus(ConnectionStatus.Disconnected, Some(connInfo)) =>
+          setServerStatusIcon("icons8-disconnected-40.png")
+          serverStatusLabel.text = resourceMgr.getMessageWithArgs("main_panel.status.disconnected.label",
+                                                                     Seq(appSettings.server.address, connInfo.serverInfo))
+          serverStatusLabel.tooltip = resourceMgr.getMessageWithArgs("main_panel.status.disconnected.tooltip",
+                                                                     Seq(appSettings.server.address, connInfo.serverInfo, connInfo.timestamp))
+
+        case ServerStatus(ConnectionStatus.Disconnected, None) =>
+          setServerStatusIcon("icons8-disconnected-40.png")
+          serverStatusLabel.text = resourceMgr.getMessageWithArgs("main_panel.status.disconnected_never.label", Seq(appSettings.server.address))
+          serverStatusLabel.tooltip = resourceMgr.getMessageWithArgs("main_panel.status.disconnected_never.tooltip", Seq(appSettings.server.address))
       }
 
-      val iconName = status.connectionStatus match {
-        case ConnectionStatus.Connected => "icons8-connected-40.png"
-        case ConnectionStatus.Warning => "icons8-error-48.png"
-        case ConnectionStatus.Disconnected => "icons8-disconnected-40.png"
-      }
+    }
 
-      val image = new ImageView(resourceManager.getImage(iconName))
+    def setServerStatusIcon(iconName: String)  {
+      val image = new ImageView(resourceMgr.getImage(iconName))
       image.fitWidth = 16
       image.fitHeight = 16
       serverStatusLabel.graphic = image
-
     }
   }
 }
