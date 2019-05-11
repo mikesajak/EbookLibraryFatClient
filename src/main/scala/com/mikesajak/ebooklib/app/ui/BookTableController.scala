@@ -116,8 +116,6 @@ class BookTableController(booksTableView: TableView[BookRow],
   })
 
   def onImportBookAction(ae: ActionEvent): Unit = {
-    logger.debug("Edit meta button")
-
     actionsController.handleImportBookAction()
   }
 

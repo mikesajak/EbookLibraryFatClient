@@ -23,9 +23,9 @@
             <Label text="%metadata_dialog.title.label" />
             <Label text="%metadata_dialog.authors.label" GridPane.rowIndex="1" />
             <Label text="%metadata_dialog.series.label" GridPane.rowIndex="2" />
-            <TextField fx:id="titleTextField" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
-            <ComboBox fx:id="authorsCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <ComboBox fx:id="seriesCombo" editable="true" maxWidth="1.7976931348623157E308" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField fx:id="titleTextField" GridPane.columnIndex="1" />
+            <ComboBox fx:id="authorsCombo" editable="true" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ComboBox fx:id="seriesCombo" editable="true" visibleRowCount="5" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Label text="%metadata_dialog.tags.label" GridPane.columnIndex="3" />
             <Label text="%metadata_dialog.identifiers.label" GridPane.columnIndex="3" GridPane.rowIndex="1" />
             <Label text="%metadata_dialog.creation_date.label" GridPane.columnIndex="3" GridPane.rowIndex="2" />
@@ -100,7 +100,7 @@
                      <children>
                         <ImageView fx:id="coverImageView" fitHeight="400.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@../images/grungy-front-book-cover-3.jpg" />
+                              <Image url="@../images/default-book-cover.jpg" />
                            </image>
                         </ImageView>
                         <Text fx:id="coverOverlayText" fill="#e1e1e1" fontSmoothingType="LCD" layoutX="267.0" layoutY="383.0" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="2.0" text="Text" textAlignment="RIGHT">
