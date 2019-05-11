@@ -1,5 +1,6 @@
 package com.mikesajak.ebooklib.app.ui
 
+import com.mikesajak.ebooklib.app.ui.ResourceManager.{ImageResource, MessageResource}
 import com.mikesajak.ebooklibrary.payload.BookMetadata
 import com.typesafe.scalalogging.Logger
 import scalafx.geometry.Insets
@@ -68,7 +69,9 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     languagesCombo.value = strVal(book.getLanguages, ", ")
     initComboTooltip(languagesCombo, "\\s*,\\s*")
 
-    setCoverImage("default-book-cover.jpg", "metadata_dialog.cover-loading.label")
+    import ResourceManager._
+
+    setCoverImage("default-book-cover.jpg".image, "metadata_dialog.cover-loading.label".message)
 
     for (image <- cover) {
       if (image.backgroundLoading) {
@@ -76,29 +79,26 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
           if (progress == 1.0) {
             if (image.isError) {
               logger.info(s"Error loading cover image", image.exception.value)
-              setCoverImage("default-book-cover.jpg", "metadata_dialog.default-cover.label")
+              setCoverImage("default-book-cover.jpg".image, "metadata_dialog.default-cover.label".message)
             } else {
-              coverImageView.image = image
-              updateCoverOverlay(image)
+              setCoverImage(image, s"${image.width.toInt}x${image.height.toInt}")
             }
           }
         }
       }
-      else updateCoverOverlay(image)
+      else setCoverImage(image, s"${image.width.toInt}x${image.height.toInt}")
     }
   }
 
-  private def setCoverImage(imgName: String, overlayTextKey: String) {
-    val image = resourceMgr.getImage(imgName)
-    coverImageView.image = image
-    val overlayText = resourceMgr.getMessage(overlayTextKey)
-    updateCoverOverlay(image, overlayText)
-  }
+  private def setCoverImage(imageRes: ImageResource, overlayTextRes: MessageResource): Unit =
+    setCoverImage(resourceMgr.getImage(imageRes), overlayTextRes)
 
-  private def updateCoverOverlay(image: Image): Unit = {
-    coverOverlayText.text = s"${image.width.toInt}x${image.height.toInt}"
-    coverOverlayText.layoutX = coverImageView.boundsInLocal.value.getWidth - coverOverlayText.boundsInLocal.value.getWidth - 4
-    coverOverlayText.layoutY = coverImageView.boundsInLocal.value.getHeight - 8
+  private def setCoverImage(image: Image, overlayTextRes: MessageResource): Unit =
+    setCoverImage(image, resourceMgr.getMessage(overlayTextRes))
+
+  private def setCoverImage(image: Image, overlayText: String) {
+    coverImageView.image = image
+    updateCoverOverlay(image, overlayText)
   }
 
   private def updateCoverOverlay(image: Image, message: String): Unit = {
@@ -107,7 +107,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     coverOverlayText.layoutY = coverImageView.boundsInLocal.value.getHeight - 8
   }
 
-  def handleSwapTitleAndAuthors() = {
+  def handleSwapTitleAndAuthors(): Unit = {
     val title = titleTextField.text.value
     titleTextField.text = authorsCombo.value.value
     authorsCombo.value = title

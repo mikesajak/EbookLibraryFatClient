@@ -24,9 +24,11 @@ object EbookLibApp extends JFXApp {
 
   val (root, _) = UILoader.loadScene(mainPanelDef)
 
+  import ResourceManager._
+
   stage = new PrimaryStage() {
-    title = resourceMgr.getMessage("app.name")
-    icons += resourceMgr.getImage("icons8-books2-64.png")
+    title = resourceMgr.getMessage("app.name".message)
+    icons += resourceMgr.getImage("icons8-books2-64.png".image)
     scene = new Scene(root)
   }
 

@@ -103,9 +103,9 @@
                               <Image url="@../images/default-book-cover.jpg" />
                            </image>
                         </ImageView>
-                        <Text fx:id="coverOverlayText" fill="#e1e1e1" fontSmoothingType="LCD" layoutX="267.0" layoutY="383.0" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="2.0" text="Text" textAlignment="RIGHT">
+                        <Text fx:id="coverOverlayText" fill="#e1e1e1" fontSmoothingType="LCD" layoutX="177.0" layoutY="382.0" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="2.0" text="%metadata_dialog.cover-loading.label" textAlignment="RIGHT">
                            <font>
-                              <Font name="System Bold" size="14.0" />
+                              <Font name="System Bold" size="12.0" />
                            </font>
                         </Text>
                      </children>

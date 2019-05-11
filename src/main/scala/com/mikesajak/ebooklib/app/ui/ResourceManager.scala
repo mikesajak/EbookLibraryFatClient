@@ -3,10 +3,17 @@ package com.mikesajak.ebooklib.app.ui
 import java.util.{Locale, ResourceBundle}
 
 import com.ibm.icu.text.MessageFormat
+import com.mikesajak.ebooklib.app.ui.ResourceManager.{ImageResource, MessageResource}
 import com.typesafe.scalalogging.Logger
 import scalafx.scene.image.Image
 
+import scala.language.implicitConversions
+
 class ResourceManager {
+
+  def getMessage(resource: MessageResource): String =
+    if (resource.parameters.isEmpty) getMessage(resource.key)
+    else getMessageWithArgs(resource.key, resource.parameters)
 
   def getMessage(key: String, resourceFile: String = "ui", locale: Locale = Locale.getDefault()): String =
     ResourceBundle.getBundle(resourceFile).getString(key)
@@ -26,7 +33,9 @@ class ResourceManager {
     formatter.format(args.toArray)
   }
 
-  def getImage(name: String): Image = {
+  def getImage(resource: ImageResource): Image = getImageImpl(resource.key)
+
+  private def getImageImpl(name: String): Image = {
     val imagePath = s"/images/$name"
     try {
       new Image(imagePath)
@@ -37,3 +46,15 @@ class ResourceManager {
     }
   }
 }
+
+
+object ResourceManager {
+  case class MessageResource(key: String, parameters: Any*)
+  case class ImageResource(key: String) extends AnyVal
+
+  implicit class ResourceUtil(val value: String) extends AnyVal {
+    def image = ImageResource(value)
+    def message = MessageResource(value)
+  }
+}
+
