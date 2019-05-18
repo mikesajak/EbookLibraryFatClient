@@ -15,12 +15,28 @@ addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.fu
 
 //unmanagedBase := baseDirectory.value / "custom_lib"
 
+// Add dependency on ScalaFX library
+libraryDependencies += "org.scalafx" %% "scalafx" % "12.0.1-R17"
+
+// Determine OS version of JavaFX binaries
+lazy val osName = System.getProperty("os.name") match {
+  case n if n.startsWith("Linux")   => "linux"
+  case n if n.startsWith("Mac")     => "mac"
+  case n if n.startsWith("Windows") => "win"
+  case _ => throw new Exception("Unknown platform!")
+}
+
+lazy val javaFXModules = Seq("base", "controls", "fxml", "graphics", "media", "swing", "web")
+libraryDependencies ++= javaFXModules.map( m => "org.openjfx" % s"javafx-$m" % "12.0.1" classifier osName)
+
 libraryDependencies ++= { // scalafx (and fxml)
   val scalafxmlVersion = "0.3" // "0.4"
   Seq("org.scalafx" %% "scalafxml-core-sfx8" % scalafxmlVersion,
       "org.scalafx" % "scalafxml-guice-sfx8_2.12" % scalafxmlVersion)
   // todo: cleanup %% / %
 }
+
+
 
 libraryDependencies ++= { // guice dependency injection
   val guiceVersion = "4.1.0"
