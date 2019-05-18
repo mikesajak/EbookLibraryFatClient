@@ -20,15 +20,15 @@ object EbookLibApp extends JFXApp {
   private val injector = ApplicationContext.globalInjector.createChildInjector()
   private val config = injector.getInstance(classOf[Config])
   private val appController = injector.getInstance(classOf[AppController])
-  private val resourceMgr = injector.getInstance(Key.get(classOf[ResourceManager]))
+  private implicit val resourceMgr: ResourceManager = injector.getInstance(Key.get(classOf[ResourceManager]))
 
   val (root, _) = UILoader.loadScene(mainPanelDef)
 
   import ResourceManager._
 
   stage = new PrimaryStage() {
-    title = resourceMgr.getMessage("app.name".message)
-    icons += resourceMgr.getImage("icons8-books2-64.png".image)
+    title = "app.name".textResource
+    icons += "icons8-books2-64.png".imgResource
     scene = new Scene(root)
   }
 

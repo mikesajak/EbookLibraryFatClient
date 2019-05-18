@@ -1,6 +1,5 @@
 package com.mikesajak.ebooklib.app.ui
 
-import com.mikesajak.ebooklib.app.ui.ResourceManager.{ImageResource, MessageResource}
 import com.mikesajak.ebooklibrary.payload.BookMetadata
 import com.typesafe.scalalogging.Logger
 import scalafx.geometry.Insets
@@ -32,7 +31,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                                      coverImageView: ImageView,
                                      coverOverlayText: Text,
 
-                                     resourceMgr: ResourceManager)
+                                     implicit val resourceMgr: ResourceManager)
     extends EditBookMetadataController {
 
   private val logger = Logger[EditBookMetadataControllerImpl]
@@ -71,7 +70,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
     import ResourceManager._
 
-    setCoverImage("default-book-cover.jpg".image, "metadata_dialog.cover-loading.label".message)
+    setCoverImage("default-book-cover.jpg".imgResource, "metadata_dialog.cover-loading.label".textResource)
 
     for (image <- cover) {
       if (image.backgroundLoading) {
@@ -79,7 +78,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
           if (progress == 1.0) {
             if (image.isError) {
               logger.info(s"Error loading cover image", image.exception.value)
-              setCoverImage("default-book-cover.jpg".image, "metadata_dialog.default-cover.label".message)
+              setCoverImage("default-book-cover.jpg".imgResource, "metadata_dialog.default-cover.label".textResource)
             } else {
               setCoverImage(image, s"${image.width.toInt}x${image.height.toInt}")
             }
@@ -89,12 +88,6 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
       else setCoverImage(image, s"${image.width.toInt}x${image.height.toInt}")
     }
   }
-
-  private def setCoverImage(imageRes: ImageResource, overlayTextRes: MessageResource): Unit =
-    setCoverImage(resourceMgr.getImage(imageRes), overlayTextRes)
-
-  private def setCoverImage(image: Image, overlayTextRes: MessageResource): Unit =
-    setCoverImage(image, resourceMgr.getMessage(overlayTextRes))
 
   private def setCoverImage(image: Image, overlayText: String) {
     coverImageView.image = image
