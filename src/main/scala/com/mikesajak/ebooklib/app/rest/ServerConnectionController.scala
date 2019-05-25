@@ -28,7 +28,7 @@ case class ServerStatus(connectionStatus: ConnectionStatus,
 
 object ServerStatus{
   def apply(connectionStatus: ConnectionStatus, connectionInfo: ConnectionInfo): ServerStatus =
-    ServerStatus(connectionStatus, Some(connectionInfo))
+    ServerStatus(connectionStatus, Option(connectionInfo))
 
   def disconnected() = ServerStatus(ConnectionStatus.Disconnected, None)
 }

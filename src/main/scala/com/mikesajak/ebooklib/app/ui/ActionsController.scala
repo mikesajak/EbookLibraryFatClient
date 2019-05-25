@@ -8,10 +8,11 @@ import com.mikesajak.ebooklib.app.bookformat.BookReadersRegistry
 import com.mikesajak.ebooklibrary.payload.BookMetadata
 import com.typesafe.scalalogging.Logger
 import scalafx.Includes._
-import scalafx.scene.Scene
+import scalafx.scene.control.ButtonType
 import scalafx.scene.image.Image
+import scalafx.scene.layout.Region
+import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter
-import scalafx.stage.{FileChooser, Modality, Stage, StageStyle}
 
 import scala.language.implicitConversions
 
@@ -23,16 +24,18 @@ class ActionsController(resourceMgr: ResourceManager,
   def openMetadataEditDialog(book: BookMetadata, coverImage: Option[Image]): Unit = {
     val layout = "/layout/edit_book_metadata.fxml"
 
-    val (root, controller) = UILoader.loadScene[EditBookMetadataController](layout)
-    val stage = new Stage() {
-      initModality(Modality.ApplicationModal)
-      initStyle(StageStyle.Utility)
-      initOwner(appController.mainStage)
-      scene = new Scene(root, 1000, 750)
-      sizeToScene()
+    val (content, controller) = UILoader.loadScene[EditBookMetadataController](layout)
+    val dialog = UIUtils.mkModalDialog[ButtonType](appController.mainStage, content)
+    controller.initialize(book, coverImage, dialog)
+    dialog.dialogPane.value.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE)
+    dialog.dialogPane.value.getScene.getWindow.sizeToScene()
+    dialog.showAndWait() match {
+      case Some(ButtonType.OK) =>
+        logger.debug("OK button selected")
+        val book = controller.bookMetadata
+        logger.debug(s"Metadata dialog confirmed: book:\n$book")
+      case bt @ _ => logger.debug(s"$bt button selected")
     }
-    controller.initialize(book, coverImage)
-    stage.show()
   }
 
   def handleImportBookAction(): Unit = {
