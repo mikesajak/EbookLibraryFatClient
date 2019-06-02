@@ -5,7 +5,7 @@ import java.nio.file.{Files, Paths}
 
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.bookformat.BookReadersRegistry
-import com.mikesajak.ebooklibrary.payload.BookMetadata
+import com.mikesajak.ebooklibrary.payload.{BookFormat, BookFormatMetadata, BookId, BookMetadata}
 import com.typesafe.scalalogging.Logger
 import scalafx.Includes._
 import scalafx.scene.control.ButtonType
@@ -21,12 +21,12 @@ class ActionsController(resourceMgr: ResourceManager,
                         bookReadersRegistry: BookReadersRegistry) {
   private val logger = Logger[ActionsController]
 
-  def openMetadataEditDialog(book: BookMetadata, coverImage: Option[Image]): Unit = {
-    val layout = "/layout/edit_book_metadata.fxml"
+  def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNav]): Unit = {
+    val layout = "/layout/edit_book_metadata1.fxml"
 
     val (content, controller) = UILoader.loadScene[EditBookMetadataController](layout)
     val dialog = UIUtils.mkModalDialog[ButtonType](appController.mainStage, content)
-    controller.initialize(book, coverImage, dialog)
+    controller.initialize(bookDataProvider, dialog, booksNav)
     dialog.dialogPane.value.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE)
     dialog.dialogPane.value.getScene.getWindow.sizeToScene()
     dialog.showAndWait() match {
@@ -42,7 +42,7 @@ class ActionsController(resourceMgr: ResourceManager,
     val fileChooser = new FileChooser() {
       initialDirectory = new File(System.getProperty("user.dir"))
       extensionFilters ++= bookReadersRegistry.allReaders
-          .map(r => new ExtensionFilter(r.getBookType, s"*.${r.getBookType.toLowerCase()}"))
+          .map(r => new ExtensionFilter(r.getBookFormatType.getName, s"*.${r.getBookFormatType.getName.toLowerCase()}"))
           .map(ef => ef.delegate)
 
     }
@@ -60,7 +60,23 @@ class ActionsController(resourceMgr: ResourceManager,
             val coverImage = Option(reader.readCover(bookData))
                 .map(c => new Image(new ByteArrayInputStream(c.getImageData)))
 
-            openMetadataEditDialog(metadata, coverImage)
+            val provider = new BookDataProvider {
+              override def bookId: BookId = new BookId("NotExisting")
+              override def bookMetadata: BookMetadata = reader.read(bookData)
+
+              override def bookCover: Option[Image] =
+                Option(reader.readCover(bookData))
+                    .map(c => new Image(new ByteArrayInputStream(c.getImageData)))
+
+              override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(metadata)
+
+              override def bookFormat(): BookFormat = new BookFormat(metadata, bookData)
+
+              private def metadata =
+                new BookFormatMetadata(bookId, reader.getBookFormatType.getMimeType(), bookFile.getAbsolutePath)
+            }
+
+            openMetadataEditDialog(provider, None)
           }
     }
   }

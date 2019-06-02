@@ -2,31 +2,58 @@ package com.mikesajak.ebooklib.app.ui
 
 import java.time.LocalDate
 
-import com.mikesajak.ebooklibrary.payload.{BookMetadata, Series}
+import com.mikesajak.ebooklib.app.ui.UIUtils.bindHeight
+import com.mikesajak.ebooklibrary.payload.{Book, BookFormatMetadata, BookMetadata, Series}
 import com.typesafe.scalalogging.Logger
 import javafx.scene.{control => jfxctrl}
+import javafx.{scene => jfxs}
 import scalafx.Includes._
 import scalafx.geometry.Insets
 import scalafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory
 import scalafx.scene.control._
 import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.layout.{Pane, Priority, VBox}
+import scalafx.scene.layout.{Priority, Region, VBox}
 import scalafx.scene.text.Text
 import scalafxml.core.macros.sfxml
 
 import scala.collection.JavaConverters._
 
 trait EditBookMetadataController {
-  def initialize(book: BookMetadata, cover: Option[Image], dialog: Dialog[ButtonType]): Unit
+  def initialize(bookDataProvider: BookDataProvider, dialog: Dialog[ButtonType],
+                 booksNavigator: Option[BooksNav] = None): Unit
 
   def bookMetadata: BookMetadata
 }
 
-trait CollectionNav {
-  def hasPrev: Boolean
-  def prevBook(): BookMetadata
+trait BooksNav {
+  def hasPrevious: Boolean
+  def previous(): Book
+
   def hasNext: Boolean
-  def nextBook(): BookMetadata
+  def next(): Book
+
+  def current(): Book
+}
+
+class BooksCollectionNav(private val books: Seq[Book], private var curPos: Int = 0) extends BooksNav {
+
+  def hasPrevious: Boolean = books.nonEmpty && curPos > 0
+  def previous(): Book = {
+    curPos -= 1
+    books(curPos)
+  }
+
+  def hasNext: Boolean = curPos < books.size - 1
+  def next(): Book = {
+    curPos += 1
+    books(curPos)
+  }
+
+  def current(): Book = books(curPos)
+}
+
+object BooksCollectionNav {
+  val empty = new BooksCollectionNav(Seq.empty)
 }
 
 @sfxml
@@ -42,37 +69,46 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                                      publicationDateSelButton: Button,
                                      publisherCombo: ComboBox[String],
                                      languagesCombo: ComboBox[String],
-                                     descriptionArea: TextArea,
+                                     descriptionTextArea: TextArea,
                                      coverImageView: ImageView,
                                      coverOverlayText: Text,
 
                                      navigationPanel: VBox,
-                                     nextButton: Button,
-                                     prevButton: Button,
+                                     nextPageButton: Button,
+                                     prevPageButton: Button,
 
-                                     toolbarSpacer: Pane,
+                                     toolbarSpacer: Region,
 
                                      implicit val resourceMgr: ResourceManager)
     extends EditBookMetadataController {
   import ResourceManager._
 
-
   private val logger = Logger[EditBookMetadataControllerImpl]
 
   private var dialog: Dialog[ButtonType] = _
 
-  zeroMargins(creationDateSelButton, publicationDateSelButton)
+  bindHeight(publicationDateSelButton, publicationDateTextField)
+  publicationDateSelButton.graphic.value.asInstanceOf[jfxs.image.ImageView].fitHeight.bind(publicationDateSelButton.height.subtract(2))
   toolbarSpacer.hgrow = Priority.Always
 
   seriesNumSpinner.valueFactory = new IntegerSpinnerValueFactory(0, 100, 0).asInstanceOf[SpinnerValueFactory[Int]]
 
-  override def initialize(book: BookMetadata, cover: Option[Image], dialog: Dialog[ButtonType]): Unit = {
+  override def initialize(bookDataProvider: BookDataProvider, dialog: Dialog[ButtonType],
+                          booksNavigator: Option[BooksNav]): Unit = {
     this.dialog = dialog
 
     coverImageView.image = "default-book-cover.jpg".imgResource
 
-    initBookContent(book)
-    initCoverImage(cover)
+    initBookContent(bookDataProvider.bookMetadata)
+    initCoverImage(bookDataProvider.bookCover)
+    initFormats(bookDataProvider.bookFormatsMetadata)
+
+    booksNavigator match {
+      case Some(nav) =>
+      case None =>
+        prevPageButton.disable = true
+        nextPageButton.disable = true
+    }
 
     val dialogPane = dialog.dialogPane.value
     dialogPane.buttonTypes = Seq(ButtonType.Cancel, ButtonType.OK)
@@ -103,7 +139,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     initComboTooltip(tagsCombo, "\\s*,\\s*")
     identifiersTextField.text = strVal(book.getIdentifiers, ", ")
     initTextFieldTooltip(identifiersTextField, "\\s*,\\s*")
-    creationDateTextField.text = strVal(book.getCreationDate)
+//    creationDateTextField.text = strVal(book.getCreationDate)
     publicationDateTextField.text = strVal(book.getPublicationDate)
     publisherCombo.value = book.getPublisher
     initComboTooltip(publisherCombo)
@@ -131,6 +167,10 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
       }
       else setCoverImage(image, s"${image.width.toInt}x${image.height.toInt}")
     }
+  }
+
+  def initFormats(formatsMetadata: Seq[BookFormatMetadata]) = {
+    println(formatsMetadata)
   }
 
   private def prepareDialogButton(buttonType: ButtonType, iconName: String) = {
@@ -179,12 +219,13 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                      parseSeq(authorsCombo.value.value, "&").asJava,
                      parseSeq(tagsCombo.value.value, ",").asJava,
                      parseSeq(identifiersTextField.text.value, ",").asJava,
-                     parseDate(creationDateTextField.text.value),
+//                     parseDate(creationDateTextField.text.value),
+                     null,
                      parseDate(publicationDateTextField.text.value),
                      parseText(publisherCombo.value.value),
                      parseSeq(languagesCombo.value.value, ",").asJava,
                      series,
-                     parseText(descriptionArea.text.value))
+                     parseText(descriptionTextArea.text.value))
   }
 
   private def empty(text: String) = text == null || text.isEmpty
@@ -195,13 +236,60 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     authorsCombo.value = title
   }
 
-  def onNextAction(): Unit = {
-    logger.debug("onNextAction")
+  def handlePublicationDateSelAction(): Unit = {
+    logger.debug("handlePublicationDateSelAction")
   }
 
-  def onPrevAction(): Unit = {
-    logger.debug("onPrevAction")
+  // ---------------------------------------------------
+  // toolbar actions
+
+  def handleDownloadMetadataAction(): Unit = {
+    logger.debug("handleDownloadMetadataAction")
   }
+
+  def handleOpenCoverFileAction(): Unit = {
+    logger.debug("handleOpenCoverFileAction")
+  }
+
+  def handleCropCoverAction(): Unit = {
+    logger.debug("handleCropCoverAction")
+  }
+
+  def handleRemoveCoverAction(): Unit = {
+    logger.debug("handleRemoveCoverAction")
+  }
+
+  def handleDownloadCoverAction(): Unit = {
+    logger.debug("handleDownloadCoverAction")
+  }
+
+
+  def handleAddBookFormatAction(): Unit = {
+    logger.debug("handleAddBookFormatAction")
+  }
+
+  def handleRemoveBookFormatAction(): Unit = {
+    logger.debug("handleAddBookFormatAction")
+  }
+
+  def handleExtractImageFromFormatAction(): Unit = {
+    logger.debug("handleExtractImageFromFormatAction")
+  }
+
+  def handleExtractMetadataFromFormatAction(): Unit = {
+    logger.debug("handleExtractMetadataFromFormatAction")
+  }
+
+
+
+  def handleNextPageAction(): Unit = {
+    logger.debug("handleNextAction")
+  }
+
+  def handlePrevPageAction(): Unit = {
+    logger.debug("handlePrevAction")
+  }
+
 
   private def zeroMargins(buttons: Button*): Unit =
     buttons.foreach { b =>

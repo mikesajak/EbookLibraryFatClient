@@ -13,7 +13,7 @@ import org.springframework.web.client.RestTemplate
 
 
 class ApplicationContext extends AbstractModule with ScalaModule {
-  def configure(): Unit = {
+  override def configure(): Unit = {
     install(new ConfigContext)
     install(new WebContext)
     install(new UIContext)

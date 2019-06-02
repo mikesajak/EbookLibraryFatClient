@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?><?import javafx.scene.control.*?><?import javafx.scene.image.*?><?import javafx.scene.layout.*?><?import javafx.scene.text.*?>
+<VBox spacing="5.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.EditBookMetadataControllerImpl">
+   <children>
+      <ToolBar prefHeight="40.0" prefWidth="200.0">
+        <items>
+          <Button fx:id="downloadMetadataButton" mnemonicParsing="false" onAction="#handleDownloadMetadataAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-download-from-cloud-32.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.add_book_format.tooltip" />
+               </tooltip>
+            </Button>
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="swapTitleAuthorsButton" mnemonicParsing="false" onAction="#handleSwapTitleAndAuthors">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-replace-24.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="openCoverFileButton" mnemonicParsing="false" onAction="#handleOpenCoverFileAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-opened-folder-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.open_cover_image.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="cropCoverButton" mnemonicParsing="false" onAction="#handleCropCoverAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-crop-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.crop_cover_image.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="removeCoverButton" mnemonicParsing="false" onAction="#handleRemoveCoverAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-cancel-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.remove_cover_image.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="downloadCoverButton" mnemonicParsing="false" onAction="#handleDownloadCoverAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-download-from-cloud-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.download_cover_image.tooltip" />
+               </tooltip>
+            </Button>
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="addBookFormatButton" mnemonicParsing="false" onAction="#handleAddBookFormatAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-add-property-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.add_book_format.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="removeBookFormatButton" mnemonicParsing="false" onAction="#handleRemoveBookFormatAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-remove-property-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.remove_book_format.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="extractImageFromFormatButton" mnemonicParsing="false" onAction="#handleExtractImageFromFormatAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-picture-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="extractMetadataFromFormatButton" mnemonicParsing="false" onAction="#handleExtractMetadataFromFormatAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-view-details-64.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
+               </tooltip>
+            </Button>
+            <Region fx:id="toolbarSpacer" maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="150.0" />
+            <Button fx:id="prevPageButton" mnemonicParsing="false" onAction="#handlePrevPageAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-back-64.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.prev_page.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="nextPageButton" mnemonicParsing="false" onAction="#handleNextPageAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-next-page-64.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.next_page.tooltip" />
+               </tooltip>
+            </Button>
+        </items>
+      </ToolBar>
+      <HBox spacing="5.0">
+         <children>
+            <GridPane hgap="5.0" vgap="5.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <VBox>
+                     <children>
+                        <Label text="Tytuł" textFill="#393939">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                           <padding>
+                              <Insets top="5.0" />
+                           </padding>
+                        </Label>
+                        <TextField fx:id="titleTextField" maxWidth="1.7976931348623157E308" minWidth="0.0" />
+                     </children>
+                  </VBox>
+                  <VBox GridPane.rowIndex="1">
+                     <children>
+                        <Label text="Autorzy" textFill="#393939">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <ComboBox fx:id="authorsCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="0.0" />
+                     </children>
+                  </VBox>
+                  <HBox spacing="10.0" GridPane.rowIndex="2">
+                     <children>
+                        <VBox HBox.hgrow="ALWAYS">
+                           <children>
+                              <Label text="Seria" textFill="#393939">
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Label>
+                              <ComboBox fx:id="seriesCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="0.0" />
+                           </children>
+                        </VBox>
+                        <VBox HBox.hgrow="NEVER">
+                           <children>
+                              <Label text="Numer" textFill="#393939">
+                                 <font>
+                                    <Font size="11.0" />
+                                 </font>
+                              </Label>
+                              <Spinner fx:id="seriesNumSpinner" editable="true" maxWidth="1.7976931348623157E308" minWidth="0.0" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <VBox GridPane.rowIndex="3">
+                     <children>
+                        <Label text="Tagi" textFill="#393939">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <ComboBox fx:id="tagsCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="0.0" />
+                     </children>
+                  </VBox>
+                  <VBox GridPane.rowIndex="4">
+                     <children>
+                        <Label text="Identyfikatory" textFill="#393939">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="identifiersTextField" maxWidth="1.7976931348623157E308" minWidth="0.0" />
+                     </children>
+                  </VBox>
+                  <VBox GridPane.rowIndex="5">
+                     <children>
+                        <Label text="Data wydania" textFill="#393939">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <HBox spacing="2.0">
+                           <children>
+                              <TextField fx:id="publicationDateTextField" maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="publicationDateSelButton" mnemonicParsing="false" onAction="#handlePublicationDateSelAction">
+                                 <graphic>
+                                    <ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-calendar-date-48.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <padding>
+                                    <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
+                                 </padding>
+                                 <HBox.margin>
+                                    <Insets />
+                                 </HBox.margin>
+                              </Button>
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  <VBox GridPane.rowIndex="6">
+                     <children>
+                        <Label text="Wydawca" textFill="#393939">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <ComboBox fx:id="publisherCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="0.0" />
+                     </children>
+                  </VBox>
+                  <VBox GridPane.rowIndex="8">
+                     <children>
+                        <Label text="Języki" textFill="#393939">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <ComboBox fx:id="languagesCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="0.0" />
+                     </children>
+                  </VBox>
+                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" GridPane.rowIndex="9">
+                     <children>
+                        <Label text="Opis, komentarze">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <TextArea fx:id="descriptionTextArea" prefHeight="200.0" prefWidth="200.0" />
+                     </children>
+                  </VBox>
+               </children>
+            </GridPane>
+            <VBox prefHeight="500.0" prefWidth="350.0" spacing="5.0">
+               <children>
+                  <VBox>
+                     <children>
+                        <Label text="Formaty książki">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <ListView fx:id="bookFormatsListView" minHeight="100.0" />
+                     </children>
+                  </VBox>
+                  <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS">
+                     <children>
+                        <Label text="Okładka">
+                           <font>
+                              <Font size="11.0" />
+                           </font>
+                        </Label>
+                        <AnchorPane VBox.vgrow="ALWAYS">
+                           <children>
+                              <ImageView fx:id="coverImageView" fitWidth="350.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../images/default-book-cover.jpg" />
+                                 </image>
+                              </ImageView>
+                              <Text fx:id="coverOverlayText" fill="#e1e1e1" fontSmoothingType="LCD" layoutX="233.0" layoutY="435.0" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="2.0" text="%metadata_dialog.cover-loading.label" textAlignment="RIGHT">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Text>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                  </VBox>
+               </children>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
+         </children>
+         <VBox.margin>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</VBox>

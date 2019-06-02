@@ -2,281 +2,286 @@
 
 
 <?import javafx.geometry.Insets?><?import javafx.scene.control.*?><?import javafx.scene.image.*?><?import javafx.scene.layout.*?><?import javafx.scene.text.Font?><?import javafx.scene.text.Text?>
-<HBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.EditBookMetadataControllerImpl">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="500.0" minWidth="500.0" spacing="10.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.EditBookMetadataControllerImpl">
    <children>
-      <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="687.0" prefWidth="899.0" spacing="10.0">
+      <ToolBar maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="0.0">
+        <items>
+            <Button fx:id="downloadMetadataButton" mnemonicParsing="false" onAction="#handleDownloadMetadataAction">
+               <graphic>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-download-from-cloud-32.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Button>
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="openCoverFileButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleOpenCoverFileAction">
+               <graphic>
+                  <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-opened-folder-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.open_cover_image.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="cropCoverButton" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleCropCoverAction">
+               <graphic>
+                  <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-crop-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.crop_cover_image.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="removeCoverButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleRemoveCoverAction">
+               <graphic>
+                  <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-cancel-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.remove_cover_image.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="downloadCoverButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#handleDownloadCoverAction">
+               <graphic>
+                  <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-download-from-cloud-48.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.download_cover_image.tooltip" />
+               </tooltip>
+            </Button>
+            <Pane fx:id="toolbarSpacer" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" />
+            <Button fx:id="nextPageButton" mnemonicParsing="false" onAction="#handleNextPageAction">
+               <graphic>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-back-64.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.prev_page.tooltip" />
+               </tooltip>
+            </Button>
+            <Button fx:id="prevPageButton" mnemonicParsing="false" onAction="#handlePrevPageAction">
+               <graphic>
+                  <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-next-page-64.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.next_page.tooltip" />
+               </tooltip>
+            </Button>
+        </items>
+         <VBox.margin>
+            <Insets bottom="20.0" />
+         </VBox.margin>
+      </ToolBar>
+      <GridPane hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="500.0" vgap="5.0" VBox.vgrow="NEVER">
+        <columnConstraints>
+          <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="10.0" />
+          <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="50.0" />
+            <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
+            <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="10.0" />
+            <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="50.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
          <children>
-            <ToolBar maxWidth="1.7976931348623157E308">
-              <items>
-                  <Button fx:id="downloadMetadataButton" mnemonicParsing="false">
-                     <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/icons8-download-from-cloud-32.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <Separator orientation="VERTICAL" />
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false">
-                     <graphic>
-                        <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/icons8-opened-folder-48.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <tooltip>
-                        <Tooltip text="%metadata_dialog.open_cover_image.tooltip" />
-                     </tooltip>
-                  </Button>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false">
-                     <graphic>
-                        <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/icons8-crop-48.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <tooltip>
-                        <Tooltip text="%metadata_dialog.crop_cover_image.tooltip" />
-                     </tooltip>
-                  </Button>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false">
-                     <graphic>
-                        <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/icons8-cancel-48.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <tooltip>
-                        <Tooltip text="%metadata_dialog.remove_cover_image.tooltip" />
-                     </tooltip>
-                  </Button>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false">
-                     <graphic>
-                        <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/icons8-download-from-cloud-48.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <tooltip>
-                        <Tooltip text="%metadata_dialog.download_cover_image.tooltip" />
-                     </tooltip>
-                  </Button>
-                  <Pane fx:id="toolbarSpacer" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" />
-                  <Button fx:id="nextButton" mnemonicParsing="false" onAction="#onNextAction">
-                     <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/icons8-back-64.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="prevButton" mnemonicParsing="false" onAction="#onPrevAction">
-                     <graphic>
-                        <ImageView fitHeight="24.0" fitWidth="24.0" pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@../images/icons8-next-page-64.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                  </Button>
-              </items>
-            </ToolBar>
-            <GridPane hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" vgap="5.0" VBox.vgrow="NEVER">
-              <columnConstraints>
-                <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="10.0" />
-                <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="50.0" />
-                  <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
-                  <ColumnConstraints halignment="RIGHT" hgrow="NEVER" minWidth="10.0" />
-                  <ColumnConstraints hgrow="ALWAYS" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="50.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-              </rowConstraints>
+            <Label text="%metadata_dialog.title.label" />
+            <Label text="%metadata_dialog.authors.label" GridPane.rowIndex="1" />
+            <Label text="%metadata_dialog.series.label" GridPane.rowIndex="2" />
+            <TextField fx:id="titleTextField" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="1" />
+            <ComboBox fx:id="authorsCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <ComboBox fx:id="seriesCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="%metadata_dialog.tags.label" GridPane.columnIndex="3" />
+            <Label text="%metadata_dialog.identifiers.label" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Label text="%metadata_dialog.creation_date.label" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <Label text="%metadata_dialog.publication_date.label" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Label text="%metadata_dialog.publisher.label" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+            <Label text="%metadata_dialog.languages.label" GridPane.rowIndex="4" />
+            <ComboBox fx:id="tagsCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="4" />
+            <ComboBox fx:id="publisherCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="4" GridPane.rowIndex="4" />
+            <ComboBox fx:id="languagesCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <TextField fx:id="identifiersTextField" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+            <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="2" GridPane.valignment="CENTER">
                <children>
-                  <Label text="%metadata_dialog.title.label" />
-                  <Label text="%metadata_dialog.authors.label" GridPane.rowIndex="1" />
-                  <Label text="%metadata_dialog.series.label" GridPane.rowIndex="2" />
-                  <TextField fx:id="titleTextField" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="1" />
-                  <ComboBox fx:id="authorsCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <ComboBox fx:id="seriesCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                  <Label text="%metadata_dialog.tags.label" GridPane.columnIndex="3" />
-                  <Label text="%metadata_dialog.identifiers.label" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                  <Label text="%metadata_dialog.creation_date.label" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                  <Label text="%metadata_dialog.publication_date.label" GridPane.columnIndex="3" GridPane.rowIndex="3" />
-                  <Label text="%metadata_dialog.publisher.label" GridPane.columnIndex="3" GridPane.rowIndex="4" />
-                  <Label text="%metadata_dialog.languages.label" GridPane.rowIndex="4" />
-                  <ComboBox fx:id="tagsCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="4" />
-                  <ComboBox fx:id="publisherCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="4" GridPane.rowIndex="4" />
-                  <ComboBox fx:id="languagesCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                  <TextField fx:id="identifiersTextField" maxWidth="1.7976931348623157E308" minWidth="10.0" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                  <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="2" GridPane.valignment="CENTER">
-                     <children>
-                        <TextField fx:id="creationDateTextField" maxWidth="1.7976931348623157E308" minWidth="10.0" HBox.hgrow="SOMETIMES" />
-                        <Button fx:id="creationDateSelButton" mnemonicParsing="false">
-                           <graphic>
-                              <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/icons8-calendar-date-48.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                     </children>
-                  </HBox>
-                  <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="3" GridPane.valignment="CENTER">
-                     <children>
-                        <TextField fx:id="publicationDateTextField" maxWidth="1.7976931348623157E308" minWidth="10.0" HBox.hgrow="SOMETIMES" />
-                        <Button fx:id="publicationDateSelButton" mnemonicParsing="false">
-                           <graphic>
-                              <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/icons8-calendar-date-48.png" />
-                                 </image>
-                              </ImageView>
-                           </graphic>
-                        </Button>
-                     </children>
-                  </HBox>
-                  <Button fx:id="swapTitleAuthorsButton" mnemonicParsing="false" onAction="#handleSwapTitleAndAuthors" GridPane.columnIndex="2" GridPane.rowSpan="2">
+                  <TextField fx:id="creationDateTextField" maxWidth="1.7976931348623157E308" minWidth="10.0" HBox.hgrow="SOMETIMES" />
+                  <Button fx:id="creationDateSelButton" mnemonicParsing="false">
                      <graphic>
-                        <ImageView fitHeight="13.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@../images/icons8-replace-24.png" />
+                              <Image url="@../images/icons8-calendar-date-48.png" />
                            </image>
                         </ImageView>
                      </graphic>
-                     <tooltip>
-                        <Tooltip text="%metadata_dialog.swap_title_authors.tooltip" />
-                     </tooltip>
                   </Button>
-                  <HBox alignment="CENTER_RIGHT" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
-                     <children>
-                        <Label text="%metadata_dialog.series_num.label" />
-                        <Spinner fx:id="seriesNumSpinner" editable="true" prefWidth="60.0" />
-                     </children>
-                  </HBox>
                </children>
-            </GridPane>
-            <GridPane hgap="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS">
-              <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
-              </columnConstraints>
-              <rowConstraints>
-                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" vgrow="SOMETIMES" />
-                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" vgrow="SOMETIMES" />
-              </rowConstraints>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" GridPane.rowIndex="3" GridPane.valignment="CENTER">
                <children>
-                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" GridPane.vgrow="ALWAYS">
-                     <children>
-                        <Label text="%metadata_dialog.book_cover.label" VBox.vgrow="NEVER" />
-                        <AnchorPane VBox.vgrow="ALWAYS">
-                           <children>
-                              <ImageView fx:id="coverImageView" fitHeight="400.0" fitWidth="400.0" pickOnBounds="true" preserveRatio="true">
-                                 <image>
-                                    <Image url="@../images/default-book-cover.jpg" />
-                                 </image>
-                              </ImageView>
-                              <Text fx:id="coverOverlayText" fill="#e1e1e1" fontSmoothingType="LCD" layoutX="177.0" layoutY="382.0" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="2.0" text="%metadata_dialog.cover-loading.label" textAlignment="RIGHT">
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font>
-                              </Text>
-                           </children>
-                        </AnchorPane>
-                     </children>
-                  </VBox>
-                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
-                     <children>
-                        <VBox spacing="5.0">
-                           <children>
-                              <Label text="%metadata_dialog.book_formats.label" />
-                              <GridPane hgap="5.0">
-                                 <columnConstraints>
-                                    <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
-                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                                 </columnConstraints>
-                                 <rowConstraints>
-                                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                                 </rowConstraints>
-                                 <children>
-                                    <ListView maxWidth="1.7976931348623157E308" prefHeight="120.0" />
-                                    <VBox spacing="5.0" GridPane.columnIndex="1">
-                                       <children>
-                                          <Button mnemonicParsing="false">
-                                             <graphic>
-                                                <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                                                   <image>
-                                                      <Image url="@../images/icons8-add-property-48.png" />
-                                                   </image>
-                                                </ImageView>
-                                             </graphic>
-                                             <tooltip>
-                                                <Tooltip text="%metadata_dialog.add_book_format.tooltip" />
-                                             </tooltip>
-                                          </Button>
-                                          <Button mnemonicParsing="false">
-                                             <graphic>
-                                                <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                                                   <image>
-                                                      <Image url="@../images/icons8-remove-property-48.png" />
-                                                   </image>
-                                                </ImageView>
-                                             </graphic>
-                                             <tooltip>
-                                                <Tooltip text="%metadata_dialog.remove_book_format.tooltip" />
-                                             </tooltip>
-                                          </Button>
-                                          <Button mnemonicParsing="false">
-                                             <graphic>
-                                                <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                                                   <image>
-                                                      <Image url="@../images/icons8-picture-48.png" />
-                                                   </image>
-                                                </ImageView>
-                                             </graphic>
-                                             <tooltip>
-                                                <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
-                                             </tooltip>
-                                          </Button>
-                                          <Button mnemonicParsing="false">
-                                             <graphic>
-                                                <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
-                                                   <image>
-                                                      <Image url="@../images/icons8-view-details-64.png" />
-                                                   </image>
-                                                </ImageView>
-                                             </graphic>
-                                             <tooltip>
-                                                <Tooltip text="%metadata_dialog.extract_book_metadata.tooltip" />
-                                             </tooltip>
-                                          </Button>
-                                       </children>
-                                    </VBox>
-                                 </children>
-                              </GridPane>
-                           </children>
-                        </VBox>
-                        <Label text="%metadata_dialog.description.label" />
-                        <TextArea fx:id="descriptionArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
-                     </children>
-                  </VBox>
+                  <TextField fx:id="publicationDateTextField" maxWidth="1.7976931348623157E308" minWidth="10.0" HBox.hgrow="SOMETIMES" />
+                  <Button fx:id="publicationDateSelButton" mnemonicParsing="false">
+                     <graphic>
+                        <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/icons8-calendar-date-48.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Button>
                </children>
-            </GridPane>
+            </HBox>
+            <Button fx:id="swapTitleAuthorsButton" mnemonicParsing="false" onAction="#handleSwapTitleAndAuthors" GridPane.columnIndex="2" GridPane.rowSpan="2">
+               <graphic>
+                  <ImageView fitHeight="13.0" fitWidth="13.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-replace-24.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%metadata_dialog.swap_title_authors.tooltip" />
+               </tooltip>
+            </Button>
+            <HBox alignment="CENTER_RIGHT" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+               <children>
+                  <Label text="%metadata_dialog.series_num.label" />
+                  <Spinner fx:id="seriesNumSpinner" editable="true" prefWidth="60.0" />
+               </children>
+            </HBox>
          </children>
-         <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-         </padding>
-      </VBox>
+      </GridPane>
+      <GridPane hgap="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" VBox.vgrow="ALWAYS">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="200.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="1.7976931348623157E308" minHeight="10.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" GridPane.vgrow="ALWAYS">
+               <children>
+                  <Label text="%metadata_dialog.book_cover.label" VBox.vgrow="NEVER" />
+                  <AnchorPane VBox.vgrow="ALWAYS">
+                     <children>
+                        <ImageView fx:id="coverImageView" fitWidth="400.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../images/default-book-cover.jpg" />
+                           </image>
+                        </ImageView>
+                        <Text fx:id="coverOverlayText" fill="#e1e1e1" fontSmoothingType="LCD" layoutX="177.0" layoutY="382.0" stroke="BLACK" strokeType="OUTSIDE" strokeWidth="2.0" text="%metadata_dialog.cover-loading.label" textAlignment="RIGHT">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Text>
+                     </children>
+                  </AnchorPane>
+               </children>
+            </VBox>
+            <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="5.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+               <children>
+                  <VBox minHeight="0.0" minWidth="0.0" spacing="5.0">
+                     <children>
+                        <Label text="%metadata_dialog.book_formats.label" />
+                        <GridPane hgap="5.0" minHeight="0.0" minWidth="0.0">
+                           <columnConstraints>
+                              <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                           </columnConstraints>
+                           <rowConstraints>
+                              <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                           </rowConstraints>
+                           <children>
+                              <ListView maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="120.0" />
+                              <VBox spacing="5.0" GridPane.columnIndex="1">
+                                 <children>
+                                    <Button mnemonicParsing="false">
+                                       <graphic>
+                                          <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../images/icons8-add-property-48.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <tooltip>
+                                          <Tooltip text="%metadata_dialog.add_book_format.tooltip" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button mnemonicParsing="false">
+                                       <graphic>
+                                          <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../images/icons8-remove-property-48.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <tooltip>
+                                          <Tooltip text="%metadata_dialog.remove_book_format.tooltip" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button mnemonicParsing="false">
+                                       <graphic>
+                                          <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../images/icons8-picture-48.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <tooltip>
+                                          <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
+                                       </tooltip>
+                                    </Button>
+                                    <Button mnemonicParsing="false">
+                                       <graphic>
+                                          <ImageView fitHeight="26.0" fitWidth="26.0" pickOnBounds="true" preserveRatio="true">
+                                             <image>
+                                                <Image url="@../images/icons8-view-details-64.png" />
+                                             </image>
+                                          </ImageView>
+                                       </graphic>
+                                       <tooltip>
+                                          <Tooltip text="%metadata_dialog.extract_book_metadata.tooltip" />
+                                       </tooltip>
+                                    </Button>
+                                 </children>
+                              </VBox>
+                           </children>
+                        </GridPane>
+                     </children>
+                  </VBox>
+                  <Label text="%metadata_dialog.description.label" />
+                  <TextArea fx:id="descriptionTextArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" VBox.vgrow="ALWAYS" />
+               </children>
+            </VBox>
+         </children>
+      </GridPane>
    </children>
-</HBox>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</VBox>

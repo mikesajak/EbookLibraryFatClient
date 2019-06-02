@@ -4,7 +4,7 @@ import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.rest.BookServerController
 import com.mikesajak.ebooklib.app.ui.controls.PopOverEx
-import com.mikesajak.ebooklibrary.payload.{Book, BookMetadata}
+import com.mikesajak.ebooklibrary.payload._
 import com.typesafe.scalalogging.Logger
 import javafx.concurrent.Task
 import javafx.{concurrent => jfxc}
@@ -37,6 +37,14 @@ class BookRow(val book: Book) {
   private def strValue(v: Any) = Option(v).map(_.toString).orNull
 }
 
+trait BookDataProvider {
+  def bookId: BookId
+  def bookMetadata: BookMetadata
+  def bookCover: Option[Image]
+  def bookFormatsMetadata: Seq[BookFormatMetadata]
+  def bookFormat(): BookFormat
+}
+
 @sfxml
 class BookTableController(booksTableView: TableView[BookRow],
                           titleColumn: TableColumn[BookRow, String],
@@ -66,6 +74,8 @@ class BookTableController(booksTableView: TableView[BookRow],
   private val filteredRows = new FilteredBuffer(bookRows)
   private val sortedRows = new SortedBuffer(filteredRows)
 
+  private var booksNavigator = BooksCollectionNav.empty
+
   titleColumn.cellValueFactory = { _.value.title }
   authorsColumn.cellValueFactory = { _.value.authors }
   tagsColumn.cellValueFactory = { _.value.tags }
@@ -78,6 +88,19 @@ class BookTableController(booksTableView: TableView[BookRow],
   booksTableView.columns.zip(appSettings.booksTable.columnWidths)
           .foreach { case (column, width) => column.setPrefWidth(width) }
 
+  class BookDataProviderImpl(val book: Book) extends BookDataProvider {
+    override def bookId: BookId = book.getId
+    override def bookMetadata: BookMetadata = book.getMetadata
+    override def bookCover: Option[Image] = bookServerController.getBookCover(book.getId)
+
+    override def bookFormatsMetadata: Seq[BookFormatMetadata] = {
+      val formatIds = bookServerController.getBookFormatIds(book.getId)
+      formatIds.map { id => bookServerController.getBookFormatMetadata(book.getId, id) }
+    }
+
+    override def bookFormat(): BookFormat = ???
+  }
+
   booksTableView.rowFactory = { tableView =>
     val row = new TableRow[BookRow]()
 
@@ -89,7 +112,7 @@ class BookTableController(booksTableView: TableView[BookRow],
             val book = row.item.value.book
             val cover = bookServerController.getBookCover(book.getId)
 
-            openMetaDataDialog(book.getMetadata, cover)
+            actionsController.openMetadataEditDialog(new BookDataProviderImpl(book), None)
 
           case MouseButton.Secondary =>
           case MouseButton.Middle =>
@@ -165,10 +188,6 @@ class BookTableController(booksTableView: TableView[BookRow],
 
   def onSavedSearchesAction(ae: ActionEvent) {
     logger.debug("saved searches action")
-  }
-
-  def openMetaDataDialog(book: BookMetadata, coverImage: Option[Image]): Unit = {
-    actionsController.openMetadataEditDialog(book, coverImage)
   }
 }
 
