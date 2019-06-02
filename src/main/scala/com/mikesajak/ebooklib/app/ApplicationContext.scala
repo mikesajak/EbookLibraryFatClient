@@ -4,7 +4,7 @@ import com.google.inject._
 import com.mikesajak.ebooklib.app.bookformat.BookReadersRegistry
 import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
 import com.mikesajak.ebooklib.app.rest.{BookServerController, ServerConnectionController}
-import com.mikesajak.ebooklib.app.ui.{ActionsController, ResourceManager}
+import com.mikesajak.ebooklib.app.ui.{ActionsController, BookDataProviderFactory, ResourceManager}
 import com.mikesajak.ebooklib.app.util.EventBus
 import com.mikesajak.ebooklibrary.bookformat.EpubBookMetadataReader
 import net.codingwell.scalaguice.ScalaModule
@@ -27,6 +27,11 @@ class ApplicationContext extends AbstractModule with ScalaModule {
     registry.register(new EpubBookMetadataReader)
     registry
   }
+
+  @Provides
+  @Singleton
+  def bookDataProviderFactory(bookServerController: BookServerController) =
+    new BookDataProviderFactory(bookServerController)
 
   @Provides
   @Singleton

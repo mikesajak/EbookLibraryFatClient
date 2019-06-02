@@ -17,7 +17,7 @@ import scalafx.collections.transformation.{FilteredBuffer, SortedBuffer}
 import scalafx.concurrent.Service
 import scalafx.event.ActionEvent
 import scalafx.scene.control.{Button, TableColumn, TableRow, TableView}
-import scalafx.scene.image.{Image, ImageView}
+import scalafx.scene.image.ImageView
 import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.{HBox, Priority}
 import scalafxml.core.macros.sfxml
@@ -52,6 +52,7 @@ class BookTableController(booksTableView: TableView[BookRow],
                           filterTextFieldHBox: HBox,
                           searchHistoryButton: Button,
 
+                          bookDataProviderFactory: BookDataProviderFactory,
                           appSettings: AppSettings,
                           appController: AppController,
                           bookServerController: BookServerController,
@@ -81,32 +82,17 @@ class BookTableController(booksTableView: TableView[BookRow],
   booksTableView.columns.zip(appSettings.booksTable.columnWidths)
           .foreach { case (column, width) => column.setPrefWidth(width) }
 
-  class BookDataProviderImpl(val book: Book) extends BookDataProvider {
-    override def bookId: BookId = book.getId
-    override def bookMetadata: BookMetadata = book.getMetadata
-    override def bookCover: Option[Image] = bookServerController.getBookCover(book.getId)
-
-    override def bookFormatsMetadata: Seq[BookFormatMetadata] = {
-      val formatIds = bookServerController.getBookFormatIds(book.getId)
-      formatIds.map { id => bookServerController.getBookFormatMetadata(book.getId, id) }
-    }
-
-    override def bookFormat(): BookFormat = ???
-  }
-
   booksTableView.rowFactory = { tableView =>
     val row = new TableRow[BookRow]()
 
     row.handleEvent(MouseEvent.MouseClicked) { event: MouseEvent =>
       if (!row.isEmpty) {
         event.button match {
-          case MouseButton.Primary if event.clickCount == 2 =>
-
-            val book = row.item.value.book
-            val cover = bookServerController.getBookCover(book.getId)
-
-            actionsController.openMetadataEditDialog(new BookDataProviderImpl(book), None)
-
+          case MouseButton.Primary =>
+            val provider = bookDataProviderFactory.getServerBookDataProvider(row.item.value.book)
+            event.clickCount match {
+              case 2 => actionsController.openMetadataEditDialog(provider, None)
+            }
           case MouseButton.Secondary =>
           case MouseButton.Middle =>
           case _ =>
@@ -141,7 +127,8 @@ class BookTableController(booksTableView: TableView[BookRow],
   }
 
   def readBooks(): Unit = {
-    fetchBooksService.start()
+    logger.debug("Loading books in the background")
+    fetchBooksService.restart()
   }
 
   class FetchBooksService extends Service(new jfxc.Service[Seq[Book]]() {
@@ -150,13 +137,14 @@ class BookTableController(booksTableView: TableView[BookRow],
     }
 
     override def succeeded(): Unit = {
-      super.succeeded()
       val books = getValue
+      logger.debug(s"Finished loading books from server (count=${books.size}). Refreshing list.")
       bookRows.setAll(books.map(new BookRow(_)).asJava)
+      super.succeeded()
     }
   })
 
-  def onImportBookAction(ae: ActionEvent) {
+  def onImportBookAction() {
     actionsController.handleImportBookAction()
   }
 
