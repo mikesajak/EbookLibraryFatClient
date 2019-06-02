@@ -30,7 +30,7 @@ lazy val javaFXModules = Seq("base", "controls", "fxml", "graphics", "media", "s
 libraryDependencies ++= javaFXModules.map( m => "org.openjfx" % s"javafx-$m" % "12.0.1" classifier osName)
 
 libraryDependencies ++= { // scalafx (and fxml)
-  val scalafxmlVersion = "0.3" // "0.4"
+  val scalafxmlVersion = "0.4"
   Seq("org.scalafx" %% "scalafxml-core-sfx8" % scalafxmlVersion,
       "org.scalafx" % "scalafxml-guice-sfx8_2.12" % scalafxmlVersion)
   // todo: cleanup %% / %
@@ -39,13 +39,13 @@ libraryDependencies ++= { // scalafx (and fxml)
 
 
 libraryDependencies ++= { // guice dependency injection
-  val guiceVersion = "4.1.0"
+  val guiceVersion = "4.2.2"
   Seq("com.google.inject" % "guice" % guiceVersion,
       "net.codingwell" %% "scala-guice" % guiceVersion)
 }
 
 // https://mvnrepository.com/artifact/com.google.guava/guava
-libraryDependencies += "com.google.guava" % "guava" % "26.0-jre"
+libraryDependencies += "com.google.guava" % "guava" % "25.1-jre"
 
 libraryDependencies ++= { // logging
   Seq("com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
@@ -58,19 +58,19 @@ libraryDependencies += "com.ibm.icu" % "icu4j" % "60.2"
 libraryDependencies += "com.beachape" %% "enumeratum" % "1.5.13"
 
 libraryDependencies ++= { // yaml parser
-  val circeVersion = "0.8.0"
-  Seq("io.circe" %% "circe-yaml" % circeVersion,
-      "io.circe" %% "circe-optics" % circeVersion,
+  val circeVersion = "0.11.1"
+  Seq("io.circe" %% "circe-yaml" % "0.10.0",//circeVersion,
+//      "io.circe" %% "circe-optics" % "0.11.0", //circeVersion,
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-generic-extras" % circeVersion,
-      "org.typelevel" %% "cats-core" % "1.6.0")
+      "org.typelevel" %% "cats-core" % "1.5.0")
   //libraryDependencies += "io.circe" %% "circe-config" % "0.6.1"
 }
 
 libraryDependencies ++= { // spring boot
-  val springBootVersion = "2.1.3.RELEASE"
-  val springVersion = "5.1.5.RELEASE"
-  val jacksonVersion = "2.9.5"
+  val springBootVersion = "2.1.5.RELEASE"
+  val springVersion = "5.1.7.RELEASE"
+  val jacksonVersion = "2.9.9"
   Seq("org.springframework.boot" % "spring-boot-starter" % springBootVersion,
       "org.springframework" % "spring-web" % springVersion,
       "com.fasterxml.jackson.core" % "jackson-databind" % jacksonVersion,
@@ -81,9 +81,11 @@ libraryDependencies ++= { // spring boot
   )
 }
 
-libraryDependencies += "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.21"
+libraryDependencies += "org.jetbrains.kotlin" % "kotlin-stdlib" % "1.3.31"
 
 libraryDependencies += "org.controlsfx" % "controlsfx" % "9.0.0"
 
 //libraryDependencies += "nl.siegmann.epublib" % "epublib-core" % "3.1"
-libraryDependencies += "com.positiondev.epublib" % "epublib-core" % "3.1"
+libraryDependencies += "com.positiondev.epublib" % "epublib-core" % "3.1" excludeAll(
+    ExclusionRule(organization = "org.slf4j")
+)
