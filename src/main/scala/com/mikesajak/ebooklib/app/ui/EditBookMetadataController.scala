@@ -20,12 +20,12 @@ import scala.collection.JavaConverters._
 
 trait EditBookMetadataController {
   def initialize(bookDataProvider: BookDataProvider, dialog: Dialog[ButtonType],
-                 booksNavigator: Option[BooksNav] = None): Unit
+                 booksNavigator: Option[BooksNavigator] = None): Unit
 
   def bookMetadata: BookMetadata
 }
 
-trait BooksNav {
+trait BooksNavigator {
   def hasPrevious: Boolean
   def previous(): Book
 
@@ -35,7 +35,7 @@ trait BooksNav {
   def current(): Book
 }
 
-class BooksCollectionNav(private val books: Seq[Book], private var curPos: Int = 0) extends BooksNav {
+class BooksCollectionNavigator(private val books: Seq[Book], private var curPos: Int = 0) extends BooksNavigator {
 
   def hasPrevious: Boolean = books.nonEmpty && curPos > 0
   def previous(): Book = {
@@ -52,8 +52,8 @@ class BooksCollectionNav(private val books: Seq[Book], private var curPos: Int =
   def current(): Book = books(curPos)
 }
 
-object BooksCollectionNav {
-  val empty = new BooksCollectionNav(Seq.empty)
+object BooksCollectionNavigator {
+  val empty = new BooksCollectionNavigator(Seq.empty)
 }
 
 @sfxml
@@ -94,7 +94,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
   seriesNumSpinner.valueFactory = new IntegerSpinnerValueFactory(0, 100, 0).asInstanceOf[SpinnerValueFactory[Int]]
 
   override def initialize(bookDataProvider: BookDataProvider, dialog: Dialog[ButtonType],
-                          booksNavigator: Option[BooksNav]): Unit = {
+                          booksNavigator: Option[BooksNavigator]): Unit = {
     this.dialog = dialog
 
     coverImageView.image = "default-book-cover.jpg".imgResource

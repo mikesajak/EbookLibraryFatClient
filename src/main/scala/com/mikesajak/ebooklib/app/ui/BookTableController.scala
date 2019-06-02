@@ -37,13 +37,6 @@ class BookRow(val book: Book) {
   private def strValue(v: Any) = Option(v).map(_.toString).orNull
 }
 
-trait BookDataProvider {
-  def bookId: BookId
-  def bookMetadata: BookMetadata
-  def bookCover: Option[Image]
-  def bookFormatsMetadata: Seq[BookFormatMetadata]
-  def bookFormat(): BookFormat
-}
 
 @sfxml
 class BookTableController(booksTableView: TableView[BookRow],
@@ -74,7 +67,7 @@ class BookTableController(booksTableView: TableView[BookRow],
   private val filteredRows = new FilteredBuffer(bookRows)
   private val sortedRows = new SortedBuffer(filteredRows)
 
-  private var booksNavigator = BooksCollectionNav.empty
+  private var booksNavigator = BooksCollectionNavigator.empty
 
   titleColumn.cellValueFactory = { _.value.title }
   authorsColumn.cellValueFactory = { _.value.authors }

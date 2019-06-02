@@ -21,7 +21,7 @@ class ActionsController(resourceMgr: ResourceManager,
                         bookReadersRegistry: BookReadersRegistry) {
   private val logger = Logger[ActionsController]
 
-  def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNav]): Unit = {
+  def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNavigator]): Unit = {
     val layout = "/layout/edit_book_metadata1.fxml"
 
     val (content, controller) = UILoader.loadScene[EditBookMetadataController](layout)
@@ -48,36 +48,33 @@ class ActionsController(resourceMgr: ResourceManager,
     }
     val result = Option(fileChooser.showOpenDialog(appController.mainStage))
 
-    println(result)
+    logger.debug(s"Selected book file: $result")
 
-    result.foreach { bookFile =>
-      val bookData = Files.readAllBytes(Paths.get(bookFile.getAbsolutePath))
-
-      bookReadersRegistry.allReaders
-          .collectFirst { case r if r.canRead(bookData) => r }
-          .foreach { reader =>
-            val metadata = reader.read(bookData)
-            val coverImage = Option(reader.readCover(bookData))
-                .map(c => new Image(new ByteArrayInputStream(c.getImageData)))
-
-            val provider = new BookDataProvider {
-              override def bookId: BookId = new BookId("NotExisting")
-              override def bookMetadata: BookMetadata = reader.read(bookData)
-
-              override def bookCover: Option[Image] =
-                Option(reader.readCover(bookData))
-                    .map(c => new Image(new ByteArrayInputStream(c.getImageData)))
-
-              override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(metadata)
-
-              override def bookFormat(): BookFormat = new BookFormat(metadata, bookData)
-
-              private def metadata =
-                new BookFormatMetadata(bookId, reader.getBookFormatType.getMimeType(), bookFile.getAbsolutePath)
-            }
-
-            openMetadataEditDialog(provider, None)
-          }
-    }
+    result.flatMap(getBookDataProviderFor)
+            .foreach(provider => openMetadataEditDialog(provider, None))
   }
+
+  def getBookDataProviderFor(bookFile: File): Option[BookDataProvider] = {
+    val bookData = Files.readAllBytes(Paths.get(bookFile.getAbsolutePath))
+
+    bookReadersRegistry.allReaders
+        .collectFirst { case r if r.canRead(new ByteArrayInputStream(bookData)) => r }
+        .map { reader => new BookDataProvider() {
+            override def bookId: BookId = new BookId("NotExisting")
+
+            override def bookMetadata: BookMetadata = reader.read(new ByteArrayInputStream(bookData))
+
+            override def bookCover: Option[Image] =
+              Option(reader.readCover(new ByteArrayInputStream(bookData)))
+              .map(c => new Image(new ByteArrayInputStream(c.getImageData)))
+
+            override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(metadata)
+
+            override def bookFormat(): BookFormat = new BookFormat(metadata, bookData)
+
+            private def metadata =
+              new BookFormatMetadata(bookId, reader.getBookFormatType.getMimeType, bookFile.getAbsolutePath)
+          }
+        }
+    }
 }
