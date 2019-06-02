@@ -7,7 +7,7 @@
         <items>
           <Button fx:id="editMetaButton" mnemonicParsing="false" onAction="#onImportBookAction">
                <graphic>
-                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../images/icons8-add-book-48.png" />
                      </image>
@@ -16,6 +16,19 @@
                <tooltip>
                   <Tooltip text="%book_table_panel.import_book.tooltip" />
                </tooltip></Button>
+            <Separator orientation="VERTICAL" />
+            <Button fx:id="refreshListButton" mnemonicParsing="false" onAction="#onRefreshListAction">
+               <graphic>
+                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../images/icons8-synchronize-64.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="%book_table_panel.refresh_books.tooltip" />
+               </tooltip>
+            </Button>
         </items>
       </ToolBar>
       <HBox maxWidth="1.7976931348623157E308" spacing="5.0" VBox.vgrow="NEVER">
@@ -52,7 +65,7 @@
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding>
       </HBox>
-      <SplitPane dividerPositions="0.75" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+      <SplitPane dividerPositions="0.8" orientation="VERTICAL" VBox.vgrow="ALWAYS">
          <items>
             <TableView fx:id="booksTableView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="-Infinity">
               <columns>
@@ -66,26 +79,14 @@
                   <TableColumn fx:id="languagesColumn" prefWidth="126.0" text="%book_table_panel.languages_column.label" />
               </columns>
             </TableView>
-            <HBox>
+            <VBox prefHeight="200.0" prefWidth="100.0">
                <children>
-                  <ImageView fitWidth="200.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="NEVER">
-                     <image>
-                        <Image url="@../images/default-book-cover.jpg" />
-                     </image>
-                  </ImageView>
-                  <GridPane HBox.hgrow="ALWAYS">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                    </rowConstraints>
-                  </GridPane>
+                  <fx:include fx:id="bookPreviewDetailsPanel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="book_details_preview_panel.fxml" />
                </children>
-            </HBox>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+            </VBox>
          </items>
       </SplitPane>
    </children>

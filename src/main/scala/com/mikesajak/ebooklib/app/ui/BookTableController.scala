@@ -20,7 +20,7 @@ import scalafx.scene.control.{Button, TableColumn, TableRow, TableView}
 import scalafx.scene.image.ImageView
 import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.{HBox, Priority}
-import scalafxml.core.macros.sfxml
+import scalafxml.core.macros.{nested, sfxml}
 
 import scala.collection.JavaConverters._
 
@@ -51,6 +51,9 @@ class BookTableController(booksTableView: TableView[BookRow],
 
                           filterTextFieldHBox: HBox,
                           searchHistoryButton: Button,
+
+                          @nested[BookDetailsPreviewControllerImpl]
+                          bookPreviewDetailsPanelController: BookDetailsPreviewController,
 
                           bookDataProviderFactory: BookDataProviderFactory,
                           appSettings: AppSettings,
@@ -89,8 +92,10 @@ class BookTableController(booksTableView: TableView[BookRow],
       if (!row.isEmpty) {
         event.button match {
           case MouseButton.Primary =>
-            val provider = bookDataProviderFactory.getServerBookDataProvider(row.item.value.book)
+            val book = row.item.value.book
+            val provider = bookDataProviderFactory.getServerBookDataProvider(book)
             event.clickCount match {
+              case 1 => bookPreviewDetailsPanelController.initBook(provider)
               case 2 => actionsController.openMetadataEditDialog(provider, None)
             }
           case MouseButton.Secondary =>
@@ -146,6 +151,10 @@ class BookTableController(booksTableView: TableView[BookRow],
 
   def onImportBookAction() {
     actionsController.handleImportBookAction()
+  }
+
+  def onRefreshListAction(): Unit = {
+    readBooks()
   }
 
   var filterHistoryPopoverVisible = false
