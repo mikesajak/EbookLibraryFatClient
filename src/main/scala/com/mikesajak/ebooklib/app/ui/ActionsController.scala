@@ -4,8 +4,8 @@ import java.io.{ByteArrayInputStream, File}
 import java.nio.file.{Files, Paths}
 
 import com.mikesajak.ebooklib.app.AppController
-import com.mikesajak.ebooklib.app.bookformat.BookReadersRegistry
-import com.mikesajak.ebooklibrary.payload.{BookFormat, BookFormatMetadata, BookId, BookMetadata}
+import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
+import com.mikesajak.ebooklibrary.payload._
 import com.typesafe.scalalogging.Logger
 import scalafx.Includes._
 import scalafx.scene.control.ButtonType
@@ -18,7 +18,8 @@ import scala.language.implicitConversions
 
 class ActionsController(resourceMgr: ResourceManager,
                         appController: AppController,
-                        bookReadersRegistry: BookReadersRegistry) {
+                        bookReadersRegistry: BookReadersRegistry,
+                        bookFormatResolver: BookFormatResolver) {
   private val logger = Logger[ActionsController]
 
   def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNavigator]): Unit = {
@@ -42,9 +43,11 @@ class ActionsController(resourceMgr: ResourceManager,
     val fileChooser = new FileChooser() {
       initialDirectory = new File(System.getProperty("user.dir"))
       extensionFilters ++= bookReadersRegistry.allReaders
-          .map(r => new ExtensionFilter(r.getBookFormatType.getName, s"*.${r.getBookFormatType.getName.toLowerCase()}"))
+          .map { r =>
+            val extension = bookFormatResolver.forMimeType(r.getMimeType).toUpperCase
+            new ExtensionFilter(extension, s"*.${extension.toLowerCase()}")
+          }
           .map(ef => ef.delegate)
-
     }
     val result = Option(fileChooser.showOpenDialog(appController.mainStage))
 
@@ -60,7 +63,7 @@ class ActionsController(resourceMgr: ResourceManager,
     bookReadersRegistry.allReaders
         .collectFirst { case r if r.canRead(new ByteArrayInputStream(bookData)) => r }
         .map { reader => new BookDataProvider() {
-            override def bookId: BookId = new BookId("NotExisting")
+            override def bookId: Option[BookId] = None
 
             override def bookMetadata: BookMetadata = reader.read(new ByteArrayInputStream(bookData))
 
@@ -68,12 +71,12 @@ class ActionsController(resourceMgr: ResourceManager,
               Option(reader.readCover(new ByteArrayInputStream(bookData)))
               .map(c => new Image(new ByteArrayInputStream(c.getImageData)))
 
-            override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(metadata)
+            override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(formatMetadata)
 
-            override def bookFormat(): BookFormat = new BookFormat(metadata, bookData)
+            override def bookFormat(formatId: BookFormatId): BookFormat = new BookFormat(formatMetadata, bookData)
 
-            private def metadata =
-              new BookFormatMetadata(bookId, reader.getBookFormatType.getMimeType, bookFile.getAbsolutePath)
+            private def formatMetadata =
+              new BookFormatMetadata(new BookId("not existing"), reader.getMimeType, bookFile.getAbsolutePath)
           }
         }
     }

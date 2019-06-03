@@ -2,9 +2,11 @@ package com.mikesajak.ebooklib.app.ui
 
 import java.time.LocalDate
 
+import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.ui.UIUtils.bindHeight
 import com.mikesajak.ebooklibrary.payload.{Book, BookFormatMetadata, BookMetadata, Series}
 import com.typesafe.scalalogging.Logger
+import javafx.scene.input.MouseButton
 import javafx.scene.{control => jfxctrl}
 import javafx.{scene => jfxs}
 import scalafx.Includes._
@@ -73,12 +75,15 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                                      coverImageView: ImageView,
                                      coverOverlayText: Text,
 
+                                     bookFormatsListView: ListView[BookFormatMetadata],
+
                                      navigationPanel: VBox,
                                      nextPageButton: Button,
                                      prevPageButton: Button,
 
                                      toolbarSpacer: Region,
 
+                                     bookFormatResolver: BookFormatResolver,
                                      implicit val resourceMgr: ResourceManager)
     extends EditBookMetadataController {
   import ResourceManager._
@@ -171,6 +176,21 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
   def initFormats(formatsMetadata: Seq[BookFormatMetadata]) = {
     println(formatsMetadata)
+    bookFormatsListView.items.value.clear()
+    bookFormatsListView.cellFactory = { p =>
+      val cell = new ListCell[BookFormatMetadata]
+      cell.item.onChange { (_,_, formatMeta) =>
+          if (formatMeta != null)
+            cell.text = bookFormatResolver.forMimeType(formatMeta.getFormatType)
+      }
+      cell.onMouseClicked = { me =>
+        if (me.getButton == MouseButton.SECONDARY) {
+          println(s"Right click on cell: $cell")
+        }
+      }
+      cell
+    }
+    bookFormatsListView.items.value ++= formatsMetadata
   }
 
   private def prepareDialogButton(buttonType: ButtonType, iconName: String) = {

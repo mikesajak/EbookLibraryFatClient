@@ -1,7 +1,7 @@
 package com.mikesajak.ebooklib.app
 
 import com.google.inject._
-import com.mikesajak.ebooklib.app.bookformat.BookReadersRegistry
+import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
 import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
 import com.mikesajak.ebooklib.app.rest.{BookServerController, ServerConnectionController}
 import com.mikesajak.ebooklib.app.ui.{ActionsController, BookDataProviderFactory, ResourceManager}
@@ -35,6 +35,10 @@ class ApplicationContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
+  def getBookFormatResolver() = new BookFormatResolver()
+
+  @Provides
+  @Singleton
   def appController(config: Config) = new AppController(config)
 
   @Provides
@@ -53,8 +57,8 @@ class UIContext extends AbstractModule with ScalaModule {
   @Provides
   @Singleton
   def actionsController(resourcesMgr: ResourceManager, appController: AppController,
-                        bookReadersRegistry: BookReadersRegistry) =
-    new ActionsController(resourcesMgr, appController, bookReadersRegistry)
+                        bookReadersRegistry: BookReadersRegistry, bookFormatResolver: BookFormatResolver) =
+    new ActionsController(resourcesMgr, appController, bookReadersRegistry, bookFormatResolver)
 }
 
 class WebContext extends AbstractModule with ScalaModule {

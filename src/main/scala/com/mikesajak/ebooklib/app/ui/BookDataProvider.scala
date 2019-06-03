@@ -23,11 +23,11 @@ class ServerBookDataProvider(book: Book)(bookServerController: BookServerControl
 
   override def bookMetadata: BookMetadata = book.getMetadata
 
-  override def bookCover: Option[Image] = bookServerController.getBookCover(bookId)
+  override def bookCover: Option[Image] = bookServerController.getBookCover(book.getId)
 
   override def bookFormatsMetadata: Seq[BookFormatMetadata] = {
-    val formatIds = bookServerController.getBookFormatIds(bookId)
-    formatIds.map { id => bookServerController.getBookFormatMetadata(bookId, id) }
+    val formatIds = bookServerController.getBookFormatIds(book.getId)
+    formatIds.map { id => bookServerController.getBookFormatMetadata(book.getId, id) }
   }
 
   override def bookFormat(formatId: BookFormatId): BookFormat = ???
