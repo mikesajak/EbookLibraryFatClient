@@ -1,14 +1,16 @@
 package com.mikesajak.ebooklib.app.ui
 
+import com.mikesajak.ebooklib.app.dto._
 import com.mikesajak.ebooklib.app.rest.BookServerController
-import com.mikesajak.ebooklibrary.payload._
 import scalafx.scene.image.Image
+
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 trait BookDataProvider {
   def bookId: Option[BookId]
   def bookMetadata: BookMetadata
   def bookCover: Option[Image]
-  def bookFormatsMetadata: Seq[BookFormatMetadata]
+  def bookFormatsMetadata: Future[Seq[BookFormatMetadata]]
   def bookFormat(formatId: BookFormatId): BookFormat
 }
 
@@ -19,15 +21,20 @@ class BookDataProviderFactory(bookServerController: BookServerController) {
 }
 
 class ServerBookDataProvider(book: Book)(bookServerController: BookServerController) extends BookDataProvider {
-  override def bookId: Option[BookId] = Some(book.getId)
+  private implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
-  override def bookMetadata: BookMetadata = book.getMetadata
+  override def bookId: Option[BookId] = Some(book.id)
 
-  override def bookCover: Option[Image] = bookServerController.getBookCover(book.getId)
+  override def bookMetadata: BookMetadata = book.metadata
 
-  override def bookFormatsMetadata: Seq[BookFormatMetadata] = {
-    val formatIds = bookServerController.getBookFormatIds(book.getId)
-    formatIds.map { id => bookServerController.getBookFormatMetadata(book.getId, id) }
+  override def bookCover: Option[Image] = bookServerController.getBookCover(book.id)
+
+  override def bookFormatsMetadata: Future[Seq[BookFormatMetadata]] = {
+    val eventualFormatIds = bookServerController.getBookFormatIds(book.id)
+    eventualFormatIds.flatMap { formatIds =>
+      val futures = formatIds.map { id => bookServerController.getBookFormatMetadata(book.id, id) }
+      Future.sequence(futures)
+    }
   }
 
   override def bookFormat(formatId: BookFormatId): BookFormat = ???

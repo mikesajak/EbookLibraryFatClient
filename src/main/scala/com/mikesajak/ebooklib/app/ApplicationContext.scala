@@ -3,14 +3,11 @@ package com.mikesajak.ebooklib.app
 import com.google.inject._
 import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
 import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
+import com.mikesajak.ebooklib.app.reader.EpubBookMetadataReader2
 import com.mikesajak.ebooklib.app.rest.{BookServerController, ServerConnectionController}
 import com.mikesajak.ebooklib.app.ui.{ActionsController, BookDataProviderFactory, ResourceManager}
 import com.mikesajak.ebooklib.app.util.EventBus
-import com.mikesajak.ebooklibrary.bookformat.EpubBookMetadataReader
 import net.codingwell.scalaguice.ScalaModule
-import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.web.client.RestTemplate
-
 
 class ApplicationContext extends AbstractModule with ScalaModule {
   override def configure(): Unit = {
@@ -24,7 +21,7 @@ class ApplicationContext extends AbstractModule with ScalaModule {
   def bookReadersRegistry(): BookReadersRegistry = {
     val registry = new BookReadersRegistry
     // TODO: add some autodiscovery of book formats
-    registry.register(new EpubBookMetadataReader)
+    registry.register(new EpubBookMetadataReader2)
     registry
   }
 
@@ -35,7 +32,7 @@ class ApplicationContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def getBookFormatResolver() = new BookFormatResolver()
+  def getBookFormatResolver = new BookFormatResolver()
 
   @Provides
   @Singleton
@@ -68,18 +65,6 @@ class WebContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def serverRestTemplate(appSettings: AppSettings): RestTemplate = {
-    //  val builder = new Jackson2ObjectMapperBuilder()
-    //  builder.modulesToInstall(new ParameterNamesModule(JsonCreator.Mode.PROPERTIES))
-
-    new RestTemplateBuilder()
-        .rootUri(appSettings.server.address)
-        //      .additionalMessageConverters(new MappingJackson2HttpMessageConverter(builder.build()))
-        .build()
-  }
-
-  @Provides
-  @Singleton
   def serverConnectionController(bookServerController: BookServerController,
                                  appSettings: AppSettings,
                                  eventBus: EventBus) =
@@ -87,8 +72,8 @@ class WebContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def bookServerController(serverRestTemplate: RestTemplate, appSettings: AppSettings) =
-    new BookServerController(serverRestTemplate, appSettings)
+  def bookServerController(appSettings: AppSettings) =
+    new BookServerController(appSettings)
 }
 
 class ConfigContext extends AbstractModule with ScalaModule {

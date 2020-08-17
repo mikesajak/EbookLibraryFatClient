@@ -2,19 +2,17 @@ package com.mikesajak.ebooklib.app.ui
 
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.config.AppSettings
+import com.mikesajak.ebooklib.app.dto.Book
 import com.mikesajak.ebooklib.app.rest.BookServerController
 import com.mikesajak.ebooklib.app.ui.controls.PopOverEx
-import com.mikesajak.ebooklibrary.payload._
 import com.typesafe.scalalogging.Logger
-import javafx.concurrent.Task
-import javafx.{concurrent => jfxc}
 import org.controlsfx.control.PopOver
 import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import scalafx.Includes._
+import scalafx.application.Platform
 import scalafx.beans.property.StringProperty
 import scalafx.collections.ObservableBuffer
 import scalafx.collections.transformation.{FilteredBuffer, SortedBuffer}
-import scalafx.concurrent.Service
 import scalafx.event.ActionEvent
 import scalafx.scene.control.{Button, TableColumn, TableRow, TableView}
 import scalafx.scene.image.ImageView
@@ -23,18 +21,18 @@ import scalafx.scene.layout.{HBox, Priority}
 import scalafxml.core.macros.{nested, sfxml}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContextExecutor
+import scala.util.{Failure, Success}
 
 class BookRow(val book: Book) {
-  val title = new StringProperty(book.getMetadata.getTitle)
-  val authors = new StringProperty(book.getMetadata.getAuthors.asScala.mkString(", "))
-  val tags = new StringProperty(book.getMetadata.getTags.asScala.mkString(", "))
-  val identifiers = new StringProperty(book.getMetadata.getIdentifiers.asScala.mkString(", "))
-  val creationDate = new StringProperty(strValue(book.getMetadata.getCreationDate))
-  val publicationDate = new StringProperty(strValue(book.getMetadata.getPublicationDate))
-  val publisher = new StringProperty(book.getMetadata.getPublisher)
-  val languages = new StringProperty(book.getMetadata.getLanguages.asScala.mkString(", "))
-
-  private def strValue(v: Any) = Option(v).map(_.toString).orNull
+  val title = new StringProperty(book.metadata.title)
+  val authors = new StringProperty(book.metadata.authors.mkString(", "))
+  val tags = new StringProperty(book.metadata.tags.mkString(", "))
+  val identifiers = new StringProperty(book.metadata.identifiers.mkString(", "))
+  val creationDate = new StringProperty(book.metadata.creationDate.map(_.toString).orNull)
+  val publicationDate = new StringProperty(book.metadata.publicationDate.map(_.toString).orNull)
+  val publisher = new StringProperty(book.metadata.publisher.orNull)
+  val languages = new StringProperty(book.metadata.languages.mkString(", "))
 }
 
 
@@ -65,7 +63,7 @@ class BookTableController(booksTableView: TableView[BookRow],
 
   private val logger = Logger[BookTableController]
 
-  private val fetchBooksService = new FetchBooksService()
+  implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
   private val bookRows = ObservableBuffer[BookRow]()
   private val filteredRows = new FilteredBuffer(bookRows)
@@ -126,28 +124,18 @@ class BookTableController(booksTableView: TableView[BookRow],
 
   readBooks()
 
-  def readBooks2(): Unit = {
-    val books = bookServerController.listBooks()
-    bookRows.setAll(books.map(new BookRow(_)).asJava)
-  }
-
   def readBooks(): Unit = {
     logger.debug("Loading books in the background")
-    fetchBooksService.restart()
+    bookServerController.listBooksAsync().onComplete {
+      case Success(books) => Platform.runLater { updateBooksTable(books) }
+      case Failure(exception) => logger.warn(s"Error fetching list of books", exception)
+    }
   }
 
-  class FetchBooksService extends Service(new jfxc.Service[Seq[Book]]() {
-    override def createTask(): Task[Seq[Book]] = () => {
-      bookServerController.listBooks()
-    }
-
-    override def succeeded(): Unit = {
-      val books = getValue
-      logger.debug(s"Finished loading books from server (count=${books.size}). Refreshing list.")
-      bookRows.setAll(books.map(new BookRow(_)).asJava)
-      super.succeeded()
-    }
-  })
+  private def updateBooksTable(books: Seq[Book]): Unit = {
+    logger.debug(s"Finished loading books from server (count=${books.size}). Refreshing list.")
+    bookRows.setAll(books.map(new BookRow(_)).asJava)
+  }
 
   def onImportBookAction() {
     actionsController.handleImportBookAction()
@@ -170,7 +158,7 @@ class BookTableController(booksTableView: TableView[BookRow],
           autoHide = true
           headerAlwaysVisible = true
           arrowLocation = PopOver.ArrowLocation.TOP_RIGHT
-          onHidden = we => filterHistoryPopoverVisible = false
+          onHidden = _ => filterHistoryPopoverVisible = false
         }.show(ae.source.asInstanceOf[javafx.scene.Node])
       }
 

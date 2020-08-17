@@ -5,7 +5,7 @@ import java.nio.file.{Files, Paths}
 
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
-import com.mikesajak.ebooklibrary.payload._
+import com.mikesajak.ebooklib.app.dto._
 import com.typesafe.scalalogging.Logger
 import scalafx.Includes._
 import scalafx.scene.control.ButtonType
@@ -14,6 +14,7 @@ import scalafx.scene.layout.Region
 import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter
 
+import scala.concurrent.Future
 import scala.language.implicitConversions
 
 class ActionsController(resourceMgr: ResourceManager,
@@ -44,7 +45,7 @@ class ActionsController(resourceMgr: ResourceManager,
       initialDirectory = new File(System.getProperty("user.dir"))
       extensionFilters ++= bookReadersRegistry.allReaders
           .map { r =>
-            val extension = bookFormatResolver.forMimeType(r.getMimeType).toUpperCase
+            val extension = bookFormatResolver.forMimeType(r.mimeType).toUpperCase
             new ExtensionFilter(extension, s"*.${extension.toLowerCase()}")
           }
           .map(ef => ef.delegate)
@@ -54,7 +55,7 @@ class ActionsController(resourceMgr: ResourceManager,
     logger.debug(s"Selected book file: $result")
 
     result.flatMap(getBookDataProviderFor)
-            .foreach(provider => openMetadataEditDialog(provider, None))
+          .foreach(provider => openMetadataEditDialog(provider, None))
   }
 
   def getBookDataProviderFor(bookFile: File): Option[BookDataProvider] = {
@@ -67,16 +68,17 @@ class ActionsController(resourceMgr: ResourceManager,
 
             override def bookMetadata: BookMetadata = reader.read(new ByteArrayInputStream(bookData))
 
-            override def bookCover: Option[Image] =
-              Option(reader.readCover(new ByteArrayInputStream(bookData)))
-              .map(c => new Image(new ByteArrayInputStream(c.getImageData)))
+            override def bookCover: Option[Image] = {
+              reader.readCover(new ByteArrayInputStream(bookData))
+                    .map(coverImage => new Image(new ByteArrayInputStream(coverImage.imageData)))
+            }
 
-            override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(formatMetadata)
+          override def bookFormatsMetadata: Future[Seq[BookFormatMetadata]] = Future.successful(Seq(formatMetadata))
 
-            override def bookFormat(formatId: BookFormatId): BookFormat = new BookFormat(formatMetadata, bookData)
+            override def bookFormat(formatId: BookFormatId): BookFormat = BookFormat(formatMetadata, bookData)
 
             private def formatMetadata =
-              new BookFormatMetadata(new BookId("not existing"), reader.getMimeType, bookFile.getAbsolutePath)
+              BookFormatMetadata(BookId("not existing"), reader.mimeType, bookFile.getAbsolutePath)
           }
         }
     }

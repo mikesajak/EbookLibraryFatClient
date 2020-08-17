@@ -4,12 +4,15 @@ import java.time.LocalDateTime
 import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 
 import com.mikesajak.ebooklib.app.config.AppSettings
+import com.mikesajak.ebooklib.app.dto.ServerInfo
 import com.mikesajak.ebooklib.app.rest.ConnectionStatus.{Connected, Disconnected, Warning}
 import com.mikesajak.ebooklib.app.util.EventBus
-import com.mikesajak.ebooklibrary.payload.ServerInfo
+import com.typesafe.scalalogging.Logger
 import enumeratum.{EnumEntry, _}
 
 import scala.collection.immutable
+import scala.concurrent.ExecutionContextExecutor
+import scala.util.{Failure, Success}
 
 sealed trait ConnectionStatus extends EnumEntry
 
@@ -30,12 +33,15 @@ object ServerStatus{
   def apply(connectionStatus: ConnectionStatus, connectionInfo: ConnectionInfo): ServerStatus =
     ServerStatus(connectionStatus, Option(connectionInfo))
 
-  def disconnected() = ServerStatus(ConnectionStatus.Disconnected, None)
+  def disconnected(): ServerStatus = ServerStatus(ConnectionStatus.Disconnected, None)
 }
 
 class ServerConnectionController(serverController: BookServerController,
                                  appSettings: AppSettings,
                                  eventBus: EventBus) {
+  private val logger = Logger[ServerConnectionController]
+  implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
+
   @volatile
   private var missedConnections = Int.MaxValue
 
@@ -55,22 +61,21 @@ class ServerConnectionController(serverController: BookServerController,
     case _ => Warning
   }
 
-  def serverStatus = ServerStatus(connectionStatus, connectionInfo)
+  def serverStatus: ServerStatus = ServerStatus(connectionStatus, connectionInfo)
+
 
   private def updateServerStatus(): Unit = {
-    executor.submit(new Runnable() {
-      def run(): Unit = {
-        try {
-          val serverInfo = serverController.serverInfo()
-          missedConnections = 0
-          connectionInfo = ConnectionInfo(serverInfo, LocalDateTime.now())
-        } catch {
-          case e: Exception =>
-            if (missedConnections != Int.MaxValue) missedConnections += 1
-        }
-        eventBus.publish(serverStatus)
-      }
-    })
+    serverController.serverInfoAsync
+                    .onComplete{ result =>
+                      result match {
+                        case Success(serverInfo) =>
+                          missedConnections = 0
+                          connectionInfo = ConnectionInfo(serverInfo, LocalDateTime.now())
+                        case Failure(_) =>
+                          if (missedConnections != Int.MaxValue) missedConnections += 1
+                      }
+                      eventBus.publish(serverStatus)
+                    }
   }
 }
 

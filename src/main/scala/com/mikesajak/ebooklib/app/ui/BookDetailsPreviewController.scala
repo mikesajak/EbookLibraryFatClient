@@ -4,8 +4,6 @@ import scalafx.scene.control.Label
 import scalafx.scene.image.ImageView
 import scalafxml.core.macros.sfxml
 
-import scala.collection.JavaConverters._
-
 trait BookDetailsPreviewController {
   def initBook(bookDataProvider: BookDataProvider)
 }
@@ -22,13 +20,13 @@ class BookDetailsPreviewControllerImpl(coverImageView: ImageView,
 
   def initBook(bookDataProvider: BookDataProvider): Unit = {
     val book = bookDataProvider.bookMetadata
-    titleValueLabel.text = book.getTitle
+    titleValueLabel.text = book.title
 
-    authorsValueLabel.text = book.getAuthors.asScala.reduceLeftOption((a,b) => s"$a & $b").getOrElse("")
+    authorsValueLabel.text = book.authors.reduceLeftOption((a,b) => s"$a & $b").getOrElse("")
     formatsValueLabel.text = "TODO"
-    identifiersValueLabel.text = book.getIdentifiers.asScala.reduceLeftOption((a,b) => s"$a, $b").getOrElse("")
-    tagsValueLabel.text = book.getTags.asScala.reduceLeftOption((a,b) => s"$a, $b").getOrElse("")
-    langsValueLabel.text = book.getLanguages.asScala.reduceLeftOption((a,b) => s"$a, $b").getOrElse("")
+    identifiersValueLabel.text = book.identifiers.reduceLeftOption((a,b) => s"$a, $b").getOrElse("")
+    tagsValueLabel.text = book.tags.reduceLeftOption((a,b) => s"$a, $b").getOrElse("")
+    langsValueLabel.text = book.languages.reduceLeftOption((a,b) => s"$a, $b").getOrElse("")
 
     bookDataProvider.bookCover.foreach(coverImage => coverImageView.image = coverImage)
   }

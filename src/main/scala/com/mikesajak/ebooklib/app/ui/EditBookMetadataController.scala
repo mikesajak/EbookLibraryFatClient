@@ -3,13 +3,14 @@ package com.mikesajak.ebooklib.app.ui
 import java.time.LocalDate
 
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
+import com.mikesajak.ebooklib.app.dto.{Book, BookFormatMetadata, BookMetadata, Series}
 import com.mikesajak.ebooklib.app.ui.UIUtils.bindHeight
-import com.mikesajak.ebooklibrary.payload.{Book, BookFormatMetadata, BookMetadata, Series}
 import com.typesafe.scalalogging.Logger
 import javafx.scene.input.MouseButton
 import javafx.scene.{control => jfxctrl}
 import javafx.{scene => jfxs}
 import scalafx.Includes._
+import scalafx.application.Platform
 import scalafx.geometry.Insets
 import scalafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory
 import scalafx.scene.control._
@@ -19,6 +20,7 @@ import scalafx.scene.text.Text
 import scalafxml.core.macros.sfxml
 
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContextExecutor
 
 trait EditBookMetadataController {
   def initialize(bookDataProvider: BookDataProvider, dialog: Dialog[ButtonType],
@@ -89,6 +91,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
   import ResourceManager._
 
   private val logger = Logger[EditBookMetadataControllerImpl]
+  private implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
   private var dialog: Dialog[ButtonType] = _
 
@@ -106,7 +109,8 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
     initBookContent(bookDataProvider.bookMetadata)
     initCoverImage(bookDataProvider.bookCover)
-    initFormats(bookDataProvider.bookFormatsMetadata)
+    bookDataProvider.bookFormatsMetadata
+                    .foreach(formatMetadatas => Platform.runLater { initFormats(formatMetadatas) } )
 
     booksNavigator match {
       case Some(nav) =>
@@ -124,9 +128,9 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
   }
 
   def initBookContent(book: BookMetadata): Unit = {
-    titleTextField.text = book.getTitle
+    titleTextField.text = book.title
     initTextFieldTooltip(titleTextField)
-    authorsCombo.value = strVal(book.getAuthors, " & ")
+    authorsCombo.value = book.authors.mkString(" & ")
     initComboTooltip(authorsCombo, "\\s*&\\s*")
 
     seriesNumSpinner.disable = true
@@ -135,20 +139,20 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
       seriesNumSpinner.disable = Option(seriesCombo.value.value).forall(_.isEmpty)
                                                        }
     initComboTooltip(seriesCombo)
-    Option(book.getSeries).foreach { series =>
-      seriesCombo.value = series.getTitle
-      seriesNumSpinner.valueFactory.value.setValue(series.getNumber)
-                                   }
+    book.series.foreach { series =>
+      seriesCombo.value = series.title
+      seriesNumSpinner.valueFactory.value.setValue(series.number)
+    }
 
-    tagsCombo.value = strVal(book.getTags, ", ")
+    tagsCombo.value = book.tags.mkString(", ")
     initComboTooltip(tagsCombo, "\\s*,\\s*")
-    identifiersTextField.text = strVal(book.getIdentifiers, ", ")
+    identifiersTextField.text = book.identifiers.mkString(", ")
     initTextFieldTooltip(identifiersTextField, "\\s*,\\s*")
 //    creationDateTextField.text = strVal(book.getCreationDate)
-    publicationDateTextField.text = strVal(book.getPublicationDate)
-    publisherCombo.value = book.getPublisher
+    publicationDateTextField.text = book.publicationDate.map(_.toString).orNull
+    publisherCombo.value = book.publisher.orNull
     initComboTooltip(publisherCombo)
-    languagesCombo.value = strVal(book.getLanguages, ", ")
+    languagesCombo.value = book.languages.mkString(", ")
     initComboTooltip(languagesCombo, "\\s*,\\s*")
   }
 
@@ -160,7 +164,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     for (image <- cover) {
       if (image.backgroundLoading) {
         image.progress.onChange { (_, _, progress) =>
-          if (progress == 1.0) {
+          if (progress.doubleValue == 1.0) {
             if (image.isError) {
               logger.info(s"Error loading cover image", image.exception.value)
               setCoverImage("default-book-cover.jpg".imgResource, "metadata_dialog.default-cover.label".textResource)
@@ -174,14 +178,13 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     }
   }
 
-  def initFormats(formatsMetadata: Seq[BookFormatMetadata]) = {
-    println(formatsMetadata)
+  def initFormats(formatsMetadata: Seq[BookFormatMetadata]): Unit = {
     bookFormatsListView.items.value.clear()
     bookFormatsListView.cellFactory = { p =>
       val cell = new ListCell[BookFormatMetadata]
       cell.item.onChange { (_,_, formatMeta) =>
           if (formatMeta != null)
-            cell.text = bookFormatResolver.forMimeType(formatMeta.getFormatType)
+            cell.text = bookFormatResolver.forMimeType(formatMeta.formatType)
       }
       cell.onMouseClicked = { me =>
         if (me.getButton == MouseButton.SECONDARY) {
@@ -222,30 +225,30 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
   }
 
   override def bookMetadata: BookMetadata = {
-    def parseText(text: String) = if (!empty(text)) text else null
+    def parseText(text: String) = if (!empty(text)) Some(text) else None
     def parseSeq(text: String, separator: String) = {
       val elems = text.split(s"\\s*$separator\\s*")
       if (elems.nonEmpty) elems.toSeq else null
     }
     def parseDate(text: String) =
-      if (!empty(text)) LocalDate.parse(text) else null
+      if (!empty(text)) Some(LocalDate.parse(text)) else None
 
     val seriesTitle = seriesCombo.value.value
     val seriesNum = seriesNumSpinner.value.value
-    val series = if (!empty(seriesTitle)) new Series(seriesTitle, seriesNum)
-                 else null
+    val series = if (!empty(seriesTitle)) Some(Series(seriesTitle, seriesNum))
+                 else None
 
-    new BookMetadata(titleTextField.text.value,
-                     parseSeq(authorsCombo.value.value, "&").asJava,
-                     parseSeq(tagsCombo.value.value, ",").asJava,
-                     parseSeq(identifiersTextField.text.value, ",").asJava,
-//                     parseDate(creationDateTextField.text.value),
-                     null,
-                     parseDate(publicationDateTextField.text.value),
-                     parseText(publisherCombo.value.value),
-                     parseSeq(languagesCombo.value.value, ",").asJava,
-                     series,
-                     parseText(descriptionTextArea.text.value))
+    BookMetadata(titleTextField.text.value,
+                 parseSeq(authorsCombo.value.value, "&"),
+                 parseSeq(tagsCombo.value.value, ","),
+                 parseSeq(identifiersTextField.text.value, ","),
+                 //                     parseDate(creationDateTextField.text.value),
+                 None,
+                 parseDate(publicationDateTextField.text.value),
+                 parseText(publisherCombo.value.value),
+                 parseSeq(languagesCombo.value.value, ","),
+                 series,
+                 parseText(descriptionTextArea.text.value))
   }
 
   private def empty(text: String) = text == null || text.isEmpty
