@@ -116,7 +116,9 @@ class BookTableController(booksTableView: TableView[BookRow],
     imageView.fitHeight = 16
     tf.setLeft(imageView)
     tf.onAction = { ae =>
-      logger.debug(s"set filter action: ${tf.text.value}")
+      val searchQuery = tf.text.value
+      logger.debug(s"set filter action: $searchQuery")
+      readBooks(Some(searchQuery))
     }
     tf
   }
@@ -124,12 +126,14 @@ class BookTableController(booksTableView: TableView[BookRow],
 
   readBooks()
 
-  def readBooks(): Unit = {
+  def readBooks(searchQuery: Option[String]=None): Unit = {
     logger.debug("Loading books in the background")
-    bookServerController.listBooksAsync().onComplete {
-      case Success(books) => Platform.runLater { updateBooksTable(books) }
-      case Failure(exception) => logger.warn(s"Error fetching list of books", exception)
-    }
+    searchQuery.map(query => bookServerController.searchBooksAsync(query))
+               .getOrElse(bookServerController.listBooksAsync())
+               .onComplete {
+                 case Success(books) => Platform.runLater { updateBooksTable(books) }
+                 case Failure(exception) => logger.warn(s"Error fetching list of books", exception)
+               }
   }
 
   private def updateBooksTable(books: Seq[Book]): Unit = {

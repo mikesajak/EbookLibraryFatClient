@@ -4,7 +4,7 @@ import java.io.InputStream
 
 import com.mikesajak.ebooklib.app.dto.{BookMetadata, CoverImage}
 
-trait BookMetadataReader2 {
+trait BookMetadataReader {
   val mimeType: String
 
   def canRead(bookData: InputStream): Boolean

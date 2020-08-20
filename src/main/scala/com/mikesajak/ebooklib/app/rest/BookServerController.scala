@@ -1,11 +1,14 @@
 package com.mikesajak.ebooklib.app.rest
 
+import java.net.URLEncoder
+
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
 import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.dto._
 import com.typesafe.scalalogging.Logger
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
+import io.circe.syntax.EncoderOps
 import net.softler.client.ClientRequest
 import scalafx.scene.image.Image
 
@@ -22,7 +25,7 @@ class BookServerController(appSettings: AppSettings) extends FailFastCirceSuppor
   import io.circe.generic.auto._
 
   def serverInfoAsync: Future[ServerInfo] = {
-    val url = s"${appSettings.server.address}/status"
+    val url = s"${appSettings.server.address}/info"
     logger.debug(s"Requesting server status: GET $url")
     ClientRequest(url).withJson.get[ServerInfo]
                       .map { result =>
@@ -34,9 +37,21 @@ class BookServerController(appSettings: AppSettings) extends FailFastCirceSuppor
   def listBooksAsync(): Future[Seq[Book]] = {
     val url = s"${appSettings.server.address}/books"
     logger.debug(s"Requesting book list: GET $url")
-    ClientRequest(url).withJson.get[Seq[Book]]
+    ClientRequest(url).withJson
+                      .get[Seq[Book]]
                       .map { result =>
                         logger.debug(s"Received book list response: $result")
+                        result
+                      }
+  }
+
+  def searchBooksAsync(searchQuery: String): Future[Seq[Book]] = {
+    val url = s"${appSettings.server.address}/books?query=${URLEncoder.encode(searchQuery, "UTF8")}"
+    logger.debug(s"Requesting book search: GET $url")
+    ClientRequest(url).withJson
+                      .get[Seq[Book]]
+                      .map { result =>
+                        logger.debug(s"Received book search response: $result")
                         result
                       }
   }
@@ -44,11 +59,26 @@ class BookServerController(appSettings: AppSettings) extends FailFastCirceSuppor
   def getBookAsync(id: BookId): Future[Book] = {
     val url = s"${appSettings.server.address}/books/${id.value}"
     logger.debug(s"Requesting book data: GET $url")
-    ClientRequest(url).withJson.get[Book]
+    ClientRequest(url).withJson
+                      .get[Book]
                       .map { result =>
                         logger.debug(s"Received book data response: $result")
                         result
                       }
+  }
+
+  def addBook(bookMetadata: BookMetadata): Future[String] = {
+    val url = s"${appSettings.server.address}/books"
+    ClientRequest(url).entity(bookMetadata.asJson.toString)
+                      .asJson
+                      .post[String]
+  }
+
+  def deleteBook(bookId: BookId): Future[String] = {
+    val url = s"${appSettings.server.address}/books"
+    ClientRequest(url).entity(bookId.value)
+                      .asJson
+                      .post[String]
   }
 
   def getBookCover(bookId: BookId): Option[Image] = {
@@ -68,7 +98,8 @@ class BookServerController(appSettings: AppSettings) extends FailFastCirceSuppor
   def getBookFormatIds(bookId: BookId): Future[Seq[BookFormatId]] = {
     val url = s"${appSettings.server.address}/bookFormats/${bookId.value}"
     logger.debug(s"Requesting book format ids list: GET $url")
-    ClientRequest(url).withJson.get[Seq[BookFormatId]]
+    ClientRequest(url).withJson
+                      .get[Seq[BookFormatId]]
                       .map { result =>
                         logger.debug(s"Received book format ids list response: $result")
                         result
@@ -78,11 +109,11 @@ class BookServerController(appSettings: AppSettings) extends FailFastCirceSuppor
   def getBookFormatMetadata(bookId: BookId, formatId: BookFormatId): Future[BookFormatMetadata] = {
     val url = s"${appSettings.server.address}/bookFormats/${bookId.value}/${formatId.value}/metadata"
     logger.debug(s"Requesting book format metadata: GET $url")
-    ClientRequest(url).withJson.get[BookFormatMetadata]
+    ClientRequest(url).withJson
+                      .get[BookFormatMetadata]
                       .map { result =>
-                        logger.debug(s"Received book format metadata response: $result")
-                        result
-                      }
+                         logger.debug(s"Received book format metadata response: $result")
+                         result
+                       }
   }
-
 }

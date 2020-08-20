@@ -27,6 +27,8 @@ trait EditBookMetadataController {
                  booksNavigator: Option[BooksNavigator] = None): Unit
 
   def bookMetadata: BookMetadata
+
+  def bookFormats(): Seq[BookFormatMetadata]
 }
 
 trait BooksNavigator {
@@ -87,7 +89,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
                                      bookFormatResolver: BookFormatResolver,
                                      implicit val resourceMgr: ResourceManager)
-    extends EditBookMetadataController {
+  extends EditBookMetadataController {
   import ResourceManager._
 
   private val logger = Logger[EditBookMetadataControllerImpl]
@@ -137,7 +139,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     seriesCombo.editor.value.textProperty().addListener{ (_, _, newValue) =>
       seriesCombo.value = newValue
       seriesNumSpinner.disable = Option(seriesCombo.value.value).forall(_.isEmpty)
-                                                       }
+    }
     initComboTooltip(seriesCombo)
     book.series.foreach { series =>
       seriesCombo.value = series.title
@@ -148,7 +150,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     initComboTooltip(tagsCombo, "\\s*,\\s*")
     identifiersTextField.text = book.identifiers.mkString(", ")
     initTextFieldTooltip(identifiersTextField, "\\s*,\\s*")
-//    creationDateTextField.text = strVal(book.getCreationDate)
+    //    creationDateTextField.text = strVal(book.getCreationDate)
     publicationDateTextField.text = book.publicationDate.map(_.toString).orNull
     publisherCombo.value = book.publisher.orNull
     initComboTooltip(publisherCombo)
@@ -172,7 +174,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
               setCoverImage(image, s"${image.width.toInt}x${image.height.toInt}")
             }
           }
-                                }
+        }
       }
       else setCoverImage(image, s"${image.width.toInt}x${image.height.toInt}")
     }
@@ -183,8 +185,8 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     bookFormatsListView.cellFactory = { p =>
       val cell = new ListCell[BookFormatMetadata]
       cell.item.onChange { (_,_, formatMeta) =>
-          if (formatMeta != null)
-            cell.text = bookFormatResolver.forMimeType(formatMeta.formatType)
+        if (formatMeta != null)
+          cell.text = bookFormatResolver.forMimeType(formatMeta.formatType)
       }
       cell.onMouseClicked = { me =>
         if (me.getButton == MouseButton.SECONDARY) {
@@ -249,6 +251,10 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                  parseSeq(languagesCombo.value.value, ","),
                  series,
                  parseText(descriptionTextArea.text.value))
+  }
+
+  override def bookFormats(): Seq[BookFormatMetadata] = {
+    bookFormatsListView.items.value
   }
 
   private def empty(text: String) = text == null || text.isEmpty

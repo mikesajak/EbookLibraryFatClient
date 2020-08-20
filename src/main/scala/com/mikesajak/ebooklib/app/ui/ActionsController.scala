@@ -17,8 +17,7 @@ import scalafx.stage.FileChooser.ExtensionFilter
 import scala.concurrent.Future
 import scala.language.implicitConversions
 
-class ActionsController(resourceMgr: ResourceManager,
-                        appController: AppController,
+class ActionsController(appController: AppController,
                         bookReadersRegistry: BookReadersRegistry,
                         bookFormatResolver: BookFormatResolver) {
   private val logger = Logger[ActionsController]
@@ -33,10 +32,11 @@ class ActionsController(resourceMgr: ResourceManager,
     dialog.dialogPane.value.getScene.getWindow.sizeToScene()
     dialog.showAndWait() match {
       case Some(ButtonType.OK) =>
-        logger.debug("OK button selected")
+        logger.debug("Metadata dialog - OK button selected")
         val book = controller.bookMetadata
         logger.debug(s"Metadata dialog confirmed: book:\n$book")
-      case bt @ _ => logger.debug(s"$bt button selected")
+
+      case bt @ _ => logger.debug(s"Metadata dialog - $bt button selected")
     }
   }
 

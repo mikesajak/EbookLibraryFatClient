@@ -8,7 +8,7 @@ import nl.siegmann.epublib.epub.EpubReader
 
 import scala.collection.JavaConverters._
 
-class EpubBookMetadataReader2 extends BookMetadataReader2() {
+class EpubBookMetadataReader extends BookMetadataReader() {
   override val mimeType: String = "application/epub+zip"
 
   override def canRead(bookData: InputStream): Boolean = {

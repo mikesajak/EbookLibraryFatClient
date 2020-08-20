@@ -3,7 +3,7 @@ package com.mikesajak.ebooklib.app
 import com.google.inject._
 import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
 import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
-import com.mikesajak.ebooklib.app.reader.EpubBookMetadataReader2
+import com.mikesajak.ebooklib.app.reader.EpubBookMetadataReader
 import com.mikesajak.ebooklib.app.rest.{BookServerController, ServerConnectionController}
 import com.mikesajak.ebooklib.app.ui.{ActionsController, BookDataProviderFactory, ResourceManager}
 import com.mikesajak.ebooklib.app.util.EventBus
@@ -21,7 +21,7 @@ class ApplicationContext extends AbstractModule with ScalaModule {
   def bookReadersRegistry(): BookReadersRegistry = {
     val registry = new BookReadersRegistry
     // TODO: add some autodiscovery of book formats
-    registry.register(new EpubBookMetadataReader2)
+    registry.register(new EpubBookMetadataReader)
     registry
   }
 
@@ -53,9 +53,9 @@ class UIContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def actionsController(resourcesMgr: ResourceManager, appController: AppController,
-                        bookReadersRegistry: BookReadersRegistry, bookFormatResolver: BookFormatResolver) =
-    new ActionsController(resourcesMgr, appController, bookReadersRegistry, bookFormatResolver)
+  def actionsController(appController: AppController, bookReadersRegistry: BookReadersRegistry,
+                        bookFormatResolver: BookFormatResolver) =
+    new ActionsController(appController, bookReadersRegistry, bookFormatResolver)
 }
 
 class WebContext extends AbstractModule with ScalaModule {
