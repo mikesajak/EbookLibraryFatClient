@@ -1,16 +1,17 @@
 package com.mikesajak.ebooklib.app.ui
 
-import com.mikesajak.ebooklib.app.dto._
+import com.mikesajak.ebooklib.app.model._
 import com.mikesajak.ebooklib.app.rest.BookServerController
 import scalafx.scene.image.Image
 
-import scala.concurrent.{ExecutionContextExecutor, Future}
+import scala.concurrent.duration.DurationInt
+import scala.concurrent.{Await, ExecutionContextExecutor}
 
 trait BookDataProvider {
   def bookId: Option[BookId]
   def bookMetadata: BookMetadata
   def bookCover: Option[Image]
-  def bookFormatsMetadata: Future[Seq[BookFormatMetadata]]
+  def bookFormatsMetadata: Seq[BookFormatMetadata]
   def bookFormat(formatId: BookFormatId): BookFormat
 }
 
@@ -29,13 +30,13 @@ class ServerBookDataProvider(book: Book)(bookServerController: BookServerControl
 
   override def bookCover: Option[Image] = bookServerController.getBookCover(book.id)
 
-  override def bookFormatsMetadata: Future[Seq[BookFormatMetadata]] = {
-    val eventualFormatIds = bookServerController.getBookFormatIds(book.id)
-    eventualFormatIds.flatMap { formatIds =>
-      val futures = formatIds.map { id => bookServerController.getBookFormatMetadata(book.id, id) }
-      Future.sequence(futures)
-    }
+  override def bookFormatsMetadata: Seq[BookFormatMetadata] = {
+    val eventualMetadatas = bookServerController.getBookFormatsMetadata(book.id)
+    Await.result(eventualMetadatas, 3.seconds)
   }
 
-  override def bookFormat(formatId: BookFormatId): BookFormat = ???
+  override def bookFormat(formatId: BookFormatId): BookFormat = {
+//    bookServerController.getBookFormatsMetadata()
+    ???
+  }
 }

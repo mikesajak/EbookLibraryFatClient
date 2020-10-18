@@ -3,14 +3,13 @@ package com.mikesajak.ebooklib.app.ui
 import java.time.LocalDate
 
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
-import com.mikesajak.ebooklib.app.dto.{Book, BookFormatMetadata, BookMetadata, Series}
+import com.mikesajak.ebooklib.app.model.{Book, BookFormatMetadata, BookMetadata, Series}
 import com.mikesajak.ebooklib.app.ui.UIUtils.bindHeight
 import com.typesafe.scalalogging.Logger
 import javafx.scene.input.MouseButton
 import javafx.scene.{control => jfxctrl}
 import javafx.{scene => jfxs}
 import scalafx.Includes._
-import scalafx.application.Platform
 import scalafx.geometry.Insets
 import scalafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory
 import scalafx.scene.control._
@@ -111,8 +110,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
     initBookContent(bookDataProvider.bookMetadata)
     initCoverImage(bookDataProvider.bookCover)
-    bookDataProvider.bookFormatsMetadata
-                    .foreach(formatMetadatas => Platform.runLater { initFormats(formatMetadatas) } )
+    initFormats(bookDataProvider.bookFormatsMetadata)
 
     booksNavigator match {
       case Some(nav) =>
@@ -180,13 +178,13 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     }
   }
 
-  def initFormats(formatsMetadata: Seq[BookFormatMetadata]): Unit = {
+  def initFormats(bookFormats: Seq[BookFormatMetadata]): Unit = {
     bookFormatsListView.items.value.clear()
     bookFormatsListView.cellFactory = { p =>
       val cell = new ListCell[BookFormatMetadata]
-      cell.item.onChange { (_,_, formatMeta) =>
-        if (formatMeta != null)
-          cell.text = bookFormatResolver.forMimeType(formatMeta.formatType)
+      cell.item.onChange { (_,_, format) =>
+        if (format != null)
+          cell.text = bookFormatResolver.forMimeType(format.formatType)
       }
       cell.onMouseClicked = { me =>
         if (me.getButton == MouseButton.SECONDARY) {
@@ -195,7 +193,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
       }
       cell
     }
-    bookFormatsListView.items.value ++= formatsMetadata
+    bookFormatsListView.items.value ++= bookFormats
   }
 
   private def prepareDialogButton(buttonType: ButtonType, iconName: String) = {
@@ -240,17 +238,17 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     val series = if (!empty(seriesTitle)) Some(Series(seriesTitle, seriesNum))
                  else None
 
-    BookMetadata(titleTextField.text.value,
-                 parseSeq(authorsCombo.value.value, "&"),
-                 parseSeq(tagsCombo.value.value, ","),
-                 parseSeq(identifiersTextField.text.value, ","),
-                 //                     parseDate(creationDateTextField.text.value),
-                 None,
-                 parseDate(publicationDateTextField.text.value),
-                 parseText(publisherCombo.value.value),
-                 parseSeq(languagesCombo.value.value, ","),
-                 series,
-                 parseText(descriptionTextArea.text.value))
+    BookMetadata(title = titleTextField.text.value,
+                 authors = parseSeq(authorsCombo.value.value, "&"),
+                 tags = parseSeq(tagsCombo.value.value, ","),
+                 identifiers = parseSeq(identifiersTextField.text.value, ","),
+                 creationDate = None, // parseDate(creationDateTextField.text.value),
+                 publicationDate = parseDate(publicationDateTextField.text.value),
+                 publisher = parseText(publisherCombo.value.value),
+                 languages = parseSeq(languagesCombo.value.value, ","),
+                 series = series,
+                 description = parseText(descriptionTextArea.text.value),
+                 formatIds = None)
   }
 
   override def bookFormats(): Seq[BookFormatMetadata] = {

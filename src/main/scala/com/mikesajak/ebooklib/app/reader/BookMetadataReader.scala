@@ -2,7 +2,7 @@ package com.mikesajak.ebooklib.app.reader
 
 import java.io.InputStream
 
-import com.mikesajak.ebooklib.app.dto.{BookMetadata, CoverImage}
+import com.mikesajak.ebooklib.app.model.{BookMetadata, CoverImage}
 
 trait BookMetadataReader {
   val mimeType: String

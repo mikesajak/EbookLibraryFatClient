@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 
 import com.mikesajak.ebooklib.app.config.AppSettings
-import com.mikesajak.ebooklib.app.dto.ServerInfo
+import com.mikesajak.ebooklib.app.model.ServerInfo
 import com.mikesajak.ebooklib.app.rest.ConnectionStatus.{Connected, Disconnected, Warning}
 import com.mikesajak.ebooklib.app.util.EventBus
 import com.typesafe.scalalogging.Logger
@@ -36,10 +36,10 @@ object ServerStatus{
   def disconnected(): ServerStatus = ServerStatus(ConnectionStatus.Disconnected, None)
 }
 
-class ServerConnectionController(serverController: BookServerController,
-                                 appSettings: AppSettings,
-                                 eventBus: EventBus) {
-  private val logger = Logger[ServerConnectionController]
+class ServerConnectionService(serverController: BookServerController,
+                              appSettings: AppSettings,
+                              eventBus: EventBus) {
+  private val logger = Logger[ServerConnectionService]
   implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
   @volatile
@@ -65,18 +65,24 @@ class ServerConnectionController(serverController: BookServerController,
 
 
   private def updateServerStatus(): Unit = {
-    serverController.serverInfoAsync
-                    .onComplete{ result =>
-                      result match {
-                        case Success(serverInfo) =>
-                          missedConnections = 0
-                          connectionInfo = ConnectionInfo(serverInfo, LocalDateTime.now())
-                        case Failure(_) =>
-                          if (missedConnections != Int.MaxValue) missedConnections += 1
-                      }
-                      eventBus.publish(serverStatus)
-                    }
+    serverController.serverInfoAsync.onComplete{ triedServerInfo =>
+      val oldServerStatus = serverStatus
+      triedServerInfo match {
+        case Success(serverInfo) =>
+          missedConnections = 0
+          connectionInfo = ConnectionInfo(serverInfo, LocalDateTime.now())
+        case Failure(ex) =>
+          logger.warn(s"Error connecting to the server: ${ex.getLocalizedMessage}")
+          if (missedConnections != Int.MaxValue) missedConnections += 1
+      }
+      val curServerStatus = serverStatus
+      eventBus.publish(curServerStatus)
+      if (curServerStatus.connectionStatus == Connected && oldServerStatus.connectionStatus != Connected) {
+        logger.info(s"Server reconnected: $connectionInfo")
+        eventBus.publish(ServerReconnectedEvent(connectionInfo))
+      }
+    }
   }
 }
 
-
+case class ServerReconnectedEvent(connectionInfo: ConnectionInfo)

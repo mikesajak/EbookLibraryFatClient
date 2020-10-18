@@ -2,7 +2,7 @@ package com.mikesajak.ebooklib.app.reader
 import java.io.{IOException, InputStream}
 import java.time.LocalDate
 
-import com.mikesajak.ebooklib.app.dto.{BookMetadata, CoverImage}
+import com.mikesajak.ebooklib.app.model.{BookMetadata, CoverImage}
 import nl.siegmann.epublib.domain.Date
 import nl.siegmann.epublib.epub.EpubReader
 
@@ -38,7 +38,8 @@ class EpubBookMetadataReader extends BookMetadataReader() {
       description = if (!description.isBlank) Some(description) else None,
       tags = Seq(),
       languages = Seq(metadata.getLanguage),
-      series = None)
+      series = None,
+      formatIds = None)
   }
 
   override def readCover(bookData: InputStream): Option[CoverImage] = None

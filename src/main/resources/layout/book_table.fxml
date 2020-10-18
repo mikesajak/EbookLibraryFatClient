@@ -77,6 +77,7 @@
                   <TableColumn fx:id="publicationDateColumn" prefWidth="118.0" text="%book_table_panel.publication_column.label" />
                   <TableColumn fx:id="publisherColumn" prefWidth="121.0" text="%book_table_panel.publisher_column.label" />
                   <TableColumn fx:id="languagesColumn" prefWidth="126.0" text="%book_table_panel.languages_column.label" />
+                  <TableColumn fx:id="formatsColumn" prefWidth="75.0" text="%book_table_panel.formats_column.label" />
               </columns>
             </TableView>
             <VBox prefHeight="200.0" prefWidth="100.0">

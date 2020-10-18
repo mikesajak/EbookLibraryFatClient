@@ -1,119 +1,42 @@
 package com.mikesajak.ebooklib.app.rest
 
-import java.net.URLEncoder
-
-import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-import com.mikesajak.ebooklib.app.config.AppSettings
-import com.mikesajak.ebooklib.app.dto._
-import com.typesafe.scalalogging.Logger
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
-import io.circe.syntax.EncoderOps
-import net.softler.client.ClientRequest
+import com.mikesajak.ebooklib.app.model._
 import scalafx.scene.image.Image
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
+import scala.concurrent.Future
 
-class BookServerController(appSettings: AppSettings) extends FailFastCirceSupport {
+trait BookServerController {
+  def serverInfoAsync: Future[ServerInfo]
 
-  private val logger = Logger[BookServerController]
+  def listBooks(): Future[Seq[Book]]
 
-  implicit lazy val system: ActorSystem = ActorSystem()
-  implicit lazy val materializer: Materializer = ActorMaterializer()
-  implicit lazy val executionContext: ExecutionContext = system.dispatcher
-  import io.circe.generic.auto._
+  def searchBooks(searchQuery: String): Future[Seq[Book]]
 
-  def serverInfoAsync: Future[ServerInfo] = {
-    val url = s"${appSettings.server.address}/info"
-    logger.debug(s"Requesting server status: GET $url")
-    ClientRequest(url).withJson.get[ServerInfo]
-                      .map { result =>
-                        logger.debug(s"Received server status response: $result")
-                        result
-                      }
-  }
+  def getBook(id: BookId): Future[Book]
 
-  def listBooksAsync(): Future[Seq[Book]] = {
-    val url = s"${appSettings.server.address}/books"
-    logger.debug(s"Requesting book list: GET $url")
-    ClientRequest(url).withJson
-                      .get[Seq[Book]]
-                      .map { result =>
-                        logger.debug(s"Received book list response: $result")
-                        result
-                      }
-  }
+  def addBook(bookMetadata: BookMetadata): Future[BookId]
 
-  def searchBooksAsync(searchQuery: String): Future[Seq[Book]] = {
-    val url = s"${appSettings.server.address}/books?query=${URLEncoder.encode(searchQuery, "UTF8")}"
-    logger.debug(s"Requesting book search: GET $url")
-    ClientRequest(url).withJson
-                      .get[Seq[Book]]
-                      .map { result =>
-                        logger.debug(s"Received book search response: $result")
-                        result
-                      }
-  }
+  def deleteBook(bookId: BookId): Future[Unit]
 
-  def getBookAsync(id: BookId): Future[Book] = {
-    val url = s"${appSettings.server.address}/books/${id.value}"
-    logger.debug(s"Requesting book data: GET $url")
-    ClientRequest(url).withJson
-                      .get[Book]
-                      .map { result =>
-                        logger.debug(s"Received book data response: $result")
-                        result
-                      }
-  }
+  def getBookCover(bookId: BookId): Option[Image]
 
-  def addBook(bookMetadata: BookMetadata): Future[String] = {
-    val url = s"${appSettings.server.address}/books"
-    ClientRequest(url).entity(bookMetadata.asJson.toString)
-                      .asJson
-                      .post[String]
-  }
+  def deleteBookCover(bookId: BookId): Future[Unit]
 
-  def deleteBook(bookId: BookId): Future[String] = {
-    val url = s"${appSettings.server.address}/books"
-    ClientRequest(url).entity(bookId.value)
-                      .asJson
-                      .post[String]
-  }
+  def getBookFormatIds(bookId: BookId): Future[Seq[BookFormatId]]
 
-  def getBookCover(bookId: BookId): Option[Image] = {
-    val coverImgUrl = s"${appSettings.server.address}/coverImages/$bookId"
-    val image =
-      try {
-        new Image(coverImgUrl, true)
-      } catch {
-        case ex: Exception =>
-          logger.info(s"Error fetching image for $coverImgUrl", ex)
-          null
-      }
+  def deleteBookFormat(bookId: BookId, formatId: BookFormatId): Future[Unit]
 
-    Option(image)
-  }
+  def getBookFormatMetadata(bookId: BookId, formatId: BookFormatId): Future[BookFormatMetadata]
 
-  def getBookFormatIds(bookId: BookId): Future[Seq[BookFormatId]] = {
-    val url = s"${appSettings.server.address}/bookFormats/${bookId.value}"
-    logger.debug(s"Requesting book format ids list: GET $url")
-    ClientRequest(url).withJson
-                      .get[Seq[BookFormatId]]
-                      .map { result =>
-                        logger.debug(s"Received book format ids list response: $result")
-                        result
-                      }
-  }
+  def getBookFormatsMetadata(bookId: BookId): Future[Seq[BookFormatMetadata]]
 
-  def getBookFormatMetadata(bookId: BookId, formatId: BookFormatId): Future[BookFormatMetadata] = {
-    val url = s"${appSettings.server.address}/bookFormats/${bookId.value}/${formatId.value}/metadata"
-    logger.debug(s"Requesting book format metadata: GET $url")
-    ClientRequest(url).withJson
-                      .get[BookFormatMetadata]
-                      .map { result =>
-                         logger.debug(s"Received book format metadata response: $result")
-                         result
-                       }
-  }
+  def getBookFormat(formatId: BookFormatId): Future[BookFormat]
+
+  def addBookFormat(bookId: BookId, bookFormat: BookFormat): Future[String]
 }
+
+class AddBookException(message: String) extends Exception(message)
+class AddBookFormatException(message: String) extends Exception(message)
+class DeleteBookException(message: String) extends Exception(message)
+class DeleteBookFormatException(message: String) extends Exception(message)
+class DeleteBookCoverException(message: String) extends Exception(message)

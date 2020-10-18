@@ -3,6 +3,7 @@ package com.mikesajak.ebooklib.app.util
 import com.google.common.eventbus.{DeadEvent, Subscribe}
 import com.typesafe.scalalogging.Logger
 
+//noinspection UnstableApiUsage
 class EventBus {
   private val eventBus = new com.google.common.eventbus.EventBus("App event bus")
   private val logger = Logger[EventBus]
@@ -18,7 +19,7 @@ class EventBus {
   def publish[A](event: A): Unit = {
     logScope(s"Publishing event: $event") { () =>
       eventBus.post(event)
-                                          }
+    }
   }
 
   def register(subscriber: AnyRef): Unit = eventBus.register(subscriber)
@@ -26,6 +27,7 @@ class EventBus {
 
 }
 
+//noinspection UnstableApiUsage
 class DeadEventHandler {
   private val logger = Logger[DeadEventHandler]
   @Subscribe
