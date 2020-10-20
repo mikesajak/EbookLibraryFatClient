@@ -114,7 +114,7 @@ class BookTableController(booksTableView: TableView[BookRow],
             val provider = bookDataProviderFactory.getServerBookDataProvider(book)
             event.clickCount match {
               case 1 => bookPreviewDetailsPanelController.initBook(provider)
-              case 2 => actionsController.openMetadataEditDialog(provider, None)
+              case 2 => actionsController.editBook(provider, None)
             }
           case MouseButton.Secondary =>
           case MouseButton.Middle =>

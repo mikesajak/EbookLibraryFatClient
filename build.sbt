@@ -43,7 +43,7 @@ libraryDependencies ++= { // guice dependency injection
 }
 
 // https://mvnrepository.com/artifact/com.google.guava/guava
-libraryDependencies += "com.google.guava" % "guava" % "25.1-jre"
+libraryDependencies += "com.google.guava" % "guava" % "29.0-jre"
 
 libraryDependencies ++= { // logging
   Seq("com.typesafe.scala-logging" %% "scala-logging" % "3.9.0",
@@ -83,3 +83,9 @@ libraryDependencies ++= List(
   "net.softler" %% "akka-http-rest-client" % "0.2.1",
   "de.heikoseeberger" %% "akka-http-circe" % "1.21.0"
   )
+
+libraryDependencies ++= {
+  val sttpVersion = "3.0.0-RC5"
+  Seq("com.softwaremill.sttp.client3" %% "core" % sttpVersion,
+      "com.softwaremill.sttp.client3" %% "circe" % sttpVersion)
+}

@@ -5,7 +5,6 @@ import java.nio.file.{Files, Paths}
 
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
-import com.mikesajak.ebooklib.app.dto.ErrorResponse
 import com.mikesajak.ebooklib.app.model._
 import com.mikesajak.ebooklib.app.rest.BookServerController
 import com.mikesajak.ebooklib.app.ui.BookChangeType.{BookAdd, BookDelete}
@@ -14,13 +13,11 @@ import com.typesafe.scalalogging.Logger
 import enumeratum.{Enum, EnumEntry}
 import scalafx.Includes._
 import scalafx.application.Platform
-import scalafx.scene.control.Alert.AlertType
-import scalafx.scene.control.{Alert, ButtonType}
+import scalafx.scene.control.ButtonType
 import scalafx.scene.image.Image
 import scalafx.scene.layout.Region
 import scalafx.stage.FileChooser
 import scalafx.stage.FileChooser.ExtensionFilter
-import sttp.client3.HttpError
 
 import scala.collection.immutable
 import scala.concurrent.ExecutionContextExecutor
@@ -51,10 +48,10 @@ class ActionsController(appController: AppController,
     logger.debug(s"Selected book file: $result")
 
     result.flatMap(getBookDataProviderFor)
-          .foreach(provider => openMetadataEditDialog(provider, None))
+          .foreach(provider => addBook(provider, None))
   }
 
-  def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNavigator]) {
+  def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNavigator]): Option[(BookMetadata, Seq[BookFormatMetadata])] = {
     val layout = "/layout/edit_book_metadata1.fxml"
 
     val (content, controller) = UILoader.loadScene[EditBookMetadataController](layout)
@@ -63,28 +60,42 @@ class ActionsController(appController: AppController,
     dialog.dialogPane.value.setMinSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE)
     dialog.dialogPane.value.getScene.getWindow.sizeToScene()
     dialog.showAndWait() match {
-      case Some(ButtonType.OK) => //Some(controller.bookMetadata, controller.bookFormatsMetadata())
-        val bookMetadata = controller.bookMetadata
-        val bookFormatsMetadata = controller.bookFormats()
-        logger.debug(s"Metadata dialog confirmed: book:\n$bookMetadata")
-        bookServerController.addBook(bookMetadata).onComplete {
-          case Success(bookId) =>
-            logger.info(s"Successfully added book metadata, bookId=$bookId")
-            bookFormatsMetadata.foreach { formatMetadata =>
-              logger.debug(s"Uploading book format: $formatMetadata")
-              val bookFormat = bookDataProvider.bookFormat(formatMetadata.formatId)
-              bookServerController.addBookFormat(bookId, bookFormat)
-            }
-            eventBus.publish(BookAddedEvent(Book(bookId, bookMetadata)))
-
-          case Failure(exception) =>
-            logger.warn(s"An error occurred while adding book to library.", exception)
-            showErrorDialog("Error adding book to library", // TODO: i18
-                            exception)
-        }
+      case Some(ButtonType.OK) => Some(controller.bookMetadata, controller.bookFormats())
       case bt @ _ =>
         logger.debug(s"Metadata dialog - $bt button selected")
         None
+    }
+  }
+
+  def addBook(bookDataProvider: BookDataProvider, booksNav: Option[BooksNavigator]): Unit = {
+    logger.debug(s"Opening book metadata dialog for add")
+    openMetadataEditDialog(bookDataProvider, booksNav).foreach { case (bookMetadata, bookFormats) =>
+      logger.debug(s"Metadata dialog confirmed: book:\n$bookMetadata")
+      bookServerController.addBook(bookMetadata).onComplete {
+        case Success(bookId) =>
+          logger.info(s"Successfully added book metadata, bookId=$bookId")
+          bookFormats.foreach { format =>
+            logger.debug(s"Uploading book format: $format")
+            bookServerController.addBookFormat(bookId, bookDataProvider.bookFormat(format.formatId))
+          }
+          eventBus.publish(BookAddedEvent(Book(bookId, bookMetadata)))
+
+        case Failure(exception) =>
+          logger.warn(s"An error occurred while adding book to library.", exception)
+          openErrorDialog("Error adding book to library", // TODO: i18
+                          exception)
+      }
+    }
+
+  }
+
+  def editBook(bookDataProvider: BookDataProvider, booksNavigator: Option[BooksNavigator]): Unit = {
+    logger.debug(s"Opening book metadata dialog for edit")
+    openMetadataEditDialog(bookDataProvider, booksNavigator) match {
+      case Some((bookMetadata, bookFormats)) =>
+        logger.debug(s"Book edit confirmed: book: $bookMetadata")
+        // TODO
+      case bt @ _ => logger.debug(s"Metadata dialog - $bt button selected")
     }
   }
 
@@ -96,24 +107,25 @@ class ActionsController(appController: AppController,
 
                           case Failure(exception) =>
                             logger.warn(s"An error occurred while removing book from library.", exception)
-                            showErrorDialog("Error removing book to library", // TODO: i18
+                            openErrorDialog("Error removing book to library", // TODO: i18
                                             exception)
                         }
   }
 
-  private def showErrorDialog(message: String, exception: Throwable): Unit = {
-    val detailedMessage = exception match {
-      case HttpError(re: ErrorResponse, statusCode) => re.message
-      case _ => exception.getLocalizedMessage
-    }
-    Platform.runLater {
-      new Alert(AlertType.Error) {
-        initOwner(appController.mainStage)
-        title = "Error"
-        headerText = message
-        contentText = detailedMessage
-      }.showAndWait()
-    }
+  private def openErrorDialog(title: String, exception: Throwable): Unit =
+    openErrorDialog(title, exception.getLocalizedMessage)
+
+  private def openErrorDialog(title: String, message: String): Unit = Platform.runLater {
+    val layout = "/layout/error_dialog.fxml"
+
+    val (content, controller) = UILoader.loadScene[ErrorDialogController](layout)
+    val dialog = UIUtils.mkModalDialog[ButtonType](appController.mainStage, content)
+    controller.init(dialog, title, message)
+
+    dialog.dialogPane.value.setMinSize(500, 300)
+    dialog.dialogPane.value.setPrefSize(500, 300)
+
+    dialog.showAndWait()
   }
 
   def getBookDataProviderFor(bookFile: File): Option[BookDataProvider] = {
@@ -137,6 +149,8 @@ class ActionsController(appController: AppController,
           private def formatMetadata =
             BookFormatMetadata(BookFormatId.NotExisting, BookId.NotExisting, reader.mimeType,
                                Some(bookFile.getAbsolutePath), bookFile.length().toInt)
+
+//          override def bookFormats: Seq[BookFormat] = Seq(BookFormat(formatMetadata, bookData))
         }
       }
     }
