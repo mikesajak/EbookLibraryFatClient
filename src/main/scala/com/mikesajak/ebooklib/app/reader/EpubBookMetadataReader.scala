@@ -39,7 +39,7 @@ class EpubBookMetadataReader extends BookMetadataReader() {
       tags = Seq(),
       languages = Seq(metadata.getLanguage),
       series = None,
-      formatIds = None)
+      formats = Seq())
   }
 
   override def readCover(bookData: InputStream): Option[CoverImage] = None

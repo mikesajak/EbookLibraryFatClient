@@ -248,7 +248,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                  languages = parseSeq(languagesCombo.value.value, ","),
                  series = series,
                  description = parseText(descriptionTextArea.text.value),
-                 formatIds = None)
+                 formats = Seq())
   }
 
   override def bookFormats(): Seq[BookFormatMetadata] = {

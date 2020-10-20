@@ -2,6 +2,7 @@ package com.mikesajak.ebooklib.app.ui
 
 import com.google.common.eventbus.Subscribe
 import com.mikesajak.ebooklib.app.AppController
+import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.model.{Book, BookId}
 import com.mikesajak.ebooklib.app.rest.{BookServerController, ServerReconnectedEvent}
@@ -26,7 +27,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
 
-class BookRow(val book: Book, var bookFormats: List[String]) {
+class BookRow(val book: Book, val bookFormatResolver: BookFormatResolver) {
   val title = new StringProperty(book.metadata.title)
   val authors = new StringProperty(book.metadata.authors.mkString(", "))
   val tags = new StringProperty(book.metadata.tags.mkString(", "))
@@ -35,7 +36,7 @@ class BookRow(val book: Book, var bookFormats: List[String]) {
   val publicationDate = new StringProperty(book.metadata.publicationDate.map(_.toString).orNull)
   val publisher = new StringProperty(book.metadata.publisher.orNull)
   val languages = new StringProperty(book.metadata.languages.mkString(", "))
-  val formats = new StringProperty(bookFormats.mkString)
+  val formats = new StringProperty(book.metadata.formats.map(fmt => bookFormatResolver.forMimeType(fmt.formatType)).mkString(", "))
 }
 
 
@@ -64,6 +65,7 @@ class BookTableController(booksTableView: TableView[BookRow],
                           bookServerController: BookServerController,
                           actionsController: ActionsController,
                           eventBus: EventBus,
+                          bookFormatResolver: BookFormatResolver,
                           implicit val resourceMgr: ResourceManager) {
   import ResourceManager._
 
@@ -173,7 +175,7 @@ class BookTableController(booksTableView: TableView[BookRow],
 
   private def updateBooksTable(books: Seq[Book]): Unit = {
     logger.debug(s"Finished loading books from server (count=${books.size}). Refreshing list.")
-    val rows = books.map(new BookRow(_, List()))
+    val rows = books.map(new BookRow(_, bookFormatResolver))
     bookRowsMap = rows.map(row => (row.book.id, row)).toMap
     bookRows.setAll(rows.asJava)
   }
