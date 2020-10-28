@@ -18,7 +18,6 @@ import scalafx.scene.layout.{Priority, Region, VBox}
 import scalafx.scene.text.Text
 import scalafxml.core.macros.sfxml
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContextExecutor
 
 trait EditBookMetadataController {
@@ -148,12 +147,13 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     initComboTooltip(tagsCombo, "\\s*,\\s*")
     identifiersTextField.text = book.identifiers.mkString(", ")
     initTextFieldTooltip(identifiersTextField, "\\s*,\\s*")
-    //    creationDateTextField.text = strVal(book.getCreationDate)
+//    creationDateTextField.text = book.creationDate.map(_.toString).orNull
     publicationDateTextField.text = book.publicationDate.map(_.toString).orNull
     publisherCombo.value = book.publisher.orNull
     initComboTooltip(publisherCombo)
     languagesCombo.value = book.languages.mkString(", ")
     initComboTooltip(languagesCombo, "\\s*,\\s*")
+    descriptionTextArea.text = book.description.orNull
   }
 
   def initCoverImage(cover: Option[Image]): Unit = {
@@ -184,7 +184,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
       val cell = new ListCell[BookFormatMetadata]
       cell.item.onChange { (_,_, format) =>
         if (format != null)
-          cell.text = bookFormatResolver.forMimeType(format.formatType)
+          cell.text = bookFormatResolver.forMimeType(format.formatType).description
       }
       cell.onMouseClicked = { me =>
         if (me.getButton == MouseButton.SECONDARY) {
@@ -338,8 +338,4 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
   }
 
   private def strVal(ob: Any) = if (ob == null) "" else ob.toString
-
-  private def strVal[A](coll: java.util.Collection[A], sep: String) =
-    if (coll == null) "" else coll.asScala.mkString(sep)
-
 }

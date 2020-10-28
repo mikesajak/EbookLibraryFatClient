@@ -6,6 +6,7 @@ import java.nio.file.{Files, Paths}
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
 import com.mikesajak.ebooklib.app.model._
+import com.mikesajak.ebooklib.app.reader.BookFormatDataReaderAggregator
 import com.mikesajak.ebooklib.app.rest.BookServerController
 import com.mikesajak.ebooklib.app.ui.BookChangeType.{BookAdd, BookDelete}
 import com.mikesajak.ebooklib.app.util.EventBus
@@ -17,7 +18,6 @@ import scalafx.scene.control.ButtonType
 import scalafx.scene.image.Image
 import scalafx.scene.layout.Region
 import scalafx.stage.FileChooser
-import scalafx.stage.FileChooser.ExtensionFilter
 
 import scala.collection.immutable
 import scala.concurrent.ExecutionContextExecutor
@@ -33,17 +33,21 @@ class ActionsController(appController: AppController,
 
   private implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
+  private var lastVisitedDir = System.getProperty("user.dir")
   def handleImportBookAction(): Unit = {
     val fileChooser = new FileChooser() {
-      initialDirectory = new File(System.getProperty("user.dir"))
-      extensionFilters ++= bookReadersRegistry.allReaders
-                                              .map { r =>
-                                                val extension = bookFormatResolver.forMimeType(r.mimeType).toUpperCase
-                                                new ExtensionFilter(extension, s"*.${extension.toLowerCase()}")
-                                              }
-                                              .map(ef => ef.delegate)
+      initialDirectory = new File(lastVisitedDir)
+//      extensionFilters ++= bookReadersRegistry.allReaders
+//                                              .map { r =>
+//                                                val extension = bookFormatResolver.forMimeType(r.mimeType).toUpperCase
+//                                                new ExtensionFilter(extension, s"*.${extension.toLowerCase()}")
+//                                              }
+//                                              .map(ef => ef.delegate)
+
     }
     val result = Option(fileChooser.showOpenDialog(appController.mainStage))
+
+    lastVisitedDir = result.map(_.getParent).getOrElse(System.getProperty("user.dir"))
 
     logger.debug(s"Selected book file: $result")
 
@@ -131,29 +135,37 @@ class ActionsController(appController: AppController,
   def getBookDataProviderFor(bookFile: File): Option[BookDataProvider] = {
     val bookData = Files.readAllBytes(Paths.get(bookFile.getAbsolutePath))
 
-    bookReadersRegistry.allReaders
-        .collectFirst { case r if r.canRead(new ByteArrayInputStream(bookData)) => r }
-        .map { reader => new BookDataProvider() {
-          override def bookId: Option[BookId] = None
+    val bookFormatDataOpt = new BookFormatDataReaderAggregator().read(new ByteArrayInputStream(bookData))
 
-          override def bookMetadata: BookMetadata = reader.read(new ByteArrayInputStream(bookData))
+    bookFormatDataOpt.map { bookFormatData =>
+      new BookDataProvider {
+        override def bookId: Option[BookId] = None
 
-          override def bookCover: Option[Image] = {
-            reader.readCover(new ByteArrayInputStream(bookData))
-          }.map(coverImage => new Image(new ByteArrayInputStream(coverImage.imageData)))
+        override def bookMetadata: BookMetadata =
+          BookMetadata(bookFormatData.titles.mkString(", "),
+                       bookFormatData.authors,
+                       bookFormatData.keywords,
+                       bookFormatData.identifiers,
+                       bookFormatData.creationDate,
+                       bookFormatData.publicationDate,
+                       bookFormatData.publisher,
+                       bookFormatData.language.toSeq,
+                       None, bookFormatData.description,
+                       bookFormatsMetadata)
 
-          override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(formatMetadata)
 
-          override def bookFormat(formatId: BookFormatId): BookFormat = BookFormat(formatMetadata, bookData)
+        override def bookCover: Option[Image] = None
 
-          private def formatMetadata =
-            BookFormatMetadata(BookFormatId.NotExisting, BookId.NotExisting, reader.mimeType,
-                               Some(bookFile.getAbsolutePath), bookFile.length().toInt)
+        override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(formatMetadata)
 
-//          override def bookFormats: Seq[BookFormat] = Seq(BookFormat(formatMetadata, bookData))
-        }
+        private def formatMetadata =
+          BookFormatMetadata(BookFormatId.NotExisting, BookId.NotExisting, bookFormatData.contentType,
+                             Some(bookFile.getAbsolutePath), bookFile.length().toInt)
+
+        override def bookFormat(formatId: BookFormatId): BookFormat = BookFormat(formatMetadata, bookData)
       }
-    }
+    }.toOption
+  }
 }
 
 sealed trait BookChangeType extends EnumEntry

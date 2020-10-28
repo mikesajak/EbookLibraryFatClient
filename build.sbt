@@ -89,3 +89,14 @@ libraryDependencies ++= {
   Seq("com.softwaremill.sttp.client3" %% "core" % sttpVersion,
       "com.softwaremill.sttp.client3" %% "circe" % sttpVersion)
 }
+
+// Apache Tika - mime type detection and file content scanning lib
+libraryDependencies ++= Seq(
+  "org.apache.tika" % "tika-core" % "1.18",
+  "org.apache.tika" % "tika-parsers" % "1.18",
+  "org.xerial" % "sqlite-jdbc" % "3.8.10.1",
+  "org.apache.pdfbox" % "jbig2-imageio" % "3.0.0",
+  "com.github.jai-imageio" % "jai-imageio-core" % "1.3.0",
+  "org.bouncycastle" % "bcprov-jdk15on" % "1.60",
+  "org.bouncycastle" % "bcmail-jdk15on" % "1.60",
+  "org.bouncycastle" % "bcpkix-jdk15on" % "1.60")

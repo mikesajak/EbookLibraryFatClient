@@ -31,12 +31,12 @@ class BookRow(val book: Book, val bookFormatResolver: BookFormatResolver) {
   val title = new StringProperty(book.metadata.title)
   val authors = new StringProperty(book.metadata.authors.mkString(", "))
   val tags = new StringProperty(book.metadata.tags.mkString(", "))
-  val identifiers = new StringProperty(book.metadata.identifiers.mkString(", "))
+  val identifiers = new StringProperty((book.metadata.identifiers :+ s"internal:${book.id}").mkString(", "))
   val creationDate = new StringProperty(book.metadata.creationDate.map(_.toString).orNull)
   val publicationDate = new StringProperty(book.metadata.publicationDate.map(_.toString).orNull)
   val publisher = new StringProperty(book.metadata.publisher.orNull)
   val languages = new StringProperty(book.metadata.languages.mkString(", "))
-  val formats = new StringProperty(book.metadata.formats.map(fmt => bookFormatResolver.forMimeType(fmt.formatType)).mkString(", "))
+  val formats = new StringProperty(book.metadata.formats.map(fmt => bookFormatResolver.forMimeType(fmt.formatType).description).mkString(", "))
 }
 
 
