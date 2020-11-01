@@ -6,7 +6,7 @@ import scalafx.scene.text.{Text, TextFlow}
 import scalafxml.core.macros.sfxml
 
 trait ErrorDialogController {
-  def init(dialog: Dialog[ButtonType], title: String, contentMessage: String)
+  def init(dialog: Dialog[ButtonType], title: String, contentMessage: String): Unit
 }
 
 @sfxml

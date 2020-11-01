@@ -39,7 +39,7 @@ object EbookLibApp extends JFXApp {
       new Timeline {
         keyFrames.add(KeyFrame(Duration(600), "fadeOut", null, Set(KeyValue(stage.opacity, 0))))
         onFinished = { () =>
-          Platform.exit
+          Platform.exit()
           System.exit(0)
         }
       }.play()

@@ -75,11 +75,11 @@ class WebContext extends AbstractModule with ScalaModule {
     new ExecutionContext {
       val threadPool: ExecutorService = Executors.newFixedThreadPool(10)
 
-      def execute(runnable: Runnable) {
+      def execute(runnable: Runnable): Unit = {
         threadPool.submit(runnable)
       }
 
-      def reportFailure(t: Throwable) {}
+      def reportFailure(t: Throwable): Unit = {}
     }
   }
 

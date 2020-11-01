@@ -4,6 +4,7 @@ import com.google.common.eventbus.Subscribe
 import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.rest.{ConnectionStatus, ServerConnectionService, ServerStatus}
 import com.mikesajak.ebooklib.app.util.EventBus
+import com.typesafe.scalalogging.Logger
 import scalafx.application.Platform
 import scalafx.scene.control.Label
 import scalafx.scene.image.ImageView
@@ -17,6 +18,8 @@ class MainPanelController(serverStatusLabel: Label,
                           eventBus: EventBus,
                           serverConnectionController: ServerConnectionService,
                           implicit val resourceMgr: ResourceManager) {
+  private val logger = Logger[MainPanelController]
+
   eventBus.register(this)
 
   serverConnectionController.startMonitoring()
@@ -53,11 +56,14 @@ class MainPanelController(serverStatusLabel: Label,
           setServerStatusIcon("icons8-disconnected-40.png")
           serverStatusLabel.text = resourceMgr.getMessage("main_panel.status.disconnected_never.label", appSettings.server.address)
           serverStatusLabel.tooltip = resourceMgr.getMessage("main_panel.status.disconnected_never.tooltip", appSettings.server.address)
+
+        case status @ _ =>
+          logger.warn(s"Invalid state: $status")
       }
 
     }
 
-    def setServerStatusIcon(iconName: String)  {
+    def setServerStatusIcon(iconName: String): Unit = {
       val image = new ImageView(resourceMgr.getImage(iconName))
       image.fitWidth = 16
       image.fitHeight = 16

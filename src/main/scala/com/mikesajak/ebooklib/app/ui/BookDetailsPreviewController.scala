@@ -6,7 +6,7 @@ import scalafx.scene.image.ImageView
 import scalafxml.core.macros.sfxml
 
 trait BookDetailsPreviewController {
-  def initBook(bookDataProvider: BookDataProvider)
+  def initBook(bookDataProvider: BookDataProvider): Unit
 }
 
 @sfxml

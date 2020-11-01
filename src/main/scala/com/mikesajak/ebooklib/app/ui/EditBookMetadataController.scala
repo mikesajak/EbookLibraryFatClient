@@ -213,7 +213,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     iv
   }
 
-  private def setCoverImage(image: Image, overlayText: String) {
+  private def setCoverImage(image: Image, overlayText: String): Unit = {
     coverImageView.image = image
     updateCoverOverlay(overlayText)
   }
@@ -252,7 +252,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
   }
 
   override def bookFormats(): Seq[BookFormatMetadata] = {
-    bookFormatsListView.items.value
+    bookFormatsListView.items.value.toList
   }
 
   private def empty(text: String) = text == null || text.isEmpty

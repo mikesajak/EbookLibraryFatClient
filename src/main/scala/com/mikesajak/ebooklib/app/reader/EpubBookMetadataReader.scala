@@ -6,7 +6,8 @@ import com.mikesajak.ebooklib.app.model.{BookMetadata, CoverImage}
 import nl.siegmann.epublib.domain.Date
 import nl.siegmann.epublib.epub.EpubReader
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters.CollectionHasAsScala
+
 
 class EpubBookMetadataReader extends BookMetadataReader() {
   override val mimeType: String = "application/epub+zip"
@@ -30,8 +31,8 @@ class EpubBookMetadataReader extends BookMetadataReader() {
 
     BookMetadata(
       title = metadata.getFirstTitle,
-      authors = metadata.getAuthors.asScala.map(author => s"${author.getFirstname} ${author.getLastname}"),
-      identifiers = metadata.getIdentifiers.asScala.map(id => s"${id.getScheme}:${id.getValue}"),
+      authors = metadata.getAuthors.asScala.map(author => s"${author.getFirstname} ${author.getLastname}").toList,
+      identifiers = metadata.getIdentifiers.asScala.map(id => s"${id.getScheme}:${id.getValue}").toList,
       creationDate = metadata.getDates.asScala.find(d => d.getEvent == Date.Event.CREATION).map(d => LocalDate.parse(d.getValue)),
       publicationDate = metadata.getDates.asScala.find(d => d.getEvent == Date.Event.PUBLICATION).map(d => LocalDate.parse(d.getValue)),
       publisher = metadata.getPublishers.asScala.headOption,

@@ -23,8 +23,8 @@ import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.{HBox, Priority}
 import scalafxml.core.macros.{nested, sfxml}
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContextExecutor
+import scala.jdk.CollectionConverters.SeqHasAsJava
 import scala.util.{Failure, Success}
 
 class BookRow(val book: Book, val bookFormatResolver: BookFormatResolver) {
@@ -180,7 +180,7 @@ class BookTableController(booksTableView: TableView[BookRow],
     bookRows.setAll(rows.asJava)
   }
 
-  def onImportBookAction() {
+  def onImportBookAction(): Unit = {
     actionsController.handleImportBookAction()
   }
 
@@ -189,7 +189,7 @@ class BookTableController(booksTableView: TableView[BookRow],
   }
 
   var filterHistoryPopoverVisible = false
-  def onFilterHistoryAction(ae: ActionEvent) {
+  def onFilterHistoryAction(ae: ActionEvent): Unit = {
     logger.debug("filter history action")
 
       if (!filterHistoryPopoverVisible) {
@@ -207,7 +207,7 @@ class BookTableController(booksTableView: TableView[BookRow],
 
   }
 
-  def onSavedSearchesAction(ae: ActionEvent) {
+  def onSavedSearchesAction(ae: ActionEvent): Unit = {
     logger.debug("saved searches action")
   }
 }

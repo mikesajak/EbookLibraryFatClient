@@ -51,7 +51,7 @@ class ServerConnectionService(serverController: BookServerController,
   private val executor = new ScheduledThreadPoolExecutor(1)
   private val task: Runnable = () => updateServerStatus()
 
-  def startMonitoring() {
+  def startMonitoring(): Unit = {
     executor.scheduleAtFixedRate(task, 0, appSettings.server.connCheckPeriod, TimeUnit.SECONDS)
   }
 
