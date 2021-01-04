@@ -32,8 +32,7 @@ class BookRow(val book: Book, val bookFormatResolver: BookFormatResolver) {
   val authors = new StringProperty(book.metadata.authors.mkString(", "))
   val tags = new StringProperty(book.metadata.tags.mkString(", "))
   val identifiers = new StringProperty((book.metadata.identifiers :+ s"internal:${book.id}").mkString(", "))
-  val creationDate = new StringProperty(book.metadata.creationDate.map(_.toString).orNull)
-  val publicationDate = new StringProperty(book.metadata.publicationDate.map(_.toString).orNull)
+  val creationDate = new StringProperty(book.metadata.creationDates.map(_.toString).headOption.orNull)
   val publisher = new StringProperty(book.metadata.publisher.orNull)
   val languages = new StringProperty(book.metadata.languages.mkString(", "))
   val formats = new StringProperty(book.metadata.formats.map(fmt => bookFormatResolver.forMimeType(fmt.formatType).description).mkString(", "))
@@ -48,7 +47,6 @@ class BookTableController(booksTableView: TableView[BookRow],
                           tagsColumn: TableColumn[BookRow, String],
                           identifiersColumn: TableColumn[BookRow, String],
                           creationDateColumn: TableColumn[BookRow, String],
-                          publicationDateColumn: TableColumn[BookRow, String],
                           publisherColumn: TableColumn[BookRow, String],
                           languagesColumn: TableColumn[BookRow, String],
                           formatsColumn: TableColumn[BookRow, String],
@@ -85,7 +83,6 @@ class BookTableController(booksTableView: TableView[BookRow],
   tagsColumn.cellValueFactory = { _.value.tags }
   identifiersColumn.cellValueFactory = { _.value.identifiers }
   creationDateColumn.cellValueFactory = { _.value.creationDate }
-  publicationDateColumn.cellValueFactory = { _.value.publicationDate }
   publisherColumn.cellValueFactory = { _.value.publisher }
   languagesColumn.cellValueFactory = { _.value.languages }
   formatsColumn.cellValueFactory = { _.value.formats }

@@ -75,8 +75,6 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                                      identifiersTextField: TextField,
                                      creationDateTextField: TextField,
                                      creationDateSelButton: Button,
-                                     publicationDateTextField: TextField,
-                                     publicationDateSelButton: Button,
                                      publisherCombo: ComboBox[String],
                                      languagesCombo: ComboBox[String],
                                      descriptionTextArea: TextArea,
@@ -102,8 +100,8 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
   private var dialog: Dialog[ButtonType] = _
 
-  bindHeight(publicationDateSelButton, publicationDateTextField)
-  publicationDateSelButton.graphic.value.asInstanceOf[jfxs.image.ImageView].fitHeight.bind(publicationDateSelButton.height.subtract(2))
+  bindHeight(creationDateSelButton, creationDateTextField)
+  creationDateSelButton.graphic.value.asInstanceOf[jfxs.image.ImageView].fitHeight.bind(creationDateSelButton.height.subtract(2))
   toolbarSpacer.hgrow = Priority.Always
 
   seriesNumSpinner.valueFactory = new IntegerSpinnerValueFactory(0, 100, 0).asInstanceOf[SpinnerValueFactory[Int]]
@@ -181,8 +179,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     initComboTooltip(tagsCombo, "\\s*,\\s*")
     identifiersTextField.text = book.identifiers.mkString(", ")
     initTextFieldTooltip(identifiersTextField, "\\s*,\\s*")
-//    creationDateTextField.text = book.creationDate.map(_.toString).orNull
-    publicationDateTextField.text = book.publicationDate.map(_.toString).orNull
+    creationDateTextField.text = book.creationDates.map(_.toString).headOption.orNull
     publisherCombo.value = book.publisher.orNull
     initComboTooltip(publisherCombo)
     languagesCombo.value = book.languages.mkString(", ")
@@ -276,8 +273,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                  authors = parseSeq(authorsCombo.value.value, "&"),
                  tags = parseSeq(tagsCombo.value.value, ","),
                  identifiers = parseSeq(identifiersTextField.text.value, ","),
-                 creationDate = None, // parseDate(creationDateTextField.text.value),
-                 publicationDate = parseDate(publicationDateTextField.text.value),
+                 creationDates = parseDate(creationDateTextField.text.value).toList,
                  publisher = parseText(publisherCombo.value.value),
                  languages = parseSeq(languagesCombo.value.value, ","),
                  series = series,

@@ -1,5 +1,6 @@
 package com.mikesajak.ebooklib.app.reader
 import java.io.InputStream
+import java.time.{LocalDate, ZoneId}
 
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.CoverImage
@@ -8,7 +9,7 @@ import org.apache.pdfbox.text.{PDFTextStripper, PDFTextStripperByArea}
 
 import scala.util.Try
 
-class PdfBookFormatDataParser extends BookFormatDataParser {
+class PdfBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataParser {
   override def acceptContentType(contentType: String): Boolean = contentType == BookFormatResolver.PdfContentType
 
   override def read(bookDataInputStream: InputStream): Either[Throwable, BookFormatData] = Try {
@@ -18,24 +19,21 @@ class PdfBookFormatDataParser extends BookFormatDataParser {
     val titles = (Option(docInfo.getTitle).toList ++ Option(docInfo.getSubject).toList)
         .filter(t => !t.isBlank)
         .distinct
+    val creationDate = Option(docInfo.getCreationDate.toInstant)
+        .map(instant => LocalDate.ofInstant(instant, ZoneId.systemDefault()))
 
-    val keywords = Option(docInfo.getKeywords)
-    val identifier = if (!document.isEncrypted) {
+    val keywords = Option(docInfo.getKeywords).map(_.split(raw"\s*,\s*").toList).getOrElse(List.empty)
+    val identifiers = if (!document.isEncrypted) {
       val stripper = new PDFTextStripperByArea()
       stripper.setSortByPosition(true)
       val textStripper = new PDFTextStripper()
       val pdfText = textStripper.getText(document)
 
-      // ISBN 0-596-00025-1
-      // ISBN 938-0-596-00025-1
-      val ISBNPattern = raw"ISBN\s*:?\s*((\d{3}[- ])?(\d{1,6}[- ]\d{1,6}[- ]\d{1,6}[- ]\d))".r
+      isbnParser.extractISBNsFrom(pdfText)
+    } else List.empty
 
-      ISBNPattern.findFirstMatchIn(pdfText)
-                 .map(m => s"ISBN:${m.group(1)}")
-    } else None
-
-    BookFormatData(BookFormatResolver.PdfContentType, titles, author.toList, List.empty, None, None,
-                   None, identifier.toList, None, None, None)
+    BookFormatData(BookFormatResolver.PdfContentType, titles, author.toList, keywords, creationDate.toList,
+                   None, identifiers, None, None, None)
   }.toEither
 
   override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = ???

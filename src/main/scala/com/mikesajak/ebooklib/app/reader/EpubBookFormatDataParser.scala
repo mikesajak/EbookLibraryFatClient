@@ -20,13 +20,21 @@ class EpubBookFormatDataParser extends BookFormatDataParser {
     val metadata = epub.getMetadata
     val description = metadata.getDescriptions.asScala.foldLeft("")((acc, d) => s"$acc\n\n$d").trim
 
+    def creationOrPublication(d: Date) = d.getEvent match {
+      case Date.Event.CREATION | Date.Event.PUBLICATION => true
+      case _ => false
+    }
+
+    val creationDates = metadata.getDates.asScala
+                                .filter(creationOrPublication).map(d => LocalDate.parse(d.getValue))
+                                .toSeq
+
     BookFormatData(
       contentType = BookFormatResolver.EpubContentType,
       titles = metadata.getTitles.asScala.toList,
       authors = metadata.getAuthors.asScala.map(author => s"${author.getFirstname} ${author.getLastname}").toList,
       identifiers = metadata.getIdentifiers.asScala.map(id => s"${id.getScheme}:${id.getValue}").toList,
-      creationDate = metadata.getDates.asScala.find(d => d.getEvent == Date.Event.CREATION).map(d => LocalDate.parse(d.getValue)),
-      publicationDate = metadata.getDates.asScala.find(d => d.getEvent == Date.Event.PUBLICATION).map(d => LocalDate.parse(d.getValue)),
+      creationDates = creationDates,
       publisher = metadata.getPublishers.asScala.headOption,
       description = if (!description.isBlank) Some(description) else None,
       keywords = Seq(),

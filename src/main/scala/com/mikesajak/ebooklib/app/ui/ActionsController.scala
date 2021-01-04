@@ -3,7 +3,6 @@ package com.mikesajak.ebooklib.app.ui
 import java.io.File
 
 import com.mikesajak.ebooklib.app.AppController
-import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
 import com.mikesajak.ebooklib.app.model._
 import com.mikesajak.ebooklib.app.reader.{BookFormatData, BookFormatDataReader}
 import com.mikesajak.ebooklib.app.rest.BookServerController
@@ -24,8 +23,6 @@ import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
 class ActionsController(appController: AppController,
-                        bookReadersRegistry: BookReadersRegistry,
-                        bookFormatResolver: BookFormatResolver,
                         bookServerController: BookServerController,
                         eventBus: EventBus,
                         bookFormatDataReader: BookFormatDataReader) {
@@ -143,8 +140,7 @@ class ActionsController(appController: AppController,
                      bookFormatData.authors,
                      bookFormatData.keywords,
                      bookFormatData.identifiers,
-                     bookFormatData.creationDate,
-                     bookFormatData.publicationDate,
+                     bookFormatData.creationDates,
                      bookFormatData.publisher,
                      bookFormatData.language.toSeq,
                      None, bookFormatData.description,

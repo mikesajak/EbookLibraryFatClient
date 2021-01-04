@@ -13,7 +13,7 @@ object BookId {
 case class Book(id: BookId, metadata: BookMetadata)
 
 case class BookMetadata(title: String, authors: Seq[String], tags: Seq[String], identifiers: Seq[String],
-                        creationDate: Option[LocalDate], publicationDate: Option[LocalDate], publisher: Option[String],
+                        creationDates: Seq[LocalDate], publisher: Option[String],
                         languages: Seq[String], series: Option[Series], description: Option[String],
                         formats: Seq[BookFormatMetadata])
 

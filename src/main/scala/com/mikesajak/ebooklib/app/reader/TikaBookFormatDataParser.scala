@@ -117,12 +117,11 @@ class TikaBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPar
     val authors = (metadata.extract(AuthorKeys) ++ matcher.flatMap(m => extract(m, "author")).toList)
         .map(_.trimInner)
     val keywords = metadata.extract(KeywordsKeys)
-    val creationDate = metadata.extract(CreationDateKeys)
+    val creationDates = metadata.extract(CreationDateKeys)
                                .flatMap(parseDate)
-                               .headOption
-    val publicationDate = (metadata.extract(PublicationDateKeys) ++ matcher.flatMap(m => extract(m, "pubDate")).toList)
+    val publicationDates = (metadata.extract(PublicationDateKeys)
+          ++ matcher.flatMap(m => extract(m, "pubDate")).toList)
         .flatMap(parseDate)
-        .headOption
     val publisher = (metadata.extract(PublisherKeys) ++ matcher.flatMap(m => extract(m, "publisher")).toList)
         .headOption
         .map(_.trimInner)
@@ -138,8 +137,9 @@ class TikaBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPar
     val stats = if (allEmpty(pageCount, wordCount, charCount)) None
                 else Some(BookStats(pageCount, wordCount, charCount))
 
-    BookFormatData(contentType, titles, authors, keywords, creationDate, publicationDate, publisher,
-                   identifiers, language, description, stats)
+    BookFormatData(contentType, titles, authors, keywords,
+                   (creationDates ++ publicationDates).distinct.sorted,
+                   publisher, identifiers, language, description, stats)
   }.toEither
 
   private def parseDate(dateStr: String) = {

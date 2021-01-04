@@ -74,7 +74,6 @@
                   <TableColumn fx:id="tagsColumn" minWidth="8.0" prefWidth="67.0" text="%book_table_panel.tags_column.label" />
                   <TableColumn fx:id="identifiersColumn" prefWidth="133.0" text="%book_table_panel.identifiers_column.label" />
                   <TableColumn fx:id="creationDateColumn" minWidth="0.0" prefWidth="119.0" text="%book_table_panel.created_column.label" />
-                  <TableColumn fx:id="publicationDateColumn" prefWidth="118.0" text="%book_table_panel.publication_column.label" />
                   <TableColumn fx:id="publisherColumn" prefWidth="121.0" text="%book_table_panel.publisher_column.label" />
                   <TableColumn fx:id="languagesColumn" prefWidth="126.0" text="%book_table_panel.languages_column.label" />
                   <TableColumn fx:id="formatsColumn" prefWidth="75.0" text="%book_table_panel.formats_column.label" />

@@ -27,105 +27,7 @@
                   </ImageView>
                </graphic>
             </Button>
-            <Separator orientation="VERTICAL" />
-            <Button fx:id="openCoverFileButton" mnemonicParsing="false" onAction="#handleOpenCoverFileAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-opened-folder-48.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%metadata_dialog.open_cover_image.tooltip" />
-               </tooltip>
-            </Button>
-            <Button fx:id="cropCoverButton" mnemonicParsing="false" onAction="#handleCropCoverAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-crop-48.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%metadata_dialog.crop_cover_image.tooltip" />
-               </tooltip>
-            </Button>
-            <Button fx:id="removeCoverButton" mnemonicParsing="false" onAction="#handleRemoveCoverAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-cancel-48.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%metadata_dialog.remove_cover_image.tooltip" />
-               </tooltip>
-            </Button>
-            <Button fx:id="downloadCoverButton" mnemonicParsing="false" onAction="#handleDownloadCoverAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-download-from-cloud-48.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%metadata_dialog.download_cover_image.tooltip" />
-               </tooltip>
-            </Button>
-            <Separator orientation="VERTICAL" />
-            <Button fx:id="addBookFormatButton" mnemonicParsing="false" onAction="#handleAddBookFormatAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-add-property-48.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%metadata_dialog.add_book_format.tooltip" />
-               </tooltip>
-            </Button>
-            <Button fx:id="removeBookFormatButton" mnemonicParsing="false" onAction="#handleRemoveBookFormatAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-remove-property-48.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%metadata_dialog.remove_book_format.tooltip" />
-               </tooltip>
-            </Button>
-            <Button fx:id="extractImageFromFormatButton" mnemonicParsing="false" onAction="#handleExtractImageFromFormatAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-picture-48.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
-               </tooltip>
-            </Button>
-            <Button fx:id="extractMetadataFromFormatButton" mnemonicParsing="false" onAction="#handleExtractMetadataFromFormatAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-view-details-64.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
-               </tooltip>
-            </Button>
-            <Region fx:id="toolbarSpacer" maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="150.0" />
+            <Region fx:id="toolbarSpacer" maxWidth="1.7976931348623157E308" minWidth="0.0" prefWidth="500.0" />
             <Button fx:id="prevPageButton" mnemonicParsing="false" onAction="#handlePrevPageAction">
                <graphic>
                   <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
@@ -159,7 +61,6 @@
                   <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
                </columnConstraints>
                <rowConstraints>
-                  <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -248,8 +149,8 @@
                         </Label>
                         <HBox spacing="2.0">
                            <children>
-                              <TextField fx:id="publicationDateTextField" maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                              <Button fx:id="publicationDateSelButton" mnemonicParsing="false" onAction="#handlePublicationDateSelAction">
+                              <TextField fx:id="creationDateTextField" maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="creationDateSelButton" mnemonicParsing="false" onAction="#handlePublicationDateSelAction">
                                  <graphic>
                                     <ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
                                        <image>
@@ -288,14 +189,14 @@
                         <ComboBox fx:id="languagesCombo" editable="true" maxWidth="1.7976931348623157E308" minWidth="0.0" />
                      </children>
                   </VBox>
-                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" GridPane.rowIndex="9">
+                  <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" GridPane.rowIndex="9" GridPane.vgrow="ALWAYS">
                      <children>
                         <Label text="Opis, komentarze">
                            <font>
                               <Font size="11.0" />
                            </font>
                         </Label>
-                        <TextArea fx:id="descriptionTextArea" prefHeight="200.0" prefWidth="200.0" />
+                        <TextArea fx:id="descriptionTextArea" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
                      </children>
                   </VBox>
                </children>
@@ -309,6 +210,58 @@
                               <Font size="11.0" />
                            </font>
                         </Label>
+                        <ToolBar prefHeight="40.0" prefWidth="200.0">
+                          <items>
+                              <Button fx:id="addBookFormatButton" mnemonicParsing="false" onAction="#handleAddBookFormatAction">
+                                 <graphic>
+                                    <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-add-property-48.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <tooltip>
+                                    <Tooltip text="%metadata_dialog.add_book_format.tooltip" />
+                                 </tooltip>
+                              </Button>
+                              <Button fx:id="removeBookFormatButton" mnemonicParsing="false" onAction="#handleRemoveBookFormatAction">
+                                 <graphic>
+                                    <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-remove-property-48.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <tooltip>
+                                    <Tooltip text="%metadata_dialog.remove_book_format.tooltip" />
+                                 </tooltip>
+                              </Button>
+                              <Button fx:id="extractImageFromFormatButton" mnemonicParsing="false" onAction="#handleExtractImageFromFormatAction">
+                                 <graphic>
+                                    <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-picture-48.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <tooltip>
+                                    <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
+                                 </tooltip>
+                              </Button>
+                              <Button fx:id="extractMetadataFromFormatButton" mnemonicParsing="false" onAction="#handleExtractMetadataFromFormatAction">
+                                 <graphic>
+                                    <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-view-details-64.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <tooltip>
+                                    <Tooltip text="%metadata_dialog.extract_book_cover.tooltip" />
+                                 </tooltip>
+                              </Button>
+                          </items>
+                        </ToolBar>
                         <ListView fx:id="bookFormatsListView" minHeight="100.0" />
                      </children>
                   </VBox>
@@ -319,6 +272,58 @@
                               <Font size="11.0" />
                            </font>
                         </Label>
+                        <ToolBar prefHeight="40.0" prefWidth="200.0">
+                          <items>
+                              <Button fx:id="openCoverFileButton" mnemonicParsing="false" onAction="#handleOpenCoverFileAction">
+                                 <graphic>
+                                    <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-opened-folder-48.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <tooltip>
+                                    <Tooltip text="%metadata_dialog.open_cover_image.tooltip" />
+                                 </tooltip>
+                              </Button>
+                              <Button fx:id="cropCoverButton" mnemonicParsing="false" onAction="#handleCropCoverAction">
+                                 <graphic>
+                                    <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-crop-48.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <tooltip>
+                                    <Tooltip text="%metadata_dialog.crop_cover_image.tooltip" />
+                                 </tooltip>
+                              </Button>
+                              <Button fx:id="removeCoverButton" mnemonicParsing="false" onAction="#handleRemoveCoverAction">
+                                 <graphic>
+                                    <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-cancel-48.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <tooltip>
+                                    <Tooltip text="%metadata_dialog.remove_cover_image.tooltip" />
+                                 </tooltip>
+                              </Button>
+                              <Button fx:id="downloadCoverButton" mnemonicParsing="false" onAction="#handleDownloadCoverAction">
+                                 <graphic>
+                                    <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../images/icons8-download-from-cloud-48.png" />
+                                       </image>
+                                    </ImageView>
+                                 </graphic>
+                                 <tooltip>
+                                    <Tooltip text="%metadata_dialog.download_cover_image.tooltip" />
+                                 </tooltip>
+                              </Button>
+                          </items>
+                        </ToolBar>
                         <AnchorPane VBox.vgrow="ALWAYS">
                            <children>
                               <ImageView fx:id="coverImageView" fitWidth="350.0" pickOnBounds="true" preserveRatio="true">
