@@ -193,6 +193,7 @@ object TikaBookFormatDataParser {
   implicit class MetadadataOps(metadata: Metadata) {
     def extract(keyList: Seq[String]): Seq[String] =
       keyList.flatMap(key => metadata.getValues(key))
+             .map(_.trim)
              .distinct
              .sorted
   }

@@ -29,11 +29,17 @@ class EpubBookFormatDataParser extends BookFormatDataParser {
                                 .filter(creationOrPublication).map(d => LocalDate.parse(d.getValue))
                                 .toSeq
 
+    val identifiers = metadata.getIdentifiers.asScala
+                              .map(id => s"${id.getScheme}:${id.getValue}")
+                              .map(_.strip)
+                              .map(id => id.replaceAll("^:+(.+)", "$1"))
+                              .toList
+
     BookFormatData(
       contentType = BookFormatResolver.EpubContentType,
       titles = metadata.getTitles.asScala.toList,
       authors = metadata.getAuthors.asScala.map(author => s"${author.getFirstname} ${author.getLastname}").toList,
-      identifiers = metadata.getIdentifiers.asScala.map(id => s"${id.getScheme}:${id.getValue}").toList,
+      identifiers = identifiers,
       creationDates = creationDates,
       publisher = metadata.getPublishers.asScala.headOption,
       description = if (!description.isBlank) Some(description) else None,

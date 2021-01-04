@@ -196,7 +196,7 @@
                               <Font size="11.0" />
                            </font>
                         </Label>
-                        <TextArea fx:id="descriptionTextArea" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                        <TextArea fx:id="descriptionTextArea" prefHeight="200.0" prefWidth="200.0" wrapText="true" VBox.vgrow="ALWAYS" />
                      </children>
                   </VBox>
                </children>
