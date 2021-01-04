@@ -18,7 +18,7 @@ class EpubBookFormatDataParser extends BookFormatDataParser {
     val epub = reader.readEpub(bookDataInputStream)
 
     val metadata = epub.getMetadata
-    val description = metadata.getDescriptions.asScala.foldLeft("")((acc, d) => s"$acc\n\n$d").trim
+    val description = metadata.getDescriptions.asScala.foldLeft("")((acc, d) => s"$acc\n\n$d").strip
 
     def creationOrPublication(d: Date) = d.getEvent match {
       case Date.Event.CREATION | Date.Event.PUBLICATION => true

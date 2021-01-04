@@ -113,9 +113,9 @@ class TikaBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPar
 
     val contentType = metadata.get("Content-Type")
     val titles = (metadata.extract(TitleKeys) ++ matcher.flatMap(m => extract(m, "title")).toList)
-        .map(_.trimInner)
+        .map(_.stripInner)
     val authors = (metadata.extract(AuthorKeys) ++ matcher.flatMap(m => extract(m, "author")).toList)
-        .map(_.trimInner)
+        .map(_.stripInner)
     val keywords = metadata.extract(KeywordsKeys)
     val creationDates = metadata.extract(CreationDateKeys)
                                .flatMap(parseDate)
@@ -124,7 +124,7 @@ class TikaBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPar
         .flatMap(parseDate)
     val publisher = (metadata.extract(PublisherKeys) ++ matcher.flatMap(m => extract(m, "publisher")).toList)
         .headOption
-        .map(_.trimInner)
+        .map(_.stripInner)
     val identifiers = metadata.extract(IdentifierKeys) ++ isbnIdentifiers
     val language = metadata.extract(LanguageKeys).headOption
     val description = metadata.extract(DescriptionKeys).headOption
@@ -193,7 +193,7 @@ object TikaBookFormatDataParser {
   implicit class MetadadataOps(metadata: Metadata) {
     def extract(keyList: Seq[String]): Seq[String] =
       keyList.flatMap(key => metadata.getValues(key))
-             .map(_.trim)
+             .map(_.strip)
              .distinct
              .sorted
   }

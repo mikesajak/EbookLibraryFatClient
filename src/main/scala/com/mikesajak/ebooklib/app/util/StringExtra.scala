@@ -2,9 +2,9 @@ package com.mikesajak.ebooklib.app.util
 
 object StringExtra {
   implicit class StringExtra(str: String) {
-    def trimInner: String =
+    def stripInner: String =
       str.replaceAll("\\s+", " ")
-         .trim
+         .strip
 
     def toIntOpt: Option[Int] =
       try {

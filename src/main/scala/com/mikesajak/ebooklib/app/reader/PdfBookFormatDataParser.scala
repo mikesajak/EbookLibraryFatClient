@@ -15,17 +15,17 @@ class PdfBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPars
   override def read(bookDataInputStream: InputStream): Either[Throwable, BookFormatData] = Try {
     val document = PDDocument.load(bookDataInputStream)
     val docInfo = document.getDocumentInformation
-    val author = Option(docInfo.getAuthor).map(_.trim)
+    val author = Option(docInfo.getAuthor).map(_.strip)
     val titles = (Option(docInfo.getTitle).toList ++ Option(docInfo.getSubject).toList)
         .filter(t => !t.isBlank)
-        .map(_.trim)
+        .map(_.strip)
         .distinct
     val creationDate = Option(docInfo.getCreationDate.toInstant)
         .map(instant => LocalDate.ofInstant(instant, ZoneId.systemDefault()))
 
     val keywords = Option(docInfo.getKeywords).map(_.split(raw"\s*,\s*").toList)
                                               .getOrElse(List.empty)
-                                              .map(_.trim)
+                                              .map(_.strip)
     val identifiers = if (!document.isEncrypted) {
       val stripper = new PDFTextStripperByArea()
       stripper.setSortByPosition(true)
