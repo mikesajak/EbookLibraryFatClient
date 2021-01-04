@@ -11,4 +11,12 @@ object Util {
   } finally{
     a.close()
   }
+
+  private val FileNamePattern = raw"(.+)\.(.+)".r
+
+  def parseFileName(filename: String): (String, String) =
+    filename match {
+      case FileNamePattern(name, extension) => (name, extension)
+      case _ => (filename, "")
+    }
 }

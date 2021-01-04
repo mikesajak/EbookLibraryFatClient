@@ -1,14 +1,20 @@
 package com.mikesajak.ebooklib.app.ui
 
+import java.awt.Desktop
+import java.io.{BufferedOutputStream, File, FileOutputStream}
 import java.time.LocalDate
 
+import com.google.inject.name.Names
+import com.mikesajak.ebooklib.app.ApplicationContext
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.{Book, BookFormatMetadata, BookMetadata, Series}
 import com.mikesajak.ebooklib.app.ui.UIUtils.bindHeight
+import com.mikesajak.ebooklib.app.util.Util.using
 import com.typesafe.scalalogging.Logger
 import javafx.scene.input.MouseButton
 import javafx.scene.{control => jfxctrl}
 import javafx.{scene => jfxs}
+import net.codingwell.scalaguice.InjectorExtensions.ScalaInjector
 import scalafx.Includes._
 import scalafx.geometry.Insets
 import scalafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory
@@ -18,7 +24,7 @@ import scalafx.scene.layout.{Priority, Region, VBox}
 import scalafx.scene.text.Text
 import scalafxml.core.macros.sfxml
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{ExecutionContext, Future}
 
 trait EditBookMetadataController {
   def initialize(bookDataProvider: BookDataProvider, dialog: Dialog[ButtonType],
@@ -87,11 +93,12 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
                                      bookFormatResolver: BookFormatResolver,
                                      implicit val resourceMgr: ResourceManager)
-  extends EditBookMetadataController {
+    extends EditBookMetadataController {
   import ResourceManager._
 
   private val logger = Logger[EditBookMetadataControllerImpl]
-  private implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
+  private implicit val ec: ExecutionContext =
+    ApplicationContext.globalInjector.instance[ExecutionContext](Names.named("externalOpenExecutionContext"))
 
   private var dialog: Dialog[ButtonType] = _
 
@@ -111,6 +118,14 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     initCoverImage(bookDataProvider.bookCover)
     initFormats(bookDataProvider.bookFormatsMetadata)
 
+    bookFormatsListView.onMouseClicked = { me =>
+      if (me.getClickCount == 2) {
+        if (Desktop.isDesktopSupported) Future {
+          openExternally(bookDataProvider)
+        }
+      }
+    }
+
     booksNavigator match {
       case Some(nav) =>
       case None =>
@@ -126,7 +141,26 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     okButton.defaultButton = true
   }
 
-  def initBookContent(book: BookMetadata): Unit = {
+  private def openExternally(bookDataProvider: BookDataProvider): Unit = {
+    val selectedBookData = bookFormatsListView.selectionModel.value.getSelectedItem
+    val bookFormat = bookDataProvider.bookFormat(selectedBookData.formatId)
+
+    val extension = bookFormatResolver.forMimeType(selectedBookData.formatType)
+                                      .extensions.headOption
+
+    val filename = selectedBookData.filename.map(name => name.replaceFirst("(.+/)?(.+)$", "$2"))
+
+    val tempFile = File.createTempFile(s"EbookLibraryClient-", //${filename.getOrElse("")}",
+                                       s"${filename.getOrElse(extension.get)}")
+    using(new BufferedOutputStream(new FileOutputStream(tempFile))) { outStream =>
+      outStream.write(bookFormat.contents)
+    }
+
+    logger.debug(s"Running desktop application for (temporary book file: ${tempFile.getCanonicalPath}")
+    Desktop.getDesktop.open(tempFile)
+  }
+
+  private def initBookContent(book: BookMetadata): Unit = {
     titleTextField.text = book.title
     initTextFieldTooltip(titleTextField)
     authorsCombo.value = book.authors.mkString(" & ")
@@ -156,7 +190,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     descriptionTextArea.text = book.description.orNull
   }
 
-  def initCoverImage(cover: Option[Image]): Unit = {
+  private def initCoverImage(cover: Option[Image]): Unit = {
     import ResourceManager._
 
     updateCoverOverlay("metadata_dialog.cover-loading.label".textResource)
@@ -178,7 +212,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     }
   }
 
-  def initFormats(bookFormats: Seq[BookFormatMetadata]): Unit = {
+  private def initFormats(bookFormats: Seq[BookFormatMetadata]): Unit = {
     bookFormatsListView.items.value.clear()
     bookFormatsListView.cellFactory = { p =>
       val cell = new ListCell[BookFormatMetadata]

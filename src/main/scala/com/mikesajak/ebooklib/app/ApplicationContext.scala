@@ -1,12 +1,13 @@
 package com.mikesajak.ebooklib.app
 
-import java.util.concurrent.{ExecutorService, Executors}
+import java.util.concurrent.Executors
 
 import com.google.inject._
+import com.google.inject.name.Named
 import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
 import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
 import com.mikesajak.ebooklib.app.model.BookDtoConverter
-import com.mikesajak.ebooklib.app.reader.EpubBookMetadataReader
+import com.mikesajak.ebooklib.app.reader._
 import com.mikesajak.ebooklib.app.rest.{BookServerController, BookServerControllerSttp, ServerConnectionService}
 import com.mikesajak.ebooklib.app.ui.{ActionsController, BookDataProviderFactory, ResourceManager}
 import com.mikesajak.ebooklib.app.util.EventBus
@@ -32,6 +33,23 @@ class ApplicationContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
+  def bookFormatDataParsers(isbnParser: ISBNParser): Seq[BookFormatDataParser] =
+    Seq(new TikaBookFormatDataParser(isbnParser),
+        new EpubBookFormatDataParser(),
+        new PdfBookFormatDataParser(),
+        new ChmBookFormatDataParser())
+
+  @Provides
+  @Singleton
+  def isbnParser() = new ISBNParser
+
+  @Provides
+  @Singleton
+  def bookFormatDataReader(bookFormatResolver: BookFormatResolver, bookFormatDataParsers: Seq[BookFormatDataParser]) =
+    new BookFormatDataReader(bookFormatResolver, bookFormatDataParsers)
+
+  @Provides
+  @Singleton
   def bookDataProviderFactory(bookServerController: BookServerController) =
     new BookDataProviderFactory(bookServerController)
 
@@ -50,6 +68,23 @@ class ApplicationContext extends AbstractModule with ScalaModule {
   @Provides
   @Singleton
   def eventBus() = new EventBus
+
+  @Provides
+  @Singleton
+  @Named("externalOpenExecutionContext")
+  def externalOpenExecutionContext(): ExecutionContext = {
+    import java.util.concurrent.{ForkJoinPool, ForkJoinWorkerThread}
+
+    val factory: ForkJoinPool.ForkJoinWorkerThreadFactory = new ForkJoinPool.ForkJoinWorkerThreadFactory() {
+      override def newThread(pool: ForkJoinPool): ForkJoinWorkerThread = {
+        val worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool)
+        worker.setName("external-execution-thread-" + worker.getPoolIndex)
+        worker
+      }
+    }
+
+    ExecutionContext.fromExecutor(new ForkJoinPool(3, factory, null, true))
+  }
 }
 
 class UIContext extends AbstractModule with ScalaModule {
@@ -60,8 +95,9 @@ class UIContext extends AbstractModule with ScalaModule {
   @Singleton
   def actionsController(appController: AppController, bookReadersRegistry: BookReadersRegistry,
                         bookFormatResolver: BookFormatResolver, bookServerController: BookServerController,
-                        eventBus: EventBus) =
-    new ActionsController(appController, bookReadersRegistry, bookFormatResolver, bookServerController, eventBus)
+                        eventBus: EventBus, bookFormatDataReader: BookFormatDataReader) =
+    new ActionsController(appController, bookReadersRegistry, bookFormatResolver, bookServerController, eventBus,
+                          bookFormatDataReader)
 }
 
 class WebContext extends AbstractModule with ScalaModule {
@@ -71,17 +107,9 @@ class WebContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def httpCallExecutionContext(): ExecutionContext = {
-    new ExecutionContext {
-      val threadPool: ExecutorService = Executors.newFixedThreadPool(10)
-
-      def execute(runnable: Runnable): Unit = {
-        threadPool.submit(runnable)
-      }
-
-      def reportFailure(t: Throwable): Unit = {}
-    }
-  }
+  @Named("httpCallExecutionContext")
+  def httpCallExecutionContext(): ExecutionContext =
+    ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
 
   @Provides
   @Singleton
@@ -93,7 +121,7 @@ class WebContext extends AbstractModule with ScalaModule {
   @Provides
   @Singleton
   def bookServerController(appSettings: AppSettings, bookDtoConverter: BookDtoConverter,
-                           httpCallExecutionContext: ExecutionContext): BookServerController =
+                           @Named("httpCallExecutionContext") httpCallExecutionContext: ExecutionContext): BookServerController =
     new BookServerControllerSttp(appSettings, bookDtoConverter, httpCallExecutionContext)
 
   @Provides

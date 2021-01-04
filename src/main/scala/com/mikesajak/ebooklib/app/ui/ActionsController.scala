@@ -1,12 +1,11 @@
 package com.mikesajak.ebooklib.app.ui
 
-import java.io.{ByteArrayInputStream, File}
-import java.nio.file.{Files, Paths}
+import java.io.File
 
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.bookformat.{BookFormatResolver, BookReadersRegistry}
 import com.mikesajak.ebooklib.app.model._
-import com.mikesajak.ebooklib.app.reader.BookFormatDataReaderAggregator
+import com.mikesajak.ebooklib.app.reader.{BookFormatData, BookFormatDataReader}
 import com.mikesajak.ebooklib.app.rest.BookServerController
 import com.mikesajak.ebooklib.app.ui.BookChangeType.{BookAdd, BookDelete}
 import com.mikesajak.ebooklib.app.util.EventBus
@@ -28,7 +27,8 @@ class ActionsController(appController: AppController,
                         bookReadersRegistry: BookReadersRegistry,
                         bookFormatResolver: BookFormatResolver,
                         bookServerController: BookServerController,
-                        eventBus: EventBus) {
+                        eventBus: EventBus,
+                        bookFormatDataReader: BookFormatDataReader) {
   private val logger = Logger[ActionsController]
 
   private implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
@@ -45,14 +45,16 @@ class ActionsController(appController: AppController,
 //                                              .map(ef => ef.delegate)
 
     }
-    val result = Option(fileChooser.showOpenDialog(appController.mainStage))
+    val fileToOpenOpt = Option(fileChooser.showOpenDialog(appController.mainStage))
 
-    lastVisitedDir = result.map(_.getParent).getOrElse(System.getProperty("user.dir"))
+    lastVisitedDir = fileToOpenOpt.map(_.getParent).getOrElse(System.getProperty("user.dir"))
 
-    logger.debug(s"Selected book file: $result")
+    logger.debug(s"Selected book file: $fileToOpenOpt")
 
-    result.flatMap(getBookDataProviderFor)
-          .foreach(provider => addBook(provider, None))
+    fileToOpenOpt.flatMap { fileToOpen =>
+      bookFormatDataReader.readFormat(fileToOpen)
+                          .map { case (bookFormatData, bookData) => createBookDataProvider(fileToOpen, bookData, bookFormatData) }
+    }.foreach(provider => addBook(provider, None))
   }
 
   def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNavigator]): Option[(BookMetadata, Seq[BookFormatMetadata])] = {
@@ -96,7 +98,7 @@ class ActionsController(appController: AppController,
   def editBook(bookDataProvider: BookDataProvider, booksNavigator: Option[BooksNavigator]): Unit = {
     logger.debug(s"Opening book metadata dialog for edit")
     openMetadataEditDialog(bookDataProvider, booksNavigator) match {
-      case Some((bookMetadata, bookFormats)) =>
+      case Some((bookMetadata, _)) =>
         logger.debug(s"Book edit confirmed: book: $bookMetadata")
         // TODO
       case bt @ _ => logger.debug(s"Metadata dialog - $bt button selected")
@@ -132,39 +134,33 @@ class ActionsController(appController: AppController,
     dialog.showAndWait()
   }
 
-  def getBookDataProviderFor(bookFile: File): Option[BookDataProvider] = {
-    val bookData = Files.readAllBytes(Paths.get(bookFile.getAbsolutePath))
+  private def createBookDataProvider(bookFile: File, bookData: Array[Byte], bookFormatData: BookFormatData) = {
+    new BookDataProvider {
+      override def bookId: Option[BookId] = None
 
-    val bookFormatDataOpt = new BookFormatDataReaderAggregator().read(new ByteArrayInputStream(bookData))
-
-    bookFormatDataOpt.map { bookFormatData =>
-      new BookDataProvider {
-        override def bookId: Option[BookId] = None
-
-        override def bookMetadata: BookMetadata =
-          BookMetadata(bookFormatData.titles.mkString(", "),
-                       bookFormatData.authors,
-                       bookFormatData.keywords,
-                       bookFormatData.identifiers,
-                       bookFormatData.creationDate,
-                       bookFormatData.publicationDate,
-                       bookFormatData.publisher,
-                       bookFormatData.language.toSeq,
-                       None, bookFormatData.description,
-                       bookFormatsMetadata)
+      override def bookMetadata: BookMetadata =
+        BookMetadata(bookFormatData.titles.mkString(", "),
+                     bookFormatData.authors,
+                     bookFormatData.keywords,
+                     bookFormatData.identifiers,
+                     bookFormatData.creationDate,
+                     bookFormatData.publicationDate,
+                     bookFormatData.publisher,
+                     bookFormatData.language.toSeq,
+                     None, bookFormatData.description,
+                     bookFormatsMetadata)
 
 
-        override def bookCover: Option[Image] = None
+      override def bookCover: Option[Image] = None
 
-        override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(formatMetadata)
+      override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(formatMetadata)
 
-        private def formatMetadata =
-          BookFormatMetadata(BookFormatId.NotExisting, BookId.NotExisting, bookFormatData.contentType,
-                             Some(bookFile.getAbsolutePath), bookFile.length().toInt)
+      private def formatMetadata =
+        BookFormatMetadata(BookFormatId.NotExisting, BookId.NotExisting, bookFormatData.contentType,
+                           Some(bookFile.getAbsolutePath), bookFile.length().toInt)
 
-        override def bookFormat(formatId: BookFormatId): BookFormat = BookFormat(formatMetadata, bookData)
-      }
-    }.toOption
+      override def bookFormat(formatId: BookFormatId): BookFormat = BookFormat(formatMetadata, bookData)
+    }
   }
 }
 

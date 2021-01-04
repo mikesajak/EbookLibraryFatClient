@@ -2,6 +2,7 @@ package com.mikesajak.ebooklib.app.reader
 import java.io.InputStream
 import java.time.LocalDate
 
+import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.CoverImage
 import nl.siegmann.epublib.domain.Date
 import nl.siegmann.epublib.epub.EpubReader
@@ -9,7 +10,9 @@ import nl.siegmann.epublib.epub.EpubReader
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.Try
 
-class EpubBookFormatDataReader extends BookFormatDataReader {
+class EpubBookFormatDataParser extends BookFormatDataParser {
+  override def acceptContentType(contentType: String): Boolean = contentType == BookFormatResolver.EpubContentType
+
   override def read(bookDataInputStream: InputStream): Either[Throwable, BookFormatData] = Try {
     val reader = new EpubReader()
     val epub = reader.readEpub(bookDataInputStream)
@@ -18,7 +21,7 @@ class EpubBookFormatDataReader extends BookFormatDataReader {
     val description = metadata.getDescriptions.asScala.foldLeft("")((acc, d) => s"$acc\n\n$d").trim
 
     BookFormatData(
-      contentType = "application/epub+zip",
+      contentType = BookFormatResolver.EpubContentType,
       titles = metadata.getTitles.asScala.toList,
       authors = metadata.getAuthors.asScala.map(author => s"${author.getFirstname} ${author.getLastname}").toList,
       identifiers = metadata.getIdentifiers.asScala.map(id => s"${id.getScheme}:${id.getValue}").toList,

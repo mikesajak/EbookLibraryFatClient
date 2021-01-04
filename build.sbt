@@ -88,3 +88,6 @@ libraryDependencies ++= {
       "org.bouncycastle" % "bcmail-jdk15on" % bouncyCastleVersion,
       "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion)
 }
+
+resolvers += "Jitpack" at "https://jitpack.io"
+libraryDependencies += "com.github.chimenchen" % "jchmlib" % "v0.5.4"

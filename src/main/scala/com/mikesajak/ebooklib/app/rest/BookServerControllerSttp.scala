@@ -1,5 +1,7 @@
 package com.mikesajak.ebooklib.app.rest
 
+import com.google.inject.name.{Named, Names}
+import com.mikesajak.ebooklib.app.ApplicationContext
 import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.dto.{BookDto, BookFormatMetadataDto, ErrorResponse}
 import com.mikesajak.ebooklib.app.model._
@@ -7,6 +9,7 @@ import com.mikesajak.ebooklib.app.util.Util.using
 import com.typesafe.scalalogging.Logger
 import io.circe
 import io.circe.generic.auto._
+import net.codingwell.scalaguice.InjectorExtensions.ScalaInjector
 import scalafx.scene.image.Image
 import sttp.client3._
 import sttp.client3.circe.{asJson, _}
@@ -15,10 +18,12 @@ import sttp.model.StatusCode
 import scala.concurrent.{ExecutionContext, Future}
 
 class BookServerControllerSttp(appSettings: AppSettings, bookDtoConverter: BookDtoConverter,
-                              httpCallExecutionContext: ExecutionContext) extends BookServerController {
+                              @Named("httpCallExecutionContext") httpCallExecutionContext: ExecutionContext) extends BookServerController {
   private val logger = Logger[BookServerControllerSttp]
 
-  private implicit val ec: ExecutionContext = httpCallExecutionContext
+  private implicit val ec: ExecutionContext =
+    ApplicationContext.globalInjector.instance[ExecutionContext](Names.named("httpCallExecutionContext"))
+
   private val httpBackend: SttpBackend[Identity, Any] = HttpURLConnectionBackend()
 
   private def serverRequest: RequestT[Empty, Either[String, String], Any] = basicRequest.header("Accept", "application/json")
