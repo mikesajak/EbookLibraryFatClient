@@ -1,7 +1,5 @@
 package com.mikesajak.ebooklib.app
 
-import java.util.concurrent.Executors
-
 import com.google.inject._
 import com.google.inject.name.Named
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
@@ -13,6 +11,7 @@ import com.mikesajak.ebooklib.app.ui.{ActionsController, BookDataProviderFactory
 import com.mikesajak.ebooklib.app.util.EventBus
 import net.codingwell.scalaguice.ScalaModule
 
+import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
 class ApplicationContext extends AbstractModule with ScalaModule {
@@ -24,15 +23,20 @@ class ApplicationContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def bookFormatDataParsers(isbnParser: ISBNParser): Seq[BookFormatDataParser] =
-    Seq(new TikaBookFormatDataParser(isbnParser),
+  def bookFormatDataParsers(isbnParser: ISBNParser, dateParser: DateParser): Seq[BookFormatDataParser] =
+    Seq(new TikaBookFormatDataParser(isbnParser, dateParser),
         new EpubBookFormatDataParser(),
         new PdfBookFormatDataParser(isbnParser),
-        new ChmBookFormatDataParser())
+        new ChmBookFormatDataParser(),
+        new MobiBookFormatDataParser(dateParser))
 
   @Provides
   @Singleton
   def isbnParser() = new ISBNParser
+
+  @Provides
+  @Singleton
+  def dateParser() = new DateParser
 
   @Provides
   @Singleton

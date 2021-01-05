@@ -1,11 +1,5 @@
 package com.mikesajak.ebooklib.app.reader
 
-import java.io.InputStream
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, LocalDateTime, ZoneId, ZonedDateTime}
-import java.util.Locale
-
 import com.google.common.base.Stopwatch
 import com.mikesajak.ebooklib.app.model.CoverImage
 import com.mikesajak.ebooklib.app.util.OptionOps.allEmpty
@@ -15,11 +9,12 @@ import org.apache.tika.metadata.Metadata
 import org.apache.tika.parser.AutoDetectParser
 import org.apache.tika.sax.BodyContentHandler
 
+import java.io.InputStream
 import scala.math.{max, min}
 import scala.util.Try
 import scala.util.matching.Regex
 
-class TikaBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataParser {
+class TikaBookFormatDataParser(isbnParser: ISBNParser, dateParser: DateParser) extends BookFormatDataParser {
   private val logger = Logger[TikaBookFormatDataParser]
 
   private val AuthorKeys = List("author", "Author", "dc:author", "meta:author",
@@ -36,16 +31,6 @@ class TikaBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPar
   private val PageCountKeys = List("meta:page-count", "Page-Count", "Page Count", "xmpTPg:NPages")
   private val WordCountKeys = List("meta:word-count")
   private val CharacterCountKeys = List("meta:character-count", "Character-Count", "Character Count")
-
-  private val DateTimeFormatters = List(DateTimeFormatter.BASIC_ISO_DATE, DateTimeFormatter.ISO_DATE,
-                                        DateTimeFormatter.ISO_DATE_TIME, DateTimeFormatter.ISO_LOCAL_DATE,
-                                        DateTimeFormatter.ISO_LOCAL_DATE_TIME, DateTimeFormatter.ISO_OFFSET_DATE,
-                                        DateTimeFormatter.ISO_OFFSET_DATE_TIME, DateTimeFormatter.ISO_ORDINAL_DATE,
-                                        DateTimeFormatter.ISO_ZONED_DATE_TIME, DateTimeFormatter.RFC_1123_DATE_TIME,
-                                        DateTimeFormatter.ISO_INSTANT)
-
-  private val CustomTimeFormatters = List(new SimpleDateFormat("MMMMM yyyy", Locale.US))
-
 
   override def acceptContentType(contentType: String): Boolean = true // accept all content types
 
@@ -118,10 +103,10 @@ class TikaBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPar
         .map(_.stripInner)
     val keywords = metadata.extract(KeywordsKeys)
     val creationDates = metadata.extract(CreationDateKeys)
-                               .flatMap(parseDate)
+                               .flatMap(dateParser.parseDate)
     val publicationDates = (metadata.extract(PublicationDateKeys)
           ++ matcher.flatMap(m => extract(m, "pubDate")).toList)
-        .flatMap(parseDate)
+        .flatMap(dateParser.parseDate)
     val publisher = (metadata.extract(PublisherKeys) ++ matcher.flatMap(m => extract(m, "publisher")).toList)
         .headOption
         .map(_.stripInner)
@@ -141,49 +126,6 @@ class TikaBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPar
                    (creationDates ++ publicationDates).distinct.sorted,
                    publisher, identifiers, language, description, stats)
   }.toEither
-
-  private def parseDate(dateStr: String) = {
-    parseLocalDate(dateStr)
-      .orElse(parseLocalDateTime(dateStr).map(_.toLocalDate))
-      .orElse(parseZonedDateTime(dateStr).map(_.toLocalDate))
-      .orElse(parseCustomDateTime(dateStr).map(_.toInstant.atZone(ZoneId.systemDefault()).toLocalDate))
-  }
-
-  private def parseLocalDate(dateStr: String) = {
-    Try { LocalDate.parse(dateStr) }
-      .toOption
-      .orElse {
-        DateTimeFormatters.map { formatter =>
-          Try { LocalDate.parse(dateStr, formatter) }.toOption
-        }.collectFirst { case Some(date) => date }
-      }
-  }
-
-  private def parseLocalDateTime(dateStr: String) = {
-    Try { LocalDateTime.parse(dateStr) }
-      .toOption
-      .orElse {
-        DateTimeFormatters.map { formatter =>
-          Try { LocalDateTime.parse(dateStr, formatter) }.toOption
-        }.collectFirst { case Some(date) => date }
-      }
-  }
-
-  private def parseZonedDateTime(dateStr: String) = {
-    Try { ZonedDateTime.parse(dateStr) }
-      .toOption
-      .orElse {
-        DateTimeFormatters.map { formatter =>
-          Try { ZonedDateTime.parse(dateStr, formatter) }.toOption
-        }.collectFirst { case Some(date) => date }
-      }
-  }
-
-  private def parseCustomDateTime(dateStr: String) = {
-    CustomTimeFormatters.map { formatter =>
-      Try { formatter.parse(dateStr) }.toOption
-    }.collectFirst { case Some(date) => date }
-  }
 
   override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = None
 }

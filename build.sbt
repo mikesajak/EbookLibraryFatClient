@@ -91,3 +91,6 @@ libraryDependencies ++= {
 
 resolvers += "Jitpack" at "https://jitpack.io"
 libraryDependencies += "com.github.chimenchen" % "jchmlib" % "v0.5.4"
+
+resolvers += "mobi-api4java-mvn-repo" at "https://raw.github.com/rrauschenbach/mobi-api4java/mvn-repo"
+libraryDependencies += "org.rr" % "mobi-api4java" % "0.0.2-SNAPSHOT"

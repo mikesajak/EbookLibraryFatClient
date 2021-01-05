@@ -1,12 +1,11 @@
 package com.mikesajak.ebooklib.app.reader
-import java.io.InputStream
-import java.time.{LocalDate, ZoneId}
-
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.CoverImage
 import org.apache.pdfbox.pdmodel.PDDocument
 import org.apache.pdfbox.text.{PDFTextStripper, PDFTextStripperByArea}
 
+import java.io.InputStream
+import java.time.{LocalDate, ZoneId}
 import scala.util.Try
 
 class PdfBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataParser {
@@ -39,7 +38,7 @@ class PdfBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPars
                    None, identifiers, None, None, None)
   }.toEither
 
-  override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = ???
+  override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = None
 
   class EncryptedPdfDocumentNotSupportedException extends Exception
 }

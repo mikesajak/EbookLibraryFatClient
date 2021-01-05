@@ -8,7 +8,7 @@ object Util {
 
   def using[A <: WithClose, B](a: A)(code: A => B): B = try {
     code(a)
-  } finally{
+  } finally {
     a.close()
   }
 

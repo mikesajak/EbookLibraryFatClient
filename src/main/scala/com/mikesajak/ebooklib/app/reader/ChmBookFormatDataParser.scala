@@ -1,10 +1,9 @@
 package com.mikesajak.ebooklib.app.reader
-import java.io.{File, FileOutputStream, InputStream}
-
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.CoverImage
 import org.jchmlib.ChmFile
 
+import java.io.{File, FileOutputStream, InputStream}
 import scala.util.Try
 
 class ChmBookFormatDataParser extends BookFormatDataParser {
@@ -32,5 +31,5 @@ class ChmBookFormatDataParser extends BookFormatDataParser {
     tmpFile
   }
 
-  override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = ???
+  override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = None
 }
