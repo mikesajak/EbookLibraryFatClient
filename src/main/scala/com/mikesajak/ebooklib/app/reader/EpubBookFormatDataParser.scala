@@ -1,23 +1,24 @@
 package com.mikesajak.ebooklib.app.reader
-import java.io.InputStream
-import java.time.LocalDate
-
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.CoverImage
 import nl.siegmann.epublib.domain.Date
 import nl.siegmann.epublib.epub.EpubReader
+import org.apache.tika.Tika
 
+import java.io.InputStream
+import java.time.LocalDate
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import scala.util.Try
 
 class EpubBookFormatDataParser extends BookFormatDataParser {
   override def acceptContentType(contentType: String): Boolean = contentType == BookFormatResolver.EpubContentType
+  private val epubReader = new EpubReader()
+  private val tika = new Tika()
 
   override def read(bookDataInputStream: InputStream): Either[Throwable, BookFormatData] = Try {
-    val reader = new EpubReader()
-    val epub = reader.readEpub(bookDataInputStream)
+    val epubData = epubReader.readEpub(bookDataInputStream)
 
-    val metadata = epub.getMetadata
+    val metadata = epubData.getMetadata
     val description = metadata.getDescriptions.asScala.foldLeft("")((acc, d) => s"$acc\n\n$d").strip
 
     def creationOrPublication(d: Date) = d.getEvent match {
@@ -51,5 +52,13 @@ class EpubBookFormatDataParser extends BookFormatDataParser {
       )
   }.toEither
 
-  override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = None
+  override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = Try {
+    val epubData = epubReader.readEpub(bookDataInputStream)
+    Option(epubData.getCoverImage)
+        .flatMap { res => Option(res.getData)
+            .flatMap { data => Option(tika.detect(data))
+                .map(mimeType => CoverImage("epubCover", mimeType, data))
+            }
+        }
+  }.toOption.flatten
 }

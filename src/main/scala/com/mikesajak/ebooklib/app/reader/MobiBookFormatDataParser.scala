@@ -2,6 +2,7 @@ package com.mikesajak.ebooklib.app.reader
 
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.CoverImage
+import org.apache.tika.Tika
 import org.rr.mobi4java.exth.StringRecordDelegate
 import org.rr.mobi4java.{ByteUtils, EXTHRecord, MobiMetaData, MobiReader}
 
@@ -11,6 +12,7 @@ import scala.util.Try
 
 class MobiBookFormatDataParser(dateParser: DateParser) extends BookFormatDataParser {
   private val mobiReader = new MobiReader()
+  private val tika = new Tika()
 
   override def acceptContentType(contentType: String): Boolean = contentType == BookFormatResolver.MobiContentType
 
@@ -74,6 +76,12 @@ class MobiBookFormatDataParser(dateParser: DateParser) extends BookFormatDataPar
             .map(data => ByteUtils.getString(data, "UTF-8"))
 
 
-  override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = None
+  override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = Try {
+    val mobiDocument = mobiReader.read(bookDataInputStream)
+    Option(mobiDocument.getCover)
+        .flatMap { imageData => Option(tika.detect(imageData))
+            .map(mimeType => CoverImage("mobiCover", mimeType, imageData))
+        }
+  }.toOption.flatten
 }
 

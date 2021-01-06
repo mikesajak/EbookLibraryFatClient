@@ -1,7 +1,5 @@
 package com.mikesajak.ebooklib.app.ui
 
-import java.io.File
-
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.model._
 import com.mikesajak.ebooklib.app.reader.{BookFormatData, BookFormatDataReader}
@@ -17,6 +15,7 @@ import scalafx.scene.image.Image
 import scalafx.scene.layout.Region
 import scalafx.stage.FileChooser
 
+import java.io.{ByteArrayInputStream, File}
 import scala.collection.immutable
 import scala.concurrent.ExecutionContextExecutor
 import scala.language.implicitConversions
@@ -50,7 +49,7 @@ class ActionsController(appController: AppController,
 
     fileToOpenOpt.flatMap { fileToOpen =>
       bookFormatDataReader.readFormat(fileToOpen)
-                          .map { case (bookFormatData, bookData) => createBookDataProvider(fileToOpen, bookData, bookFormatData) }
+                          .map { case (bookFormatData, bookCover, bookData) => createBookDataProvider(fileToOpen, bookData, bookFormatData, bookCover) }
     }.foreach(provider => addBook(provider, None))
   }
 
@@ -131,7 +130,8 @@ class ActionsController(appController: AppController,
     dialog.showAndWait()
   }
 
-  private def createBookDataProvider(bookFile: File, bookData: Array[Byte], bookFormatData: BookFormatData) = {
+  private def createBookDataProvider(bookFile: File, bookData: Array[Byte],
+                                     bookFormatData: BookFormatData, bookCoverData: Option[CoverImage]) = {
     new BookDataProvider {
       override def bookId: Option[BookId] = None
 
@@ -147,7 +147,8 @@ class ActionsController(appController: AppController,
                      bookFormatsMetadata)
 
 
-      override def bookCover: Option[Image] = None
+      override def bookCover: Option[Image] =
+        bookCoverData.map(coverImage => new Image(new ByteArrayInputStream(coverImage.imageData)))
 
       override def bookFormatsMetadata: Seq[BookFormatMetadata] = Seq(formatMetadata)
 
