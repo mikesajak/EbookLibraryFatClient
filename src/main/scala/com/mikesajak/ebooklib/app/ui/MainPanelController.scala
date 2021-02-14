@@ -2,23 +2,27 @@ package com.mikesajak.ebooklib.app.ui
 
 import com.google.common.eventbus.Subscribe
 import com.mikesajak.ebooklib.app.config.AppSettings
-import com.mikesajak.ebooklib.app.rest.{ConnectionStatus, ServerConnectionService, ServerStatus}
+import com.mikesajak.ebooklib.app.rest.{BookServerService, ConnectionStatus, ServerConnectionService, ServerStatus}
 import com.mikesajak.ebooklib.app.util.EventBus
 import com.typesafe.scalalogging.Logger
 import scalafx.application.Platform
 import scalafx.scene.control.Label
 import scalafx.scene.image.ImageView
-import scalafxml.core.macros.sfxml
+import scalafxml.core.macros.{nested, sfxml}
 
 //noinspection UnstableApiUsage
 @sfxml
 class MainPanelController(serverStatusLabel: Label,
+                          @nested[BookTableControllerImpl] bookTableController: BookTableController,
 
                           appSettings: AppSettings,
                           eventBus: EventBus,
+                          bookServerService: BookServerService,
                           serverConnectionController: ServerConnectionService,
                           implicit val resourceMgr: ResourceManager) {
   private val logger = Logger[MainPanelController]
+
+  bookTableController.init(new BookServerBooksProvider(bookServerService))
 
   eventBus.register(this)
 

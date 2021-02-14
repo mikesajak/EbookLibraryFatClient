@@ -6,8 +6,8 @@ import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
 import com.mikesajak.ebooklib.app.model.BookDtoConverter
 import com.mikesajak.ebooklib.app.reader._
-import com.mikesajak.ebooklib.app.rest.{BookServerController, BookServerControllerSttp, ServerConnectionService}
-import com.mikesajak.ebooklib.app.ui.{ActionsController, BookDataProviderFactory, ResourceManager}
+import com.mikesajak.ebooklib.app.rest.{BookServerService, BookServerServiceSttp, ServerConnectionService}
+import com.mikesajak.ebooklib.app.ui.{ActionsController, ResourceManager}
 import com.mikesajak.ebooklib.app.util.EventBus
 import net.codingwell.scalaguice.ScalaModule
 
@@ -42,11 +42,6 @@ class ApplicationContext extends AbstractModule with ScalaModule {
   @Singleton
   def bookFormatDataReader(bookFormatResolver: BookFormatResolver, bookFormatDataParsers: Seq[BookFormatDataParser]) =
     new BookFormatDataReader(bookFormatResolver, bookFormatDataParsers)
-
-  @Provides
-  @Singleton
-  def bookDataProviderFactory(bookServerController: BookServerController) =
-    new BookDataProviderFactory(bookServerController)
 
   @Provides
   @Singleton
@@ -88,9 +83,9 @@ class UIContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def actionsController(appController: AppController, bookServerController: BookServerController,
+  def actionsController(appController: AppController, bookServerService: BookServerService,
                         eventBus: EventBus, bookFormatDataReader: BookFormatDataReader) =
-    new ActionsController(appController, bookServerController, eventBus, bookFormatDataReader)
+    new ActionsController(appController, bookServerService, eventBus, bookFormatDataReader)
 }
 
 class WebContext extends AbstractModule with ScalaModule {
@@ -106,16 +101,16 @@ class WebContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def serverConnectionController(bookServerController: BookServerController,
+  def serverConnectionController(bookServerService: BookServerService,
                                  appSettings: AppSettings,
                                  eventBus: EventBus) =
-    new ServerConnectionService(bookServerController, appSettings, eventBus)
+    new ServerConnectionService(bookServerService, appSettings, eventBus)
 
   @Provides
   @Singleton
-  def bookServerController(appSettings: AppSettings, bookDtoConverter: BookDtoConverter,
-                           @Named("httpCallExecutionContext") httpCallExecutionContext: ExecutionContext): BookServerController =
-    new BookServerControllerSttp(appSettings, bookDtoConverter, httpCallExecutionContext)
+  def bookServerService(appSettings: AppSettings, bookDtoConverter: BookDtoConverter,
+                        @Named("httpCallExecutionContext") httpCallExecutionContext: ExecutionContext): BookServerService =
+    new BookServerServiceSttp(appSettings, bookDtoConverter, httpCallExecutionContext)
 
   @Provides
   @Singleton

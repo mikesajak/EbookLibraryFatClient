@@ -1,5 +1,3 @@
 package com.mikesajak.ebooklib.app.dto
 
-import com.mikesajak.ebooklib.app.model.{BookFormatId, BookId}
-
-case class BookFormatMetadataDto(id: BookFormatId, bookId: BookId, formatType: String, size: Int)
+case class BookFormatMetadataDto(id: String, bookId: String, formatType: String, size: Int)

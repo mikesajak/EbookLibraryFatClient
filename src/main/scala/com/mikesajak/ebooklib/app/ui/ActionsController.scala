@@ -3,7 +3,7 @@ package com.mikesajak.ebooklib.app.ui
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.model._
 import com.mikesajak.ebooklib.app.reader.{BookFormatData, BookFormatDataReader}
-import com.mikesajak.ebooklib.app.rest.BookServerController
+import com.mikesajak.ebooklib.app.rest.BookServerService
 import com.mikesajak.ebooklib.app.ui.BookChangeType.{BookAdd, BookDelete}
 import com.mikesajak.ebooklib.app.util.EventBus
 import com.typesafe.scalalogging.Logger
@@ -22,7 +22,7 @@ import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
 class ActionsController(appController: AppController,
-                        bookServerController: BookServerController,
+                        bookServerService: BookServerService,
                         eventBus: EventBus,
                         bookFormatDataReader: BookFormatDataReader) {
   private val logger = Logger[ActionsController]
@@ -53,6 +53,10 @@ class ActionsController(appController: AppController,
     }.foreach(provider => addBook(provider, None))
   }
 
+  def handleImportMultiBooksAction(): Unit = {
+    logger.debug("handleImportMultiBooksAction")
+  }
+
   def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNavigator]): Option[(BookMetadata, Seq[BookFormatMetadata])] = {
     val layout = "/layout/edit_book_metadata1.fxml"
 
@@ -73,12 +77,12 @@ class ActionsController(appController: AppController,
     logger.debug(s"Opening book metadata dialog for add")
     openMetadataEditDialog(bookDataProvider, booksNav).foreach { case (bookMetadata, bookFormats) =>
       logger.debug(s"Metadata dialog confirmed: book:\n$bookMetadata")
-      bookServerController.addBook(bookMetadata).onComplete {
+      bookServerService.addBook(bookMetadata).onComplete {
         case Success(bookId) =>
           logger.info(s"Successfully added book metadata, bookId=$bookId")
           bookFormats.foreach { format =>
             logger.debug(s"Uploading book format: $format")
-            bookServerController.addBookFormat(bookId, bookDataProvider.bookFormat(format.formatId))
+            bookServerService.addBookFormat(bookId, bookDataProvider.bookFormat(format.formatId))
           }
           eventBus.publish(BookAddedEvent(Book(bookId, bookMetadata)))
 
@@ -102,16 +106,16 @@ class ActionsController(appController: AppController,
   }
 
   def handleRemoveBookAction(book: Book): Unit = {
-    bookServerController.deleteBook(book.id)
-                        .onComplete {
-                          case Success(_) =>
-                            eventBus.publish(BookRemovedEvent(book))
+    bookServerService.deleteBook(book.id)
+                     .onComplete {
+                       case Success(_) =>
+                         eventBus.publish(BookRemovedEvent(book))
 
-                          case Failure(exception) =>
-                            logger.warn(s"An error occurred while removing book from library.", exception)
-                            openErrorDialog("Error removing book to library", // TODO: i18
-                                            exception)
-                        }
+                       case Failure(exception) =>
+                         logger.warn(s"An error occurred while removing book from library.", exception)
+                         openErrorDialog("Error removing book to library", // TODO: i18
+                                         exception)
+                     }
   }
 
   private def openErrorDialog(title: String, exception: Throwable): Unit =
@@ -136,16 +140,7 @@ class ActionsController(appController: AppController,
       override def bookId: Option[BookId] = None
 
       override def bookMetadata: BookMetadata =
-        BookMetadata(bookFormatData.titles.mkString(", "),
-                     bookFormatData.authors,
-                     bookFormatData.keywords,
-                     bookFormatData.identifiers,
-                     bookFormatData.creationDates,
-                     bookFormatData.publisher,
-                     bookFormatData.language.toSeq,
-                     None, bookFormatData.description,
-                     bookFormatsMetadata)
-
+        BookMetadata.from(bookFormatData, bookFormatsMetadata)
 
       override def bookCover: Option[Image] =
         bookCoverData.map(coverImage => new Image(new ByteArrayInputStream(coverImage.imageData)))

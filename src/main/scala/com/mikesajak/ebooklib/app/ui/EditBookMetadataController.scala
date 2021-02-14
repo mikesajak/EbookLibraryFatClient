@@ -1,9 +1,5 @@
 package com.mikesajak.ebooklib.app.ui
 
-import java.awt.Desktop
-import java.io.{BufferedOutputStream, File, FileOutputStream}
-import java.time.LocalDate
-
 import com.google.inject.name.Names
 import com.mikesajak.ebooklib.app.ApplicationContext
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
@@ -24,6 +20,9 @@ import scalafx.scene.layout.{Priority, Region, VBox}
 import scalafx.scene.text.Text
 import scalafxml.core.macros.sfxml
 
+import java.awt.Desktop
+import java.io.{BufferedOutputStream, File, FileOutputStream}
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EditBookMetadataController {
@@ -269,16 +268,15 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     val series = if (!empty(seriesTitle)) Some(Series(seriesTitle, seriesNum))
                  else None
 
-    BookMetadata(title = titleTextField.text.value,
-                 authors = parseSeq(authorsCombo.value.value, "&"),
-                 tags = parseSeq(tagsCombo.value.value, ","),
-                 identifiers = parseSeq(identifiersTextField.text.value, ","),
-                 creationDates = parseDate(creationDateTextField.text.value).toList,
-                 publisher = parseText(publisherCombo.value.value),
-                 languages = parseSeq(languagesCombo.value.value, ","),
-                 series = series,
-                 description = parseText(descriptionTextArea.text.value),
-                 formats = Seq())
+    BookMetadata.from(title = titleTextField.text.value,
+                      authors = parseSeq(authorsCombo.value.value, "&"),
+                      tags = parseSeq(tagsCombo.value.value, ","),
+                      identifiers = parseSeq(identifiersTextField.text.value, ","),
+                      creationDates = parseDate(creationDateTextField.text.value).toList,
+                      publisher = parseText(publisherCombo.value.value),
+                      languages = parseSeq(languagesCombo.value.value, ","),
+                      series = series,
+                      description = parseText(descriptionTextArea.text.value))
   }
 
   override def bookFormats(): Seq[BookFormatMetadata] = {

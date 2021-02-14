@@ -1,36 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?><?import javafx.scene.control.*?><?import javafx.scene.image.*?><?import javafx.scene.layout.*?>
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.BookTableController">
+<?import javafx.geometry.Insets?><?import javafx.scene.control.*?><?import javafx.scene.image.Image?><?import javafx.scene.image.ImageView?><?import javafx.scene.layout.*?>
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.BookTableControllerImpl">
    <children>
-      <ToolBar prefHeight="40.0" prefWidth="200.0" VBox.vgrow="NEVER">
-        <items>
-          <Button fx:id="editMetaButton" mnemonicParsing="false" onAction="#onImportBookAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-add-book-48.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%book_table_panel.import_book.tooltip" />
-               </tooltip></Button>
-            <Separator orientation="VERTICAL" />
-            <Button fx:id="refreshListButton" mnemonicParsing="false" onAction="#onRefreshListAction">
-               <graphic>
-                  <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                     <image>
-                        <Image url="@../images/icons8-synchronize-64.png" />
-                     </image>
-                  </ImageView>
-               </graphic>
-               <tooltip>
-                  <Tooltip text="%book_table_panel.refresh_books.tooltip" />
-               </tooltip>
-            </Button>
-        </items>
-      </ToolBar>
       <HBox maxWidth="1.7976931348623157E308" spacing="5.0" VBox.vgrow="NEVER">
          <children>
             <Label alignment="CENTER_RIGHT" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />

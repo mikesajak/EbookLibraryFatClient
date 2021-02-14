@@ -17,11 +17,11 @@ import sttp.model.StatusCode
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BookServerControllerSttp(appSettings: AppSettings, bookDtoConverter: BookDtoConverter,
-                              @Named("httpCallExecutionContext") httpCallExecutionContext: ExecutionContext) extends BookServerController {
-  private val logger = Logger[BookServerControllerSttp]
+class BookServerServiceSttp(appSettings: AppSettings, bookDtoConverter: BookDtoConverter,
+                            @Named("httpCallExecutionContext") httpCallExecutionContext: ExecutionContext) extends BookServerService {
+  private val logger = Logger[BookServerServiceSttp]
 
-  private implicit val ec: ExecutionContext =
+  private implicit val ec: ExecutionContext = // for some reason injecting via @Named parameter does not work, so we have to inject manually...
     ApplicationContext.globalInjector.instance[ExecutionContext](Names.named("httpCallExecutionContext"))
 
   private val httpBackend: SttpBackend[Identity, Any] = HttpURLConnectionBackend()
@@ -160,16 +160,12 @@ class BookServerControllerSttp(appSettings: AppSettings, bookDtoConverter: BookD
     logger.debug(s"Requesting book formats metadata: GET $bookFormatsMetadataUri")
     val request = serverRequest.get(bookFormatsMetadataUri)
                                .response(asJson[Seq[BookFormatMetadataDto]])
-                               .mapResponseRight(dtos => dtos.map(mkBookFormatMetadataFromDto))
+                               .mapResponseRight(dtos => dtos.map(bookDtoConverter.bookFormatMetadataFromDto))
 
     using(HttpURLConnectionBackend()) { backend => request.send(backend) }
       .body
       .getOrThrowException("Get book formats metadata")
   }
-
-  private def mkBookFormatMetadataFromDto(dto: BookFormatMetadataDto) =
-    BookFormatMetadata(dto.id, dto.bookId, dto.formatType, None, dto.size)
-
 
   override def getBookFormat(formatId: BookFormatId): Future[BookFormat] = {
     val getBookFormatUri = uri"${appSettings.server.address}/bookFormats/$formatId"
@@ -180,11 +176,11 @@ class BookServerControllerSttp(appSettings: AppSettings, bookDtoConverter: BookD
     val addBookFormatMetadataUri = uri"${appSettings.server.address}/bookFormats/$bookId"
     logger.debug(s"Adding book format: POST $addBookFormatMetadataUri")
     val request = serverRequest.post(addBookFormatMetadataUri)
-                               .multipartBody(multipart("formatMetadata", bookFormat.metadata),
+                               .multipartBody(multipart("formatType", bookFormat.metadata.formatType),
                                               multipart("file", bookFormat.contents).fileName(bookFormat.metadata.filename.getOrElse("unknown")))
                                .response(asString)
 
-    using(HttpURLConnectionBackend()) { backend => request.send(backend) }
+    using(httpBackend) { backend => request.send(backend) }
       .body
       .getOrThrowException("Add book format metadata", msg => new AddBookFormatException(msg))
   }

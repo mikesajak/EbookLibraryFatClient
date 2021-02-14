@@ -9,11 +9,17 @@ class BookDtoConverter {
                                           dto.creationDate.toList, dto.publisher, dto.languages,
                                           dto.series.map(s => Series(s.title, s.number)),
                                           dto.description,
-                                          dto.formats.map(fmt => BookFormatMetadata(fmt.id, fmt.bookId, fmt.formatType, None, fmt.size))))
+                                          dto.formats.map(fmt => bookFormatMetadataFromDto(fmt))))
 
   def mkDtoFrom(meta: BookMetadata): BookDto =
     BookDto(None, meta.title, meta.authors, meta.tags, meta.identifiers, meta.creationDates.headOption,
             meta.publisher, meta.languages, meta.series.map(s => SeriesDto(s.title, s.number)), meta.description,
-            meta.formats.map(fmt => BookFormatMetadataDto(fmt.formatId, fmt.bookId, fmt.formatType, fmt.size)))
+            meta.formats.map(fmt => mkBookFormatMetadataDtoFrom(fmt)))
+
+  def bookFormatMetadataFromDto(dto: BookFormatMetadataDto): BookFormatMetadata =
+    BookFormatMetadata(BookFormatId(dto.id), BookId(dto.bookId), dto.formatType, None, 0)//dto.size)
+
+  def mkBookFormatMetadataDtoFrom(meta: BookFormatMetadata): BookFormatMetadataDto =
+    BookFormatMetadataDto(meta.formatId.value, meta.bookId.value, meta.formatType)//, meta.size)
 
 }

@@ -5,7 +5,7 @@ import scalafx.scene.image.Image
 
 import scala.concurrent.Future
 
-trait BookServerController {
+trait BookServerService {
   def serverInfoAsync: Future[ServerInfo]
 
   def listBooks(): Future[Seq[Book]]

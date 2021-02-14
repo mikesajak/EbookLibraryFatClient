@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.VBox?>
-
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.MainPanelController">
+<?import javafx.geometry.Insets?><?import javafx.scene.control.Label?><?import javafx.scene.image.ImageView?><?import javafx.scene.layout.*?>
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.MainPanelController">
    <children>
       <fx:include source="menu_bar.fxml" />
-      <fx:include maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="book_table.fxml" VBox.vgrow="ALWAYS" />
+      <fx:include source="tool_bar.fxml" />
+      <fx:include fx:id="bookTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" source="book_table.fxml" VBox.vgrow="ALWAYS" />
       <HBox maxWidth="1.7976931348623157E308" VBox.vgrow="NEVER">
          <children>
             <Pane maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />

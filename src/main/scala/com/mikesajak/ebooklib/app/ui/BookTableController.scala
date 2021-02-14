@@ -1,11 +1,10 @@
 package com.mikesajak.ebooklib.app.ui
 
 import com.google.common.eventbus.Subscribe
-import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.model.{Book, BookId}
-import com.mikesajak.ebooklib.app.rest.{BookServerController, ServerReconnectedEvent}
+import com.mikesajak.ebooklib.app.rest.ServerReconnectedEvent
 import com.mikesajak.ebooklib.app.ui.controls.PopOverEx
 import com.mikesajak.ebooklib.app.util.EventBus
 import com.typesafe.scalalogging.Logger
@@ -23,7 +22,7 @@ import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.{HBox, Priority}
 import scalafxml.core.macros.{nested, sfxml}
 
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.jdk.CollectionConverters.SeqHasAsJava
 import scala.util.{Failure, Success}
 
@@ -38,36 +37,36 @@ class BookRow(val book: Book, val bookFormatResolver: BookFormatResolver) {
   val formats = new StringProperty(book.metadata.formats.map(fmt => bookFormatResolver.forMimeType(fmt.formatType).description).mkString(", "))
 }
 
+trait BookTableController {
+  def init(booksProvider: BooksProvider)
+}
 
 //noinspection UnstableApiUsage
 @sfxml
-class BookTableController(booksTableView: TableView[BookRow],
-                          titleColumn: TableColumn[BookRow, String],
-                          authorsColumn: TableColumn[BookRow, String],
-                          tagsColumn: TableColumn[BookRow, String],
-                          identifiersColumn: TableColumn[BookRow, String],
-                          creationDateColumn: TableColumn[BookRow, String],
-                          publisherColumn: TableColumn[BookRow, String],
-                          languagesColumn: TableColumn[BookRow, String],
-                          formatsColumn: TableColumn[BookRow, String],
+class BookTableControllerImpl(booksTableView: TableView[BookRow],
+                              titleColumn: TableColumn[BookRow, String],
+                              authorsColumn: TableColumn[BookRow, String],
+                              tagsColumn: TableColumn[BookRow, String],
+                              identifiersColumn: TableColumn[BookRow, String],
+                              creationDateColumn: TableColumn[BookRow, String],
+                              publisherColumn: TableColumn[BookRow, String],
+                              languagesColumn: TableColumn[BookRow, String],
+                              formatsColumn: TableColumn[BookRow, String],
 
-                          filterTextFieldHBox: HBox,
-                          searchHistoryButton: Button,
+                              filterTextFieldHBox: HBox,
+                              searchHistoryButton: Button,
 
-                          @nested[BookDetailsPreviewControllerImpl]
-                          bookPreviewDetailsPanelController: BookDetailsPreviewController,
+                              @nested[BookDetailsPreviewControllerImpl]
+                              bookPreviewDetailsPanelController: BookDetailsPreviewController,
 
-                          bookDataProviderFactory: BookDataProviderFactory,
-                          appSettings: AppSettings,
-                          appController: AppController,
-                          bookServerController: BookServerController,
-                          actionsController: ActionsController,
-                          eventBus: EventBus,
-                          bookFormatResolver: BookFormatResolver,
-                          implicit val resourceMgr: ResourceManager) {
+                              appSettings: AppSettings,
+                              actionsController: ActionsController,
+                              eventBus: EventBus,
+                              bookFormatResolver: BookFormatResolver,
+                              implicit val resourceMgr: ResourceManager) extends BookTableController {
   import ResourceManager._
 
-  private val logger = Logger[BookTableController]
+  private val logger = Logger[BookTableControllerImpl]
 
   implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
@@ -75,56 +74,6 @@ class BookTableController(booksTableView: TableView[BookRow],
   private var bookRowsMap = Map[BookId, BookRow]()
   private val filteredRows = new FilteredBuffer(bookRows)
   private val sortedRows = new SortedBuffer(filteredRows)
-
-  private var booksNavigator = BooksCollectionNavigator.empty
-
-  titleColumn.cellValueFactory = { _.value.title }
-  authorsColumn.cellValueFactory = { _.value.authors }
-  tagsColumn.cellValueFactory = { _.value.tags }
-  identifiersColumn.cellValueFactory = { _.value.identifiers }
-  creationDateColumn.cellValueFactory = { _.value.creationDate }
-  publisherColumn.cellValueFactory = { _.value.publisher }
-  languagesColumn.cellValueFactory = { _.value.languages }
-  formatsColumn.cellValueFactory = { _.value.formats }
-
-  booksTableView.columns.zip(appSettings.booksTable.columnWidths)
-          .foreach { case (column, width) => column.setPrefWidth(width) }
-
-  booksTableView.rowFactory = { tableView =>
-    val row = new TableRow[BookRow]()
-
-    row.contextMenu = new ContextMenu() {
-      private val removeBookItem = new MenuItem() {
-        text = "Remove book" // TODO: i18
-        onAction = { event =>
-          actionsController.handleRemoveBookAction(row.item.value.book)
-        }
-      }
-      items.add(removeBookItem)
-    }
-
-    row.handleEvent(MouseEvent.MouseClicked) { event: MouseEvent =>
-      if (!row.isEmpty) {
-        event.button match {
-          case MouseButton.Primary =>
-            val book = row.item.value.book
-            val provider = bookDataProviderFactory.getServerBookDataProvider(book)
-            event.clickCount match {
-              case 1 => bookPreviewDetailsPanelController.initBook(provider)
-              case 2 => actionsController.editBook(provider, None)
-            }
-          case MouseButton.Secondary =>
-          case MouseButton.Middle =>
-          case _ =>
-        }
-      }
-    }
-    row
-  }
-
-  booksTableView.items = sortedRows
-
-  eventBus.register(this)
 
   private val filterTextField = {
     val tf = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
@@ -139,11 +88,72 @@ class BookTableController(booksTableView: TableView[BookRow],
   }
   filterTextFieldHBox.children.setAll(filterTextField)
 
-  refreshBooks()
+  private var booksNavigator = BooksCollectionNavigator.empty
+  private var booksProvider: BooksProvider = _
+
+  def init(booksProvider: BooksProvider): Unit = {
+    this.booksProvider = booksProvider
+
+    titleColumn.cellValueFactory = {_.value.title}
+    authorsColumn.cellValueFactory = {_.value.authors}
+    tagsColumn.cellValueFactory = {_.value.tags}
+    identifiersColumn.cellValueFactory = {_.value.identifiers}
+    creationDateColumn.cellValueFactory = {_.value.creationDate}
+    publisherColumn.cellValueFactory = {_.value.publisher}
+    languagesColumn.cellValueFactory = {_.value.languages}
+    formatsColumn.cellValueFactory = {_.value.formats}
+
+    booksTableView.columns.zip(appSettings.booksTable.columnWidths)
+                  .foreach { case (column, width) => column.setPrefWidth(width) }
+
+    booksTableView.rowFactory = { tableView =>
+      val row = new TableRow[BookRow]()
+
+      row.contextMenu = new ContextMenu() {
+        private val removeBookItem = new MenuItem() {
+          text = "Remove book" // TODO: i18
+          onAction = { event =>
+            actionsController.handleRemoveBookAction(row.item.value.book)
+          }
+        }
+        items.add(removeBookItem)
+      }
+
+      row.handleEvent(MouseEvent.MouseClicked) { event: MouseEvent =>
+        if (!row.isEmpty) {
+          event.button match {
+            case MouseButton.Primary =>
+              val book = row.item.value.book
+              val provider = booksProvider.getBookDataProvider(book)
+              event.clickCount match {
+                case 1 => bookPreviewDetailsPanelController.initBook(provider)
+                case 2 => actionsController.editBook(provider, None)
+              }
+            case MouseButton.Secondary =>
+            case MouseButton.Middle =>
+            case _ =>
+          }
+        }
+      }
+      row
+    }
+
+    booksTableView.items = sortedRows
+
+    eventBus.register(this)
+
+    refreshBooks()
+  }
 
   @Subscribe
   def refreshBooks(serverReconnectedEvent: ServerReconnectedEvent): Unit = {
     logger.info(s"Server connection reestablished - refreshing books")
+    refreshBooks()
+  }
+
+  @Subscribe
+  def refreshBooks(refreshBooksAction: RefreshBooksAction): Unit = {
+    logger.debug(s"Refresh books event received")
     refreshBooks()
   }
 
@@ -154,20 +164,20 @@ class BookTableController(booksTableView: TableView[BookRow],
   }
 
   def refreshBooks(): Unit = {
-    val searchQuery = filterTextField.text.value
+    val searchQuery = Option(filterTextField.text.value).filter(q => !q.isBlank)
     logger.debug(s"set filter action: $searchQuery")
-    readBooks(if (searchQuery.isBlank) None else Some(searchQuery))
+    readBooks(searchQuery)
   }
 
   def readBooks(searchQuery: Option[String]=None): Unit = {
     logger.debug("Loading books in the background")
-    searchQuery.map(query => bookServerController.searchBooks(query))
-               .getOrElse(bookServerController.listBooks())
-               .onComplete {
-                 case Success(books) =>
-                   Platform.runLater { updateBooksTable(books) }
-                 case Failure(exception) => logger.warn(s"Error fetching list of books", exception)
-               }
+    Future(booksProvider.readBooks(searchQuery).get)
+        .onComplete {
+          case Success(books) =>
+            Platform.runLater { updateBooksTable(books) }
+          case Failure(exception) =>
+            logger.warn(s"Error fetching list of books", exception)
+        }
   }
 
   private def updateBooksTable(books: Seq[Book]): Unit = {
@@ -175,14 +185,6 @@ class BookTableController(booksTableView: TableView[BookRow],
     val rows = books.map(new BookRow(_, bookFormatResolver))
     bookRowsMap = rows.map(row => (row.book.id, row)).toMap
     bookRows.setAll(rows.asJava)
-  }
-
-  def onImportBookAction(): Unit = {
-    actionsController.handleImportBookAction()
-  }
-
-  def onRefreshListAction(): Unit = {
-    refreshBooks()
   }
 
   var filterHistoryPopoverVisible = false

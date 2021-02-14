@@ -1,8 +1,5 @@
 package com.mikesajak.ebooklib.app.rest
 
-import java.time.LocalDateTime
-import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
-
 import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.model.ServerInfo
 import com.mikesajak.ebooklib.app.rest.ConnectionStatus.{Connected, Disconnected, Warning}
@@ -10,6 +7,8 @@ import com.mikesajak.ebooklib.app.util.EventBus
 import com.typesafe.scalalogging.Logger
 import enumeratum.{EnumEntry, _}
 
+import java.time.LocalDateTime
+import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
 import scala.collection.immutable
 import scala.concurrent.ExecutionContextExecutor
 import scala.util.{Failure, Success}
@@ -36,7 +35,7 @@ object ServerStatus{
   def disconnected(): ServerStatus = ServerStatus(ConnectionStatus.Disconnected, None)
 }
 
-class ServerConnectionService(serverController: BookServerController,
+class ServerConnectionService(bookServerService: BookServerService,
                               appSettings: AppSettings,
                               eventBus: EventBus) {
   private val logger = Logger[ServerConnectionService]
@@ -65,7 +64,7 @@ class ServerConnectionService(serverController: BookServerController,
 
 
   private def updateServerStatus(): Unit = {
-    serverController.serverInfoAsync.onComplete{ triedServerInfo =>
+    bookServerService.serverInfoAsync.onComplete{ triedServerInfo =>
       val oldServerStatus = serverStatus
       triedServerInfo match {
         case Success(serverInfo) =>
