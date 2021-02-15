@@ -4,11 +4,11 @@ import com.google.common.eventbus.Subscribe
 import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.rest.{BookServerService, ConnectionStatus, ServerConnectionService, ServerStatus}
 import com.mikesajak.ebooklib.app.util.EventBus
-import com.typesafe.scalalogging.Logger
 import scalafx.application.Platform
 import scalafx.scene.control.Label
 import scalafx.scene.image.ImageView
 import scalafxml.core.macros.{nested, sfxml}
+import scribe.Logging
 
 //noinspection UnstableApiUsage
 @sfxml
@@ -19,8 +19,7 @@ class MainPanelController(serverStatusLabel: Label,
                           eventBus: EventBus,
                           bookServerService: BookServerService,
                           serverConnectionController: ServerConnectionService,
-                          implicit val resourceMgr: ResourceManager) {
-  private val logger = Logger[MainPanelController]
+                          implicit val resourceMgr: ResourceManager) extends Logging {
 
   bookTableController.init(new BookServerBooksProvider(bookServerService))
 

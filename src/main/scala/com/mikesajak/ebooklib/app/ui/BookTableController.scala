@@ -7,7 +7,6 @@ import com.mikesajak.ebooklib.app.model.{Book, BookId}
 import com.mikesajak.ebooklib.app.rest.ServerReconnectedEvent
 import com.mikesajak.ebooklib.app.ui.controls.PopOverEx
 import com.mikesajak.ebooklib.app.util.EventBus
-import com.typesafe.scalalogging.Logger
 import org.controlsfx.control.PopOver
 import org.controlsfx.control.textfield.{CustomTextField, TextFields}
 import scalafx.Includes._
@@ -21,6 +20,7 @@ import scalafx.scene.image.ImageView
 import scalafx.scene.input.{MouseButton, MouseEvent}
 import scalafx.scene.layout.{HBox, Priority}
 import scalafxml.core.macros.{nested, sfxml}
+import scribe.Logging
 
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.jdk.CollectionConverters.SeqHasAsJava
@@ -38,7 +38,7 @@ class BookRow(val book: Book, val bookFormatResolver: BookFormatResolver) {
 }
 
 trait BookTableController {
-  def init(booksProvider: BooksProvider)
+  def init(booksProvider: BooksProvider): Unit
 }
 
 //noinspection UnstableApiUsage
@@ -63,10 +63,8 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
                               actionsController: ActionsController,
                               eventBus: EventBus,
                               bookFormatResolver: BookFormatResolver,
-                              implicit val resourceMgr: ResourceManager) extends BookTableController {
+                              implicit val resourceMgr: ResourceManager) extends BookTableController with Logging {
   import ResourceManager._
-
-  private val logger = Logger[BookTableControllerImpl]
 
   implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 

@@ -1,25 +1,17 @@
 package com.mikesajak.ebooklib.app.util
 
 import com.google.common.eventbus.{DeadEvent, Subscribe}
-import com.typesafe.scalalogging.Logger
+import scribe.Logging
 
 //noinspection UnstableApiUsage
-class EventBus {
+class EventBus extends Logging {
   private val eventBus = new com.google.common.eventbus.EventBus("App event bus")
-  private val logger = Logger[EventBus]
   eventBus.register(new DeadEventHandler)
 
-  def logScope[A](name: => String)(code: () => A): A = {
-    logger.trace(s"Start: $name")
-    val r = code()
-    logger.trace(s"End: $name")
-    r
-  }
-
   def publish[A](event: A): Unit = {
-    logScope(s"Publishing event: $event") { () =>
-      eventBus.post(event)
-    }
+    logger.trace(s"Publishing event $event")
+    eventBus.post(event)
+    logger.trace(s"Event published, event=$event")
   }
 
   def register(subscriber: AnyRef): Unit = eventBus.register(subscriber)
@@ -28,10 +20,9 @@ class EventBus {
 }
 
 //noinspection UnstableApiUsage
-class DeadEventHandler {
-  private val logger = Logger[DeadEventHandler]
+class DeadEventHandler extends Logging {
   @Subscribe
   def handleDeadEvent(de: DeadEvent): Unit = {
-    logger.debug(s"$de")
+    logger.debug(s"Dead event (not-delivered): $de")
   }
 }

@@ -4,8 +4,8 @@ import com.mikesajak.ebooklib.app.config.AppSettings
 import com.mikesajak.ebooklib.app.model.ServerInfo
 import com.mikesajak.ebooklib.app.rest.ConnectionStatus.{Connected, Disconnected, Warning}
 import com.mikesajak.ebooklib.app.util.EventBus
-import com.typesafe.scalalogging.Logger
 import enumeratum.{EnumEntry, _}
+import scribe.Logging
 
 import java.time.LocalDateTime
 import java.util.concurrent.{ScheduledThreadPoolExecutor, TimeUnit}
@@ -37,8 +37,7 @@ object ServerStatus{
 
 class ServerConnectionService(bookServerService: BookServerService,
                               appSettings: AppSettings,
-                              eventBus: EventBus) {
-  private val logger = Logger[ServerConnectionService]
+                              eventBus: EventBus) extends Logging {
   implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
   @volatile

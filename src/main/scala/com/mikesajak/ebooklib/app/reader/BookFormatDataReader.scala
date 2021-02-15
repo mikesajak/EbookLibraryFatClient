@@ -4,13 +4,13 @@ import com.google.common.base.Stopwatch
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.CoverImage
 import com.mikesajak.ebooklib.app.util.Util
-import com.typesafe.scalalogging.Logger
+import scribe.Logging
 
 import java.io.{ByteArrayInputStream, File}
 import java.nio.file.{Files, Paths}
 
-class BookFormatDataReader(bookFormatResolver: BookFormatResolver, bookFormatDataParsers: Seq[BookFormatDataParser]) {
-  private val logger = Logger[BookFormatDataReader]
+class BookFormatDataReader(bookFormatResolver: BookFormatResolver, bookFormatDataParsers: Seq[BookFormatDataParser])
+    extends Logging {
 
   def readFormat(bookFile: File): Option[(BookFormatData, Option[CoverImage], Array[Byte])] = {
     val bookData = Files.readAllBytes(Paths.get(bookFile.getAbsolutePath))

@@ -6,7 +6,6 @@ import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.{Book, BookFormatMetadata, BookMetadata, Series}
 import com.mikesajak.ebooklib.app.ui.UIUtils.bindHeight
 import com.mikesajak.ebooklib.app.util.Util.using
-import com.typesafe.scalalogging.Logger
 import javafx.scene.input.MouseButton
 import javafx.scene.{control => jfxctrl}
 import javafx.{scene => jfxs}
@@ -19,6 +18,7 @@ import scalafx.scene.image.{Image, ImageView}
 import scalafx.scene.layout.{Priority, Region, VBox}
 import scalafx.scene.text.Text
 import scalafxml.core.macros.sfxml
+import scribe.Logging
 
 import java.awt.Desktop
 import java.io.{BufferedOutputStream, File, FileOutputStream}
@@ -90,10 +90,9 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
                                      bookFormatResolver: BookFormatResolver,
                                      implicit val resourceMgr: ResourceManager)
-    extends EditBookMetadataController {
+    extends EditBookMetadataController with Logging {
   import ResourceManager._
 
-  private val logger = Logger[EditBookMetadataControllerImpl]
   private implicit val ec: ExecutionContext =
     ApplicationContext.globalInjector.instance[ExecutionContext](Names.named("externalOpenExecutionContext"))
 

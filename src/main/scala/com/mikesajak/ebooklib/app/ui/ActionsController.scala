@@ -6,7 +6,6 @@ import com.mikesajak.ebooklib.app.reader.{BookFormatData, BookFormatDataReader}
 import com.mikesajak.ebooklib.app.rest.BookServerService
 import com.mikesajak.ebooklib.app.ui.BookChangeType.{BookAdd, BookDelete}
 import com.mikesajak.ebooklib.app.util.EventBus
-import com.typesafe.scalalogging.Logger
 import enumeratum.{Enum, EnumEntry}
 import scalafx.Includes._
 import scalafx.application.Platform
@@ -14,6 +13,7 @@ import scalafx.scene.control.ButtonType
 import scalafx.scene.image.Image
 import scalafx.scene.layout.Region
 import scalafx.stage.FileChooser
+import scribe.Logging
 
 import java.io.{ByteArrayInputStream, File}
 import scala.collection.immutable
@@ -24,8 +24,7 @@ import scala.util.{Failure, Success}
 class ActionsController(appController: AppController,
                         bookServerService: BookServerService,
                         eventBus: EventBus,
-                        bookFormatDataReader: BookFormatDataReader) {
-  private val logger = Logger[ActionsController]
+                        bookFormatDataReader: BookFormatDataReader) extends Logging {
 
   private implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 

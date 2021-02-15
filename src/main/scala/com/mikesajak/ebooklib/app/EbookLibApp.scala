@@ -3,17 +3,18 @@ package com.mikesajak.ebooklib.app
 import com.google.inject.Key
 import com.mikesajak.ebooklib.app.config.Config
 import com.mikesajak.ebooklib.app.ui.{ResourceManager, UILoader}
-import com.typesafe.scalalogging.Logger
 import scalafx.Includes._
 import scalafx.animation.{KeyFrame, KeyValue, Timeline}
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.application.{JFXApp, Platform}
 import scalafx.scene.Scene
 import scalafx.util.Duration
+import scribe.Logging
 
-object EbookLibApp extends JFXApp {
-  private val logger = Logger("Main")
+object EbookLibApp extends JFXApp with Logging {
   private val mainPanelDef: String = "/layout/main_panel.fxml"
+
+  ScribeCfg.initScribeLogging()
 
   logger.info(s"EbookLibApp starting")
 

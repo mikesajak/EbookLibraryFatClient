@@ -17,9 +17,9 @@ class BookDtoConverter {
             meta.formats.map(fmt => mkBookFormatMetadataDtoFrom(fmt)))
 
   def bookFormatMetadataFromDto(dto: BookFormatMetadataDto): BookFormatMetadata =
-    BookFormatMetadata(BookFormatId(dto.id), BookId(dto.bookId), dto.formatType, None, 0)//dto.size)
+    BookFormatMetadata(BookFormatId(dto.id), BookId(dto.bookId), dto.formatType, None, dto.size)
 
   def mkBookFormatMetadataDtoFrom(meta: BookFormatMetadata): BookFormatMetadataDto =
-    BookFormatMetadataDto(meta.formatId.value, meta.bookId.value, meta.formatType)//, meta.size)
+    BookFormatMetadataDto(meta.formatId.value, meta.bookId.value, meta.formatType, meta.size)
 
 }

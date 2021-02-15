@@ -1,14 +1,13 @@
 package com.mikesajak.ebooklib.app.ui
 
-import java.util.{Locale, ResourceBundle}
-
 import com.ibm.icu.text.MessageFormat
-import com.typesafe.scalalogging.Logger
 import scalafx.scene.image.Image
+import scribe.Logging
 
+import java.util.{Locale, ResourceBundle}
 import scala.language.implicitConversions
 
-class ResourceManager(val resourceFile: String = "ui", locale: Locale = Locale.getDefault()) {
+class ResourceManager(val resourceFile: String = "ui", locale: Locale = Locale.getDefault()) extends Logging {
 
   def getMessage(key: String): String =
     ResourceBundle.getBundle(resourceFile).getString(key)
@@ -27,7 +26,7 @@ class ResourceManager(val resourceFile: String = "ui", locale: Locale = Locale.g
       new Image(imagePath)
     } catch {
       case e: Exception =>
-        Logger[ResourceManager].warn(s"Exception thrown during getting icon $imagePath", e)
+        logger.warn(s"Exception thrown during getting icon $imagePath", e)
         throw e
     }
   }

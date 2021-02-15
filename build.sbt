@@ -38,10 +38,8 @@ libraryDependencies ++= { // guice dependency injection
 // https://mvnrepository.com/artifact/com.google.guava/guava
 libraryDependencies += "com.google.guava" % "guava" % "29.0-jre"
 
-libraryDependencies ++= { // logging
-  Seq("com.typesafe.scala-logging" %% "scala-logging" % "3.9.2",
-      "ch.qos.logback" % "logback-classic" % "1.2.3")
-}
+// logging - Scribe
+libraryDependencies += "com.outr" %% "scribe" % "3.3.3"   // Scala
 
 // ICU4J https://mvnrepository.com/artifact/com.ibm.icu/icu4j
 libraryDependencies += "com.ibm.icu" % "icu4j" % "60.2"
@@ -69,9 +67,10 @@ libraryDependencies += "com.positiondev.epublib" % "epublib-core" % "3.1" exclud
 libraryDependencies += "org.codehaus.groovy" % "groovy-jsr223" % "2.5.2"
 
 libraryDependencies ++= {
-  val sttpVersion = "3.0.0-RC5"
+  val sttpVersion = "3.1.1"
   Seq("com.softwaremill.sttp.client3" %% "core" % sttpVersion,
-      "com.softwaremill.sttp.client3" %% "circe" % sttpVersion)
+      "com.softwaremill.sttp.client3" %% "circe" % sttpVersion,
+      "com.softwaremill.sttp.client3" %% "scribe-backend" % "3.1.0")
 }
 
 // Apache Tika - mime type detection and file content scanning lib

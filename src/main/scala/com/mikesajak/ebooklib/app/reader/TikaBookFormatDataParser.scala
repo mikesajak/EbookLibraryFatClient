@@ -4,18 +4,17 @@ import com.google.common.base.Stopwatch
 import com.mikesajak.ebooklib.app.model.CoverImage
 import com.mikesajak.ebooklib.app.util.OptionOps.allEmpty
 import com.mikesajak.ebooklib.app.util.StringExtra._
-import com.typesafe.scalalogging.Logger
 import org.apache.tika.metadata.Metadata
 import org.apache.tika.parser.AutoDetectParser
 import org.apache.tika.sax.BodyContentHandler
+import scribe.Logging
 
 import java.io.InputStream
 import scala.math.{max, min}
 import scala.util.Try
 import scala.util.matching.Regex
 
-class TikaBookFormatDataParser(isbnParser: ISBNParser, dateParser: DateParser) extends BookFormatDataParser {
-  private val logger = Logger[TikaBookFormatDataParser]
+class TikaBookFormatDataParser(isbnParser: ISBNParser, dateParser: DateParser) extends BookFormatDataParser with Logging {
 
   private val AuthorKeys = List("author", "Author", "dc:author", "meta:author",
                                 "creator", "dc:creator", "pdf:docinfo:creator",

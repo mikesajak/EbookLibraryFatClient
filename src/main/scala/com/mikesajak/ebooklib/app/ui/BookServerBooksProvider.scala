@@ -2,15 +2,14 @@ package com.mikesajak.ebooklib.app.ui
 
 import com.mikesajak.ebooklib.app.model._
 import com.mikesajak.ebooklib.app.rest.BookServerService
-import com.typesafe.scalalogging.Logger
 import scalafx.scene.image.Image
+import scribe.Logging
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.util.Try
 
-class BookServerBooksProvider(bookServerService: BookServerService) extends BooksProvider {
-  private val logger = Logger[BookServerBooksProvider]
+class BookServerBooksProvider(bookServerService: BookServerService) extends BooksProvider with Logging {
 
   def readBooks(searchQuery: Option[String]=None): Try[Seq[Book]] = Try {
     logger.debug("Loading books in the background")
@@ -39,6 +38,7 @@ class ServerBookDataProvider(book: Book)(bookServerService: BookServerService) e
   }
 
   override def bookFormat(formatId: BookFormatId): BookFormat = {
-    ???
+    val eventualBookFormat = bookServerService.getBookFormat(formatId)
+    Await.result(eventualBookFormat, 3.seconds)
   }
 }
