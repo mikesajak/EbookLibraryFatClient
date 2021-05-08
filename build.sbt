@@ -11,7 +11,7 @@ scalacOptions += "-deprecation"
 //scalacOptions += "-Ypartial-unification"
 
 // Add dependency on ScalaFX library
-libraryDependencies += "org.scalafx" %% "scalafx" % "14-R19"
+libraryDependencies += "org.scalafx" %% "scalafx" % "16.0.0-R22"
 
 // Determine OS version of JavaFX binaries
 lazy val osName = System.getProperty("os.name") match {
@@ -31,20 +31,20 @@ libraryDependencies ++= { // scalafx (and fxml)
 }
 
 libraryDependencies ++= { // guice dependency injection
-  Seq("com.google.inject" % "guice" % "5.0.0-BETA-1",
-      "net.codingwell" %% "scala-guice" % "4.2.11")
+  Seq("com.google.inject" % "guice" % "5.0.1",
+      "net.codingwell" %% "scala-guice" % "5.0.0")
 }
 
 // https://mvnrepository.com/artifact/com.google.guava/guava
-libraryDependencies += "com.google.guava" % "guava" % "29.0-jre"
+libraryDependencies += "com.google.guava" % "guava" % "30.1.1-jre"
 
 // logging - Scribe
 libraryDependencies += "com.outr" %% "scribe" % "3.3.3"   // Scala
 
 // ICU4J https://mvnrepository.com/artifact/com.ibm.icu/icu4j
-libraryDependencies += "com.ibm.icu" % "icu4j" % "60.2"
+libraryDependencies += "com.ibm.icu" % "icu4j" % "69.1"
 
-libraryDependencies += "com.beachape" %% "enumeratum" % "1.5.13"
+libraryDependencies += "com.beachape" %% "enumeratum" % "1.6.1"
 
 libraryDependencies ++= { // yaml parser
   val circeVersion = "0.13.0"
@@ -57,32 +57,32 @@ libraryDependencies ++= { // yaml parser
   //libraryDependencies += "io.circe" %% "circe-config" % "0.6.1"
 }
 
-libraryDependencies += "org.controlsfx" % "controlsfx" % "9.0.0"
+libraryDependencies += "org.controlsfx" % "controlsfx" % "11.1.0"
 
 libraryDependencies += "com.positiondev.epublib" % "epublib-core" % "3.1" excludeAll(
     ExclusionRule(organization = "org.slf4j")
 )
 
 // https://mvnrepository.com/artifact/org.codehaus.groovy/groovy-jsr223
-libraryDependencies += "org.codehaus.groovy" % "groovy-jsr223" % "2.5.2"
+libraryDependencies += "org.codehaus.groovy" % "groovy-jsr223" % "3.0.8"
 
 libraryDependencies ++= {
-  val sttpVersion = "3.1.1"
+  val sttpVersion = "3.3.1"
   Seq("com.softwaremill.sttp.client3" %% "core" % sttpVersion,
       "com.softwaremill.sttp.client3" %% "circe" % sttpVersion,
-      "com.softwaremill.sttp.client3" %% "scribe-backend" % "3.1.0")
+      "com.softwaremill.sttp.client3" %% "scribe-backend" % sttpVersion)
 }
 
 // Apache Tika - mime type detection and file content scanning lib
 libraryDependencies ++= {
-  val tikaVersion = "1.24.1"
-  val bouncyCastleVersion = "1.66"
+  val tikaVersion = "1.26"
+  val bouncyCastleVersion = "1.68"
   Seq("org.apache.tika" % "tika-core" % tikaVersion,
       "org.apache.tika" % "tika-parsers" % tikaVersion,
-      "org.xerial" % "sqlite-jdbc" % "3.8.10.1",
-      "org.apache.pdfbox" % "pdfbox" % "2.0.21",
+      "org.xerial" % "sqlite-jdbc" % "3.34.0",
+      "org.apache.pdfbox" % "pdfbox" % "2.0.23",
       "org.apache.pdfbox" % "jbig2-imageio" % "3.0.3",
-      "com.github.jai-imageio" % "jai-imageio-core" % "1.3.0",
+      "com.github.jai-imageio" % "jai-imageio-core" % "1.4.0",
       "org.bouncycastle" % "bcprov-jdk15on" % bouncyCastleVersion,
       "org.bouncycastle" % "bcmail-jdk15on" % bouncyCastleVersion,
       "org.bouncycastle" % "bcpkix-jdk15on" % bouncyCastleVersion)
