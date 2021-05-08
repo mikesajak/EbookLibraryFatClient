@@ -146,11 +146,16 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
 
     val filename = selectedBookData.filename.map(name => name.replaceFirst("(.+/)?(.+)$", "$2"))
 
+    val suffix = extension.map(ext => s".$ext")
+                          .orElse(filename)
+                          .getOrElse("")
+
     val tempFile = File.createTempFile(s"EbookLibraryClient-", //${filename.getOrElse("")}",
-                                       s"${filename.getOrElse(extension.get)}")
+                                       suffix)
     using(new BufferedOutputStream(new FileOutputStream(tempFile))) { outStream =>
       outStream.write(bookFormat.contents)
     }
+    tempFile.deleteOnExit()
 
     logger.debug(s"Running desktop application for (temporary book file: ${tempFile.getCanonicalPath}")
     Desktop.getDesktop.open(tempFile)

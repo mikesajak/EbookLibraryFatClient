@@ -19,7 +19,7 @@ class BookServerServiceSttp(appSettings: AppSettings, bookDtoConverter: BookDtoC
                             @Named("httpCallExecutionContext") httpCallExecutionContext: ExecutionContext)
     extends BookServerService with Logging {
 
-  private implicit val ec: ExecutionContext = // for some reason injecting via @Named parameter does not work, so we have to inject manually...
+  private implicit val ec: ExecutionContext = // for some reason injecting via @Named parameter does not work, so I have to inject manually :(
     ApplicationContext.globalInjector.instance[ExecutionContext](Names.named("httpCallExecutionContext"))
 
   private val rawHttpBackend = HttpURLConnectionBackend()
@@ -109,7 +109,7 @@ class BookServerServiceSttp(appSettings: AppSettings, bookDtoConverter: BookDtoC
   }
 
   override def getBookCover(bookId: BookId): Option[Image] = {
-    val coverImgUrl = s"${appSettings.server.address}/coverImages/$bookId"
+    val coverImgUrl = s"${appSettings.server.address}/books/$bookId/cover"
     val image =
       try {
         new Image(coverImgUrl, true)
@@ -124,7 +124,7 @@ class BookServerServiceSttp(appSettings: AppSettings, bookDtoConverter: BookDtoC
 
 
   override def deleteBookCover(bookId: BookId): Future[Unit] = Future {
-    val removeCoverUri = uri"${appSettings.server.address}/coverImages/$bookId"
+    val removeCoverUri = uri"${appSettings.server.address}/books/$bookId/cover"
     logger.debug(s"Removing book cover: DELETE $removeCoverUri")
 
     val request = serverRequest.delete(removeCoverUri)
@@ -134,22 +134,23 @@ class BookServerServiceSttp(appSettings: AppSettings, bookDtoConverter: BookDtoC
            .getOrThrowException(s"Delete book cover for bookId=$bookId", msg => new DeleteBookCoverException(msg))
   }
 
-  override def getBookFormatIds(bookId: BookId): Future[Seq[BookFormatId]] = Future {
-    val bookFormatsUri = uri"${appSettings.server.address}/bookFormats/$bookId"
-    logger.debug(s"Requesting book format Ids: GET $bookFormatsUri")
-    val request = serverRequest.get(bookFormatsUri)
-                               .response(asJson[Seq[BookFormatId]])
+//  override def getBookFormatIds(bookId: BookId): Future[Seq[BookFormatId]] = Future {
+//    val bookFormatsUri = uri"${appSettings.server.address}/bookFormats/$bookId"
+//    logger.debug(s"Requesting book format Ids: GET $bookFormatsUri")
+//    val request = serverRequest.get(bookFormatsUri)
+//                               .response(asJson[Seq[BookFormatId]])
+//
+//    request.send(httpBackend)
+//           .body
+//           .getOrThrowException("Get book format ids")
+//  }
 
-    request.send(httpBackend)
-           .body
-           .getOrThrowException("Get book format ids")
-  }
-
-  override def getBookFormatMetadata(bookId: BookId, formatId: BookFormatId): Future[BookFormatMetadata] = Future {
-    val bookFormatMetadataUri = uri"${appSettings.server.address}/bookFormats/$bookId/$formatId/metadata"
+  override def getBookFormatMetadata(formatId: BookFormatId): Future[BookFormatMetadata] = Future {
+    val bookFormatMetadataUri = uri"${appSettings.server.address}/bookFormats/$formatId"
     logger.debug(s"Requesting book format metadata: GET $bookFormatMetadataUri")
     val request = serverRequest.get(bookFormatMetadataUri)
-                               .response(asJson[BookFormatMetadata])
+                               .response(asJson[BookFormatMetadataDto])
+                               .mapResponseRight(bookDtoConverter.bookFormatMetadataFromDto)
 
     request.send(httpBackend)
            .body
@@ -157,7 +158,7 @@ class BookServerServiceSttp(appSettings: AppSettings, bookDtoConverter: BookDtoC
   }
 
   override def getBookFormatsMetadata(bookId: BookId): Future[Seq[BookFormatMetadata]] = Future {
-    val bookFormatsMetadataUri = uri"${appSettings.server.address}/bookFormats/$bookId"
+    val bookFormatsMetadataUri = uri"${appSettings.server.address}/books/$bookId/formats"
     logger.debug(s"Requesting book formats metadata: GET $bookFormatsMetadataUri")
     val request = serverRequest.get(bookFormatsMetadataUri)
                                .response(asJson[Seq[BookFormatMetadataDto]])
@@ -168,13 +169,20 @@ class BookServerServiceSttp(appSettings: AppSettings, bookDtoConverter: BookDtoC
            .getOrThrowException("Get book formats metadata")
   }
 
-  override def getBookFormat(formatId: BookFormatId): Future[BookFormat] = {
-    val getBookFormatUri = uri"${appSettings.server.address}/bookFormats/$formatId"
-    ???
+  override def getBookFormat(formatId: BookFormatId): Future[Array[Byte]] = Future {
+    val bookFormatUri = uri"${appSettings.server.address}/bookFormats/$formatId/contents"
+    logger.debug(s"Requesting book format contents: GET $bookFormatUri")
+    val request = serverRequest.get(bookFormatUri)
+                               .response(asByteArray)
+
+    val body = request.send(httpBackend)
+                      .body
+    body
+           .getOrThrowException("Get book formats metadata", msg => new BookFormatFetchErrorException(msg))
   }
 
   override def addBookFormat(bookId: BookId, bookFormat: BookFormat): Future[String] = Future {
-    val addBookFormatMetadataUri = uri"${appSettings.server.address}/bookFormats/$bookId"
+    val addBookFormatMetadataUri = uri"${appSettings.server.address}/books/$bookId/formats"
     logger.debug(s"Adding book format: POST $addBookFormatMetadataUri")
     val request = serverRequest.post(addBookFormatMetadataUri)
                                .multipartBody(multipart("formatType", bookFormat.metadata.formatType),
@@ -187,18 +195,18 @@ class BookServerServiceSttp(appSettings: AppSettings, bookDtoConverter: BookDtoC
   }
 
 
-  override def deleteBookFormat(bookId: BookId, formatId: BookFormatId): Future[Unit] = Future {
-    val deleteBookFormatUri = uri"${appSettings.server.address}/bookFormats/$bookId/$formatId"
+  override def deleteBookFormat(formatId: BookFormatId): Future[Unit] = Future {
+    val deleteBookFormatUri = uri"${appSettings.server.address}/bookFormats/$formatId"
     logger.debug(s"Deleting book format: DELETE $deleteBookFormatUri")
     val request = serverRequest.get(deleteBookFormatUri) // FIXME: get??
     request.send(httpBackend) match {
       case response if response.code == StatusCode.Ok =>
-      case response => throw new DeleteBookFormatException(s"Error while deleting book format, bookId=$bookId, formatId=$formatId. Response: $response")
+      case response => throw new DeleteBookFormatException(s"Error while deleting book format, formatId=$formatId. Response: $response")
     }
 
     request.send(httpBackend)
            .body
-           .getOrThrowException(s"Delete book format, bookId=$bookId, formatId=$formatId", msg => new DeleteBookFormatException(msg))
+           .getOrThrowException(s"Delete book format, formatId=$formatId", msg => new DeleteBookFormatException(msg))
   }
 
   implicit class EitherPlus[T](either: Either[Throwable, T]) {

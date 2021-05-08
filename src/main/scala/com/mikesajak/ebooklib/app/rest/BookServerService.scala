@@ -22,15 +22,15 @@ trait BookServerService {
 
   def deleteBookCover(bookId: BookId): Future[Unit]
 
-  def getBookFormatIds(bookId: BookId): Future[Seq[BookFormatId]]
+//  def getBookFormatIds(bookId: BookId): Future[Seq[BookFormatId]]
 
-  def deleteBookFormat(bookId: BookId, formatId: BookFormatId): Future[Unit]
+  def deleteBookFormat(formatId: BookFormatId): Future[Unit]
 
-  def getBookFormatMetadata(bookId: BookId, formatId: BookFormatId): Future[BookFormatMetadata]
+  def getBookFormatMetadata(formatId: BookFormatId): Future[BookFormatMetadata]
 
   def getBookFormatsMetadata(bookId: BookId): Future[Seq[BookFormatMetadata]]
 
-  def getBookFormat(formatId: BookFormatId): Future[BookFormat]
+  def getBookFormat(formatId: BookFormatId): Future[Array[Byte]]
 
   def addBookFormat(bookId: BookId, bookFormat: BookFormat): Future[String]
 }
@@ -40,3 +40,4 @@ class AddBookFormatException(message: String) extends Exception(message)
 class DeleteBookException(message: String) extends Exception(message)
 class DeleteBookFormatException(message: String) extends Exception(message)
 class DeleteBookCoverException(message: String) extends Exception(message)
+class BookFormatFetchErrorException(message: String) extends Exception(message)

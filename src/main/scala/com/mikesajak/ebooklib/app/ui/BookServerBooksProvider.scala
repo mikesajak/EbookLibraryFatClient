@@ -38,7 +38,10 @@ class ServerBookDataProvider(book: Book)(bookServerService: BookServerService) e
   }
 
   override def bookFormat(formatId: BookFormatId): BookFormat = {
-    val eventualBookFormat = bookServerService.getBookFormat(formatId)
-    Await.result(eventualBookFormat, 3.seconds)
+    val eventualFormatMetadata = bookServerService.getBookFormatMetadata(formatId)
+    val eventualFormatData = bookServerService.getBookFormat(formatId)
+    val metadata = Await.result(eventualFormatMetadata, 3.seconds)
+    val bytes = Await.result(eventualFormatData, 3.seconds)
+    BookFormat(metadata, bytes)
   }
 }
