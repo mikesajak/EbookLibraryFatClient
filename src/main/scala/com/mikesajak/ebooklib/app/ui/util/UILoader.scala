@@ -1,7 +1,4 @@
-package com.mikesajak.ebooklib.app.ui
-
-import java.io.IOException
-import java.util.ResourceBundle
+package com.mikesajak.ebooklib.app.ui.util
 
 import com.google.inject.{Injector, Module}
 import com.mikesajak.ebooklib.app.ApplicationContext
@@ -9,13 +6,16 @@ import javafx.scene.Parent
 import scalafxml.core.FXMLLoader
 import scalafxml.guice.GuiceDependencyResolver
 
+import java.io.IOException
+import java.util.ResourceBundle
+
 object UILoader {
 
   def loadScene[CtrlType](layout: String, additionalContexts: Module*): (Parent, CtrlType) =
     loadScene[CtrlType](layout, "ui.css", "ui", additionalContexts: _*)
 
   def loadScene[CtrlType](layout: String, css: String, resourceBundle: String, additionalContexts: Module*): (Parent, CtrlType) = {
-    val (root, loader)= loadSceneImpl(layout, css, resourceBundle, additionalContexts: _*)
+    val (root, loader) = loadSceneImpl(layout, css, resourceBundle, additionalContexts: _*)
     val controller = loader.getController[CtrlType]()
     (root, controller)
   }
@@ -42,6 +42,6 @@ object UILoader {
     val root = loader.getRoot[Parent]()
     root.getStylesheets.add(getClass.getResource(s"/$css").toExternalForm)
 
-    (root,loader)
+    (root, loader)
   }
 }

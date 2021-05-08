@@ -4,7 +4,7 @@ import com.google.inject.name.Names
 import com.mikesajak.ebooklib.app.ApplicationContext
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.model.{Book, BookFormatMetadata, BookMetadata, Series}
-import com.mikesajak.ebooklib.app.ui.UIUtils.bindHeight
+import com.mikesajak.ebooklib.app.ui.util.UIUtils.bindHeight
 import com.mikesajak.ebooklib.app.util.Util.using
 import javafx.scene.input.MouseButton
 import javafx.scene.{control => jfxctrl}

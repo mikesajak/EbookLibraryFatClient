@@ -2,7 +2,8 @@ package com.mikesajak.ebooklib.app
 
 import com.google.inject.Key
 import com.mikesajak.ebooklib.app.config.Config
-import com.mikesajak.ebooklib.app.ui.{ResourceManager, UILoader}
+import com.mikesajak.ebooklib.app.ui.ResourceManager
+import com.mikesajak.ebooklib.app.ui.util.UILoader
 import scalafx.Includes._
 import scalafx.animation.{KeyFrame, KeyValue, Timeline}
 import scalafx.application.JFXApp.PrimaryStage

@@ -110,7 +110,7 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
       row.contextMenu = new ContextMenu() {
         private val removeBookItem = new MenuItem() {
           text = "Remove book" // TODO: i18
-          onAction = { event =>
+          onAction = { _ =>
             actionsController.handleRemoveBookAction(row.item.value.book)
           }
         }
@@ -143,12 +143,14 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
     refreshBooks()
   }
 
+  //noinspection ScalaUnusedSymbol
   @Subscribe
   def refreshBooks(serverReconnectedEvent: ServerReconnectedEvent): Unit = {
     logger.info(s"Server connection reestablished - refreshing books")
     refreshBooks()
   }
 
+  //noinspection ScalaUnusedSymbol
   @Subscribe
   def refreshBooks(refreshBooksAction: RefreshBooksAction): Unit = {
     logger.debug(s"Refresh books event received")
@@ -204,6 +206,7 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
 
   }
 
+  //noinspection ScalaUnusedSymbol
   def onSavedSearchesAction(ae: ActionEvent): Unit = {
     logger.debug("saved searches action")
   }

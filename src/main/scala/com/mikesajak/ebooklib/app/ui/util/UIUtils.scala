@@ -1,4 +1,4 @@
-package com.mikesajak.ebooklib.app.ui
+package com.mikesajak.ebooklib.app.ui.util
 
 import scalafx.Includes._
 import scalafx.scene.Parent
