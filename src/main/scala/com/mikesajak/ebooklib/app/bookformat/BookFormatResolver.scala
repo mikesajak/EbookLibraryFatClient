@@ -17,10 +17,11 @@ object BookFormatResolver {
 class BookFormatResolver {
   import BookFormatResolver._
 
-  val supportedFormats = List(BookFormatType(EpubContentType, "Epub ebook", "epub"),
-                              BookFormatType(PlainTextContentType, "Plain text file", "txt"),
-                              BookFormatType(PdfContentType, "PDF file", "pdf"),
-                              BookFormatType(MobiContentType, "MOBI ebook", "mobi"))
+  val supportedFormats = List(BookFormatType(EpubContentType, "Epub", "epub"),
+                              BookFormatType(PlainTextContentType, "Plain text", "txt"),
+                              BookFormatType(PdfContentType, "PDF", "pdf"),
+                              BookFormatType(MobiContentType, "MOBI", "mobi"),
+                              BookFormatType(ChmContentType, "CHM", "chm"))
 
   def forMimeType(mimeType: String): BookFormatType = {
     supportedFormats.find(bft => mimeType.startsWith(bft.contentType))

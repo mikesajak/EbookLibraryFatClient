@@ -15,8 +15,9 @@ class ChmBookFormatDataParser extends BookFormatDataParser {
       Try {
         val chmFile = new ChmFile(tmpFile.getAbsolutePath)
 
-        BookFormatData(BookFormatResolver.ChmContentType, List(chmFile.getTitle), List.empty,
-                       List.empty, List.empty, None, List.empty, None, None, None)
+        BookFormatData(contentType = BookFormatResolver.ChmContentType, titles = List(chmFile.getTitle),
+                       authors = List.empty, keywords = List.empty, creationDate = None, publicationDate = None,
+                       publisher = None, identifiers = List.empty, language = None, description = None, stats = None)
       }.toEither
     } finally {
       tmpFile.delete()

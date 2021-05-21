@@ -3,7 +3,7 @@ package com.mikesajak.ebooklib.app.ui
 import com.google.common.eventbus.Subscribe
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.config.AppSettings
-import com.mikesajak.ebooklib.app.model.{Book, BookId}
+import com.mikesajak.ebooklib.app.model.Book
 import com.mikesajak.ebooklib.app.rest.ServerReconnectedEvent
 import com.mikesajak.ebooklib.app.ui.controls.PopOverEx
 import com.mikesajak.ebooklib.app.util.EventBus
@@ -31,7 +31,8 @@ class BookRow(val book: Book, val bookFormatResolver: BookFormatResolver) {
   val authors = new StringProperty(book.metadata.authors.mkString(", "))
   val tags = new StringProperty(book.metadata.tags.mkString(", "))
   val identifiers = new StringProperty((book.metadata.identifiers :+ s"internal:${book.id}").mkString(", "))
-  val creationDate = new StringProperty(book.metadata.creationDates.map(_.toString).headOption.orNull)
+  val creationDate = new StringProperty(book.metadata.creationDate.map(_.toString).orNull) // TODO: format date
+  val publicationDate = new StringProperty(book.metadata.publicationDate.map(_.toString).orNull) // TODO: format date
   val publisher = new StringProperty(book.metadata.publisher.orNull)
   val languages = new StringProperty(book.metadata.languages.mkString(", "))
   val formats = new StringProperty(book.metadata.formats.map(fmt => bookFormatResolver.forMimeType(fmt.formatType).description).mkString(", "))
@@ -69,13 +70,13 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
   implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
   private val bookRows = ObservableBuffer[BookRow]()
-  private var bookRowsMap = Map[BookId, BookRow]()
+//  private var bookRowsMap = Map[BookId, BookRow]()
   private val filteredRows = new FilteredBuffer(bookRows)
   private val sortedRows = new SortedBuffer(filteredRows)
 
   private val filterTextField = {
     val tf = TextFields.createClearableTextField().asInstanceOf[CustomTextField]
-    tf.promptText = "Search book library"
+    tf.promptText = "Search book library" // TODO: i18
     tf.hgrow = Priority.Always
     val imageView = new ImageView("icons8-search-48.png".imgResource)
     imageView.fitWidth = 16
@@ -104,15 +105,13 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
     booksTableView.columns.zip(appSettings.booksTable.columnWidths)
                   .foreach { case (column, width) => column.setPrefWidth(width) }
 
-    booksTableView.rowFactory = { tableView =>
+    booksTableView.rowFactory = { _ =>
       val row = new TableRow[BookRow]()
 
       row.contextMenu = new ContextMenu() {
         private val removeBookItem = new MenuItem() {
-          text = "Remove book" // TODO: i18
-          onAction = { _ =>
-            actionsController.handleRemoveBookAction(row.item.value.book)
-          }
+          text = resourceMgr.getMessage("book_table_panel.context_menu.remove_book")
+          onAction = { _ => actionsController.handleRemoveBookAction(row.item.value.book) }
         }
         items.add(removeBookItem)
       }
@@ -183,27 +182,25 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
   private def updateBooksTable(books: Seq[Book]): Unit = {
     logger.debug(s"Finished loading books from server (count=${books.size}). Refreshing list.")
     val rows = books.map(new BookRow(_, bookFormatResolver))
-    bookRowsMap = rows.map(row => (row.book.id, row)).toMap
+//    bookRowsMap = rows.map(row => (row.book.id, row)).toMap
     bookRows.setAll(rows.asJava)
   }
 
   var filterHistoryPopoverVisible = false
   def onFilterHistoryAction(ae: ActionEvent): Unit = {
     logger.debug("filter history action")
+    if (!filterHistoryPopoverVisible) {
+      filterHistoryPopoverVisible = true
 
-      if (!filterHistoryPopoverVisible) {
-        filterHistoryPopoverVisible = true
-
-        new PopOverEx {
-          title = "Previous filters"
-          detachable = false
-          autoHide = true
-          headerAlwaysVisible = true
-          arrowLocation = PopOver.ArrowLocation.TOP_RIGHT
-          onHidden = _ => filterHistoryPopoverVisible = false
-        }.show(ae.source.asInstanceOf[javafx.scene.Node])
-      }
-
+      new PopOverEx {
+        title = "Previous filters" // TODO: i18
+        detachable = false
+        autoHide = true
+        headerAlwaysVisible = true
+        arrowLocation = PopOver.ArrowLocation.TOP_RIGHT
+        onHidden = _ => filterHistoryPopoverVisible = false
+      }.show(ae.source.asInstanceOf[javafx.scene.Node])
+    }
   }
 
   //noinspection ScalaUnusedSymbol

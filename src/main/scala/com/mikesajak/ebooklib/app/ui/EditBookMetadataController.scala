@@ -73,6 +73,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                                      tagsCombo: ComboBox[String],
                                      identifiersTextField: TextField,
                                      creationDateTextField: TextField,
+                                     publicationDateTextField: TextField,
                                      creationDateSelButton: Button,
                                      publisherCombo: ComboBox[String],
                                      languagesCombo: ComboBox[String],
@@ -182,7 +183,8 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
     initComboTooltip(tagsCombo, "\\s*,\\s*")
     identifiersTextField.text = book.identifiers.mkString(", ")
     initTextFieldTooltip(identifiersTextField, "\\s*,\\s*")
-    creationDateTextField.text = book.creationDates.map(_.toString).headOption.orNull
+    creationDateTextField.text = book.creationDate.map(_.toString).orNull
+    publicationDateTextField.text = book.publicationDate.map(_.toString).orNull
     publisherCombo.value = book.publisher.orNull
     initComboTooltip(publisherCombo)
     languagesCombo.value = book.languages.mkString(", ")
@@ -276,7 +278,8 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                       authors = parseSeq(authorsCombo.value.value, "&"),
                       tags = parseSeq(tagsCombo.value.value, ","),
                       identifiers = parseSeq(identifiersTextField.text.value, ","),
-                      creationDates = parseDate(creationDateTextField.text.value).toList,
+                      creationDate = parseDate(creationDateTextField.text.value),
+                      publicationDate = parseDate(publicationDateTextField.text.value),
                       publisher = parseText(publisherCombo.value.value),
                       languages = parseSeq(languagesCombo.value.value, ","),
                       series = series,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?><?import javafx.scene.control.*?><?import javafx.scene.image.Image?><?import javafx.scene.image.ImageView?><?import javafx.scene.layout.*?>
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.BookTableControllerImpl">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.BookTableControllerImpl">
    <children>
       <HBox maxWidth="1.7976931348623157E308" spacing="5.0" VBox.vgrow="NEVER">
          <children>
@@ -41,8 +41,8 @@
          <items>
             <TableView fx:id="booksTableView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="-Infinity">
               <columns>
-                <TableColumn fx:id="titleColumn" prefWidth="101.0" text="%book_table_panel.title_column.label" />
-                <TableColumn fx:id="authorsColumn" prefWidth="145.0" text="%book_table_panel.authors_column.label" />
+                <TableColumn fx:id="titleColumn" prefWidth="177.0" text="%book_table_panel.title_column.label" />
+                <TableColumn fx:id="authorsColumn" prefWidth="69.0" text="%book_table_panel.authors_column.label" />
                   <TableColumn fx:id="tagsColumn" minWidth="8.0" prefWidth="67.0" text="%book_table_panel.tags_column.label" />
                   <TableColumn fx:id="identifiersColumn" prefWidth="133.0" text="%book_table_panel.identifiers_column.label" />
                   <TableColumn fx:id="creationDateColumn" minWidth="0.0" prefWidth="119.0" text="%book_table_panel.created_column.label" />

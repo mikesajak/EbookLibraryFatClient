@@ -122,7 +122,7 @@ class TikaBookFormatDataParser(isbnParser: ISBNParser, dateParser: DateParser) e
                 else Some(BookStats(pageCount, wordCount, charCount))
 
     BookFormatData(contentType, titles, authors, keywords,
-                   (creationDates ++ publicationDates).distinct.sorted,
+                   creationDates.headOption, publicationDates.headOption,
                    publisher, identifiers, language, description, stats)
   }.toEither
 

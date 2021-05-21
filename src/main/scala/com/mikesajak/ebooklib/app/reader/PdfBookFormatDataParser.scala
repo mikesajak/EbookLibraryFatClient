@@ -36,8 +36,8 @@ class PdfBookFormatDataParser(isbnParser: ISBNParser) extends BookFormatDataPars
       isbnParser.extractISBNsFrom(pdfText)
     } else List.empty
 
-    BookFormatData(BookFormatResolver.PdfContentType, titles, author.toList, keywords, creationDate.toList,
-                   None, identifiers, None, None, None)
+    BookFormatData(BookFormatResolver.PdfContentType, titles, author.toList, keywords, creationDate,
+      publicationDate = None, publisher = None, identifiers, language = None, description = None, stats = None)
   }.toEither
 
   override def readCover(bookDataInputStream: InputStream): Option[CoverImage] = Try {

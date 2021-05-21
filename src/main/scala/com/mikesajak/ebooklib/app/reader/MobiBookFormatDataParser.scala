@@ -35,11 +35,12 @@ class MobiBookFormatDataParser(dateParser: DateParser) extends BookFormatDataPar
                               .toSeq
     val language = Option(metadata.getLanguageRecord).map(_.getLanguageCode)
     val publishersSeq = extractStringSeq(metadata.getPublisherRecords)
-    val publishers = if (publishersSeq.isEmpty) None
+    val publisher = if (publishersSeq.isEmpty) None
                      else Some(publishersSeq.mkString(", "))
-    val creationDates = metadata.getPublishingDateRecords.asScala.toSeq
-                                .map(_.getAsString("UTF-8"))
-                                .flatMap(dateStr => dateParser.parseDate(dateStr))
+
+    val publicationDates = metadata.getPublishingDateRecords.asScala.toSeq
+                                   .map(_.getAsString("UTF-8"))
+                                   .flatMap(dateStr => dateParser.parseDate(dateStr))
     val keywords = extractStringSeq(metadata.getSubjectRecords)
 
     println("MOBI records: ")
@@ -52,8 +53,9 @@ class MobiBookFormatDataParser(dateParser: DateParser) extends BookFormatDataPar
       titles = titles,
       authors = authors,
       identifiers = identifiers,
-      creationDates = creationDates,
-      publisher = publishers,
+      creationDate = publicationDates.drop(1).headOption,
+      publicationDate = publicationDates.headOption,
+      publisher = publisher,
       description = description,
       keywords = keywords,
       language = language,

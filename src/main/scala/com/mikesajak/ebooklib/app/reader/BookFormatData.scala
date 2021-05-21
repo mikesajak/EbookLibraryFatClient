@@ -1,18 +1,19 @@
 package com.mikesajak.ebooklib.app.reader
 
-import java.time.LocalDate
-
 import com.mikesajak.ebooklib.app.util.OptionOps._
 
+import java.time.LocalDate
+
 case class BookFormatData(contentType: String, titles: Seq[String], authors: Seq[String], keywords: Seq[String],
-                          creationDates: Seq[LocalDate], publisher: Option[String],
+                          creationDate: Option[LocalDate], publicationDate: Option[LocalDate], publisher: Option[String],
                           identifiers: Seq[String], language: Option[String], description: Option[String],
                           stats: Option[BookStats]) {
 
   def merge(other: BookFormatData): BookFormatData = {
     BookFormatData(contentType, (titles ++ other.titles).distinct.sorted, (authors ++ other.authors).distinct.sorted,
-                   (keywords ++ other.keywords).distinct.sorted, (creationDates ++ other.creationDates).distinct.sorted,
-                   publisher.orElse(other.publisher), (identifiers ++ other.identifiers).distinct.sorted,
+                   (keywords ++ other.keywords).distinct.sorted, creationDate.orElse(other.creationDate),
+                   publicationDate.orElse(other.publicationDate), publisher.orElse(other.publisher),
+                   (identifiers ++ other.identifiers).distinct.sorted,
                    language.orElse(other.language), description.orElse(other.description),
                    merge(stats, other.stats))
   }

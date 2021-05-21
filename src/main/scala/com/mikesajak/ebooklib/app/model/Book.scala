@@ -15,16 +15,16 @@ object BookId {
 case class Book(id: BookId, metadata: BookMetadata)
 
 case class BookMetadata(title: String, authors: Seq[String], tags: Seq[String], identifiers: Seq[String],
-                        creationDates: Seq[LocalDate], publisher: Option[String],
+                        creationDate: Option[LocalDate], publicationDate: Option[LocalDate], publisher: Option[String],
                         languages: Seq[String], series: Option[Series], description: Option[String],
                         formats: Seq[BookFormatMetadata])
 
 object BookMetadata {
   def from(title: String, authors: Seq[String], tags: Seq[String], identifiers: Seq[String],
-           creationDates: Seq[LocalDate], publisher: Option[String], languages: Seq[String],
+           creationDate: Option[LocalDate], publicationDate: Option[LocalDate], publisher: Option[String], languages: Seq[String],
            series: Option[Series], description: Option[String], formats: Seq[BookFormatMetadata] = Seq()): BookMetadata = {
     BookMetadata(title = title, authors = authors.distinct, tags = tags.distinct,
-                 identifiers = identifiers.distinct, creationDates = creationDates.distinct,
+                 identifiers = identifiers.distinct, creationDate = creationDate, publicationDate = publicationDate,
                  publisher = publisher, languages = languages.distinct, series = series,
                  description = description, formats = formats)
   }
@@ -34,7 +34,8 @@ object BookMetadata {
                  bookFormatData.authors.distinct,
                  bookFormatData.keywords.distinct,
                  bookFormatData.identifiers.distinct,
-                 bookFormatData.creationDates.distinct,
+                 bookFormatData.creationDate,
+                 bookFormatData.publicationDate,
                  bookFormatData.publisher,
                  bookFormatData.language.toSeq.distinct,
                  None, bookFormatData.description,
