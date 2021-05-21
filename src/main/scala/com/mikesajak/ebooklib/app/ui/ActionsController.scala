@@ -5,8 +5,11 @@ import com.mikesajak.ebooklib.app.model._
 import com.mikesajak.ebooklib.app.reader.{BookFormatData, BookFormatDataReader}
 import com.mikesajak.ebooklib.app.rest.BookServerService
 import com.mikesajak.ebooklib.app.ui.BookChangeType.{BookAdd, BookDelete}
+import com.mikesajak.ebooklib.app.ui.util.{CancelledException, UILoader, UIUtils}
 import com.mikesajak.ebooklib.app.util.EventBus
 import enumeratum.{Enum, EnumEntry}
+import javafx.concurrent.Worker.State
+import javafx.{concurrent => jfxc}
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.scene.control.ButtonType
@@ -17,7 +20,7 @@ import scribe.Logging
 
 import java.io.{ByteArrayInputStream, File}
 import scala.collection.immutable
-import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.{CancellationException, ExecutionContextExecutor}
 import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
@@ -30,20 +33,7 @@ class ActionsController(appController: AppController,
 
   private var lastVisitedDir = System.getProperty("user.dir")
   def handleImportBookAction(): Unit = {
-    val fileChooser = new FileChooser() {
-      initialDirectory = new File(lastVisitedDir)
-//      extensionFilters ++= bookReadersRegistry.allReaders
-//                                              .map { r =>
-//                                                val extension = bookFormatResolver.forMimeType(r.mimeType).toUpperCase
-//                                                new ExtensionFilter(extension, s"*.${extension.toLowerCase()}")
-//                                              }
-//                                              .map(ef => ef.delegate)
-
-    }
-    val fileToOpenOpt = Option(fileChooser.showOpenDialog(appController.mainStage))
-
-    lastVisitedDir = fileToOpenOpt.map(_.getParent).getOrElse(System.getProperty("user.dir"))
-
+    val fileToOpenOpt = selectSingleBook()
     logger.debug(s"Selected book file: $fileToOpenOpt")
 
     fileToOpenOpt.flatMap { fileToOpen =>
@@ -54,6 +44,120 @@ class ActionsController(appController: AppController,
 
   def handleImportMultiBooksAction(): Unit = {
     logger.debug("handleImportMultiBooksAction")
+
+    val selectedFilesOpt = selectMultipleBooks()
+    logger.debug(s"Selected book files: $selectedFilesOpt")
+
+    selectedFilesOpt.foreach { filesToOpen => loadFilesInProgressDialog(filesToOpen) }
+  }
+
+  private def loadFilesInProgressDialog(filesToOpen: Seq[File]): Unit = {
+    val layout = "/layout/progress_panel.fxml"
+
+    val task = new jfxc.Task[Seq[(File, Option[BookDataProvider])]]() with Logging {
+      private def checkCancelled(): Unit = {
+        if (isCancelled) {
+          logger.info("Task was cancelled, aborting current work by CancelledException")
+          throw CancelledException("XX")
+        }
+      }
+
+      override def call(): Seq[(File, Option[BookDataProvider])] = {
+        val result =
+          filesToOpen.zipWithIndex
+                     .map { case (bookFile, idx) =>
+                       checkCancelled()
+                       updateProgress(idx, filesToOpen.size)
+                       val bookDataProviderOpt = bookFormatDataReader.readFormat(bookFile)
+                                                                     .map { case (bookFormatData, bookCover, bookData) =>
+                                                                       createBookDataProvider(bookFile, bookData, bookFormatData, bookCover)
+                                                                     }
+                       (bookFile, bookDataProviderOpt)
+                     }
+        updateProgress(filesToOpen.size, filesToOpen.size)
+        result
+      }
+    }
+    val service = new BackgroundService(task)
+
+    val (content, ctrl) = UILoader.loadScene[ProgressPanelController](layout)
+    ctrl.init(service)
+
+    val dialog = UIUtils.mkModalDialog[Seq[(File, Option[BookDataProvider])]](appController.mainStage, content)
+    dialog.title = s"Progress"
+    dialog.dialogPane.value.buttonTypes = Seq(ButtonType.Close)
+//    val window = dialog.dialogPane.value.getScene.getWindow
+//    window.setOnCloseRequest { _ => dialog.hide() }
+
+    service.state.onChange { (_, _, state) => state match {
+      case State.FAILED | State.CANCELLED => dialog.close()
+      case State.SUCCEEDED => dialog.result = service.value.value
+      case _ =>
+    }}
+
+    dialog.onShown = _ => service.start()
+    dialog.resizable = false
+    dialog.dialogPane.value.setPrefSize(300, 50)
+    val booksDataDialogResultOpt = dialog.showAndWait()
+
+    try {
+      logger.debug("Dialog closed, cancelling service.")
+      service.cancel()
+    } catch {
+      case _: CancellationException => logger.debug(s"Background service cancelled")
+    }
+
+    booksDataDialogResultOpt.foreach(booksData =>
+                                       openBooksImportTableDialog(booksData.asInstanceOf[Seq[(File, Option[BookDataProvider])]]))
+  }
+
+  private def openBooksImportTableDialog(parsedBooksData: Seq[(File, Option[BookDataProvider])]): Unit = {
+    val layout = "/layout/import_books_panel.fxml"
+
+    logger.debug(s"Opening books import table dialog for: $parsedBooksData")
+
+    val (content,ctrl) = UILoader.loadScene[ImportBooksPanelController](layout)
+    ctrl.init(parsedBooksData)
+
+    val dialog = UIUtils.mkModalDialog[Unit](appController.mainStage, content)
+    dialog.title = "Import books" // TODO: i18
+    dialog.dialogPane.value.buttonTypes = Seq(ButtonType.Close)
+    dialog.dialogPane.value.setPrefSize(1500, 800)
+
+    dialog.showAndWait()
+  }
+
+  private def selectSingleBook(): Option[File] = selectSingleBook(_ => ())
+  private def selectSingleBook(f: FileChooser => Unit): Option[File] =
+    withBookFileChooserImpl { fc =>
+      f(fc)
+      val selectedFileOpt = Option(fc.showOpenDialog(appController.mainStage))
+      (selectedFileOpt, selectedFileOpt)
+    }
+
+  private def selectMultipleBooks(): Option[Seq[File]] = selectMultipleBooks(_ => ())
+  private def selectMultipleBooks(f: FileChooser => Unit): Option[Seq[File]] =
+    withBookFileChooserImpl { fc =>
+      f(fc)
+      val selectedFiles = Option(fc.showOpenMultipleDialog(appController.mainStage))
+      (selectedFiles.flatMap(_.headOption), selectedFiles)
+    }
+
+  private def withBookFileChooserImpl[B](f: FileChooser => (Option[File], B)): B = {
+    val fileChooser = new FileChooser() {
+      initialDirectory = new File(lastVisitedDir)
+      //      extensionFilters ++= bookReadersRegistry.allReaders
+      //                                              .map { r =>
+      //                                                val extension = bookFormatResolver.forMimeType(r.mimeType).toUpperCase
+      //                                                new ExtensionFilter(extension, s"*.${extension.toLowerCase()}")
+      //                                              }
+      //                                              .map(ef => ef.delegate)
+    }
+    val (selectedDir, result) = f(fileChooser)
+
+    lastVisitedDir = selectedDir.map(d => if (d.isDirectory) d.getAbsolutePath else d.getParent)
+                                .getOrElse(System.getProperty("user.dir"))
+    result
   }
 
   def openMetadataEditDialog(bookDataProvider: BookDataProvider, booksNav: Option[BooksNavigator]): Option[(BookMetadata, Seq[BookFormatMetadata])] = {
