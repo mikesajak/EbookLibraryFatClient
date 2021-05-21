@@ -4,7 +4,7 @@ name := "EbookLibraryFatClient"
 
 version := "0.1"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.4"
 
 scalacOptions += "-Ymacro-annotations"
 scalacOptions += "-deprecation"
@@ -39,7 +39,7 @@ libraryDependencies ++= { // guice dependency injection
 libraryDependencies += "com.google.guava" % "guava" % "30.1.1-jre"
 
 // logging - Scribe
-libraryDependencies += "com.outr" %% "scribe" % "3.3.3"   // Scala
+libraryDependencies += "com.outr" %% "scribe" % "3.3.3"
 
 // ICU4J https://mvnrepository.com/artifact/com.ibm.icu/icu4j
 libraryDependencies += "com.ibm.icu" % "icu4j" % "69.1"
