@@ -9,6 +9,7 @@ import scalafx.collections.ObservableBuffer
 import scalafx.collections.transformation.{FilteredBuffer, SortedBuffer}
 import scalafx.geometry.Pos
 import scalafx.scene.control._
+import scalafx.scene.control.cell.CheckBoxTableCell
 import scalafx.scene.image.ImageView
 import scalafxml.core.macros.sfxml
 
@@ -28,6 +29,7 @@ class ImportedBookRow(val file: File, val bookDataProvider: Option[BookDataProvi
   val publisher = StringProperty(bookDataProvider.flatMap(_.bookMetadata.publisher).orNull)
   val languages = StringProperty(bookDataProvider.map(_.bookMetadata.languages.mkString(", ")).getOrElse(""))
   val formats = StringProperty(bookDataProvider.map(_.bookMetadata.formats.map(resolveFormat).mkString(", ")).getOrElse(""))
+  val selected = BooleanProperty(bookDataProvider.isDefined)
 
   private def resolveFormat(formatMeta: BookFormatMetadata) =
     formatResolver.forMimeType(formatMeta.formatType).description
@@ -41,6 +43,7 @@ trait ImportBooksPanelController {
 class ImportBooksPanelControllerImpl(booksTableView: TableView[ImportedBookRow],
                                      filenameColumn: TableColumn[ImportedBookRow, String],
                                      statusColumn: TableColumn[ImportedBookRow, Boolean],
+                                     selectColumn: TableColumn[ImportedBookRow, Boolean],
                                      titleColumn: TableColumn[ImportedBookRow, String],
                                      authorsColumn: TableColumn[ImportedBookRow, String],
                                      identifiersColumn: TableColumn[ImportedBookRow, String],
@@ -86,6 +89,11 @@ class ImportBooksPanelControllerImpl(booksTableView: TableView[ImportedBookRow],
   statusColumn.cellValueFactory = { t =>
     BooleanProperty(t.value.bookDataProvider.isDefined).asInstanceOf[ObservableValue[Boolean, Boolean]]
   }
+
+  selectColumn.cellFactory = { tc: TableColumn[ImportedBookRow, Boolean] =>
+    new CheckBoxTableCell[ImportedBookRow, Boolean](idx => bookRows.get(idx).selected)
+  }
+
   statusColumn.cellFactory = { _: TableColumn[ImportedBookRow, Boolean] =>
     new TableCell[ImportedBookRow, Boolean]() {
       alignment = Pos.Center
@@ -103,7 +111,6 @@ class ImportBooksPanelControllerImpl(booksTableView: TableView[ImportedBookRow],
     image.fitHeight = 16
     image
   }
-
 
   titleColumn.cellValueFactory = {_.value.title}
   authorsColumn.cellValueFactory = {_.value.authors}

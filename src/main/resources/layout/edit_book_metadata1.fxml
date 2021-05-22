@@ -150,8 +150,8 @@
                         </Label>
                         <HBox spacing="2.0">
                            <children>
-                              <TextField fx:id="creationDateTextField1" maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
-                              <Button fx:id="creationDateSelButton1" mnemonicParsing="false" onAction="#handlePublicationDateSelAction">
+                              <TextField fx:id="creationDateTextField" maxWidth="1.7976931348623157E308" minWidth="0.0" HBox.hgrow="ALWAYS" />
+                              <Button fx:id="creationDateSelButton" mnemonicParsing="false" onAction="#handlePublicationDateSelAction">
                                  <graphic>
                                     <ImageView fitHeight="20.0" pickOnBounds="true" preserveRatio="true">
                                        <image>

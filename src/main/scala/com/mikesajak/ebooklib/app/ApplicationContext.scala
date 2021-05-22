@@ -7,7 +7,7 @@ import com.mikesajak.ebooklib.app.config.{AppSettings, Config, ConfigReader}
 import com.mikesajak.ebooklib.app.model.BookDtoConverter
 import com.mikesajak.ebooklib.app.reader._
 import com.mikesajak.ebooklib.app.rest.{BookServerService, BookServerServiceSttp, ServerConnectionService}
-import com.mikesajak.ebooklib.app.ui.{ActionsController, ResourceManager}
+import com.mikesajak.ebooklib.app.ui.{ActionsController, BookDataProviderFactory, ResourceManager}
 import com.mikesajak.ebooklib.app.util.EventBus
 import net.codingwell.scalaguice.ScalaModule
 
@@ -49,6 +49,10 @@ class ApplicationContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
+  def bookDataProviderFactory() = new BookDataProviderFactory()
+
+  @Provides
+  @Singleton
   def appController(config: Config) = new AppController(config)
 
   @Provides
@@ -83,9 +87,8 @@ class UIContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def actionsController(appController: AppController, bookServerService: BookServerService,
-                        eventBus: EventBus, bookFormatDataReader: BookFormatDataReader) =
-    new ActionsController(appController, bookServerService, eventBus, bookFormatDataReader)
+  def actionsController(appController: AppController, bookServerService: BookServerService, eventBus: EventBus) =
+    new ActionsController(appController, bookServerService, eventBus)
 }
 
 class WebContext extends AbstractModule with ScalaModule {

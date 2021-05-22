@@ -5,12 +5,13 @@ import com.mikesajak.ebooklib.app.model.CoverImage
 import org.apache.tika.Tika
 import org.rr.mobi4java.exth.StringRecordDelegate
 import org.rr.mobi4java.{ByteUtils, EXTHRecord, MobiMetaData, MobiReader}
+import scribe.Logging
 
 import java.io.InputStream
 import scala.jdk.CollectionConverters._
 import scala.util.Try
 
-class MobiBookFormatDataParser(dateParser: DateParser) extends BookFormatDataParser {
+class MobiBookFormatDataParser(dateParser: DateParser) extends BookFormatDataParser with Logging {
   private val mobiReader = new MobiReader()
   private val tika = new Tika()
 
@@ -43,10 +44,10 @@ class MobiBookFormatDataParser(dateParser: DateParser) extends BookFormatDataPar
                                    .flatMap(dateStr => dateParser.parseDate(dateStr))
     val keywords = extractStringSeq(metadata.getSubjectRecords)
 
-    println("MOBI records: ")
-    println(metadata.getEXTHRecords.iterator.asScala
-                    .map(r => s"${r.getRecordType} -> ${ByteUtils.getString(r.getData, "UTF8")}")
-                    .mkString("\n"))
+    logger.debug(s"""MOBI records:
+                 |${metadata.getEXTHRecords.iterator.asScala
+                            .map(r => s"${r.getRecordType} -> ${ByteUtils.getString(r.getData, "UTF8")}")
+                            .mkString("\n")}""".stripMargin)
 
     BookFormatData(
       contentType = BookFormatResolver.MobiContentType,

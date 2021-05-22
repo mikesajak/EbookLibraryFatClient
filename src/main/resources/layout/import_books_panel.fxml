@@ -4,10 +4,11 @@
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.ImportBooksPanelControllerImpl">
    <children>
       <Label maxWidth="1.7976931348623157E308" text="Label" />
-      <TableView fx:id="booksTableView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+      <TableView fx:id="booksTableView" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
         <columns>
           <TableColumn fx:id="filenameColumn" prefWidth="400.0" text="%import_book_table_panel.filename_column.label" />
             <TableColumn fx:id="statusColumn" prefWidth="57.0" text="%import_book_table_panel.status_column.label" />
+            <TableColumn fx:id="selectColumn" prefWidth="50.0" text="Select" />
           <TableColumn fx:id="titleColumn" prefWidth="250.0" text="%import_book_table_panel.title_column.label" />
             <TableColumn fx:id="authorsColumn" minWidth="7.0" prefWidth="200.0" text="%import_book_table_panel.authors_column.label" />
             <TableColumn fx:id="identifiersColumn" prefWidth="200.0" text="%import_book_table_panel.identifiers_column.label" />

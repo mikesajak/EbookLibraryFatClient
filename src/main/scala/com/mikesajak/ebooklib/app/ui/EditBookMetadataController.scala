@@ -151,8 +151,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
                           .orElse(filename)
                           .getOrElse("")
 
-    val tempFile = File.createTempFile(s"EbookLibraryClient-", //${filename.getOrElse("")}",
-                                       suffix)
+    val tempFile = File.createTempFile(s"EbookLibraryClient-", /*${filename.getOrElse("")}",*/ suffix)
     using(new BufferedOutputStream(new FileOutputStream(tempFile))) { outStream =>
       outStream.write(bookFormat.contents)
     }
@@ -224,7 +223,7 @@ class EditBookMetadataControllerImpl(titleTextField: TextField,
       }
       cell.onMouseClicked = { me =>
         if (me.getButton == MouseButton.SECONDARY) {
-          println(s"Right click on cell: $cell")
+          logger.debug(s"Right click on cell: $cell")
         }
       }
       cell
