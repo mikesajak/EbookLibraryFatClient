@@ -3,6 +3,7 @@ package com.mikesajak.ebooklib.app.ui
 import com.google.common.eventbus.Subscribe
 import com.mikesajak.ebooklib.app.bookformat.BookFormatResolver
 import com.mikesajak.ebooklib.app.config.AppSettings
+import com.mikesajak.ebooklib.app.config.ConfigEvents.BookTableColumnWidthChange
 import com.mikesajak.ebooklib.app.model.Book
 import com.mikesajak.ebooklib.app.rest.ServerReconnectedEvent
 import com.mikesajak.ebooklib.app.ui.controls.PopOverEx
@@ -102,8 +103,9 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
     languagesColumn.cellValueFactory = {_.value.languages}
     formatsColumn.cellValueFactory = {_.value.formats}
 
-    booksTableView.columns.zip(appSettings.booksTable.columnWidths)
-                  .foreach { case (column, width) => column.setPrefWidth(width) }
+    booksTableView.columns
+                  .filter(col => appSettings.booksTable.columnWidths.contains(col.getId))
+                  .foreach(col => col.setPrefWidth(appSettings.booksTable.columnWidths(col.getId)))
 
     booksTableView.rowFactory = { _ =>
       val row = new TableRow[BookRow]()
@@ -133,6 +135,10 @@ class BookTableControllerImpl(booksTableView: TableView[BookRow],
         }
       }
       row
+    }
+
+    booksTableView.columns.foreach { column =>
+      column.width.onChange { (_,_,newWidth) => eventBus.publish(BookTableColumnWidthChange(column.id.value, newWidth.intValue())) }
     }
 
     booksTableView.items = sortedRows

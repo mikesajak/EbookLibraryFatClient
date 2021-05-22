@@ -3,17 +3,17 @@
 <?import javafx.scene.control.*?><?import javafx.scene.layout.VBox?>
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mikesajak.ebooklib.app.ui.ImportBooksPanelControllerImpl">
    <children>
-      <Label text="Label" />
+      <Label maxWidth="1.7976931348623157E308" text="Label" />
       <TableView fx:id="booksTableView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
         <columns>
           <TableColumn fx:id="filenameColumn" prefWidth="400.0" text="%import_book_table_panel.filename_column.label" />
             <TableColumn fx:id="statusColumn" prefWidth="57.0" text="%import_book_table_panel.status_column.label" />
-          <TableColumn fx:id="titleColumn" prefWidth="93.0" text="%import_book_table_panel.title_column.label" />
-            <TableColumn fx:id="authorsColumn" prefWidth="75.0" text="%import_book_table_panel.authors_column.label" />
-            <TableColumn fx:id="identifiersColumn" prefWidth="75.0" text="%import_book_table_panel.identifiers_column.label" />
-            <TableColumn fx:id="createdColumn" prefWidth="75.0" text="%import_book_table_panel.created_column.label" />
-            <TableColumn fx:id="publishedColumn" prefWidth="75.0" text="%import_book_table_panel.publication_column.label" />
-            <TableColumn fx:id="publisherColumn" prefWidth="75.0" text="%import_book_table_panel.publisher_column.label" />
+          <TableColumn fx:id="titleColumn" prefWidth="250.0" text="%import_book_table_panel.title_column.label" />
+            <TableColumn fx:id="authorsColumn" minWidth="7.0" prefWidth="200.0" text="%import_book_table_panel.authors_column.label" />
+            <TableColumn fx:id="identifiersColumn" prefWidth="200.0" text="%import_book_table_panel.identifiers_column.label" />
+            <TableColumn fx:id="createdColumn" prefWidth="100.0" text="%import_book_table_panel.created_column.label" />
+            <TableColumn fx:id="publishedColumn" prefWidth="100.0" text="%import_book_table_panel.publication_column.label" />
+            <TableColumn fx:id="publisherColumn" prefWidth="100.0" text="%import_book_table_panel.publisher_column.label" />
             <TableColumn fx:id="languageColumn" prefWidth="75.0" text="%import_book_table_panel.languages_column.label" />
             <TableColumn fx:id="formatColumn" prefWidth="75.0" text="%import_book_table_panel.formats_column.label" />
         </columns>

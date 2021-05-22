@@ -41,11 +41,11 @@
          <items>
             <TableView fx:id="booksTableView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0" minWidth="-Infinity">
               <columns>
-                <TableColumn fx:id="titleColumn" prefWidth="177.0" text="%book_table_panel.title_column.label" />
-                <TableColumn fx:id="authorsColumn" prefWidth="69.0" text="%book_table_panel.authors_column.label" />
-                  <TableColumn fx:id="tagsColumn" minWidth="8.0" prefWidth="67.0" text="%book_table_panel.tags_column.label" />
-                  <TableColumn fx:id="identifiersColumn" prefWidth="133.0" text="%book_table_panel.identifiers_column.label" />
-                  <TableColumn fx:id="creationDateColumn" minWidth="0.0" prefWidth="119.0" text="%book_table_panel.created_column.label" />
+                <TableColumn fx:id="titleColumn" prefWidth="250.0" text="%book_table_panel.title_column.label" />
+                <TableColumn fx:id="authorsColumn" minWidth="0.0" prefWidth="200.0" text="%book_table_panel.authors_column.label" />
+                  <TableColumn fx:id="tagsColumn" minWidth="8.0" prefWidth="100.0" text="%book_table_panel.tags_column.label" />
+                  <TableColumn fx:id="identifiersColumn" prefWidth="100.0" text="%book_table_panel.identifiers_column.label" />
+                  <TableColumn fx:id="creationDateColumn" minWidth="0.0" prefWidth="100.0" text="%book_table_panel.created_column.label" />
                   <TableColumn fx:id="publisherColumn" prefWidth="121.0" text="%book_table_panel.publisher_column.label" />
                   <TableColumn fx:id="languagesColumn" prefWidth="126.0" text="%book_table_panel.languages_column.label" />
                   <TableColumn fx:id="formatsColumn" prefWidth="75.0" text="%book_table_panel.formats_column.label" />

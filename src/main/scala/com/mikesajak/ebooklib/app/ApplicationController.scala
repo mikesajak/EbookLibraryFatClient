@@ -6,7 +6,7 @@ import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.control.{Alert, ButtonType}
 import scalafx.stage.Stage
 
-class ApplicationController() {
+class ApplicationController {
 
   private var mainStage0: Stage =_
   private var application0: JFXApp = _
@@ -31,23 +31,12 @@ class ApplicationController() {
   def exitApplication(): Unit = exitApplication(() => false)
   def exitApplication(exitAction: () => Boolean): Unit = {
     if (canExit) {
-      // TODO: save config, close connections, etc.
-//      config.intProperty("window", "width") := mainStage.width.toInt
-//      config.intProperty("window", "height") := mainStage.height.toInt
-//      config.save()
-
       if (!exitAction())
         Platform.exit()
     }
   }
 
-  private def canExit: Boolean = {
-//    val confirm = config.boolProperty("application", "exitConfirmation").getOrElse(true)
-
-//    if (confirm)
-      askUserForExit()
-//    else true
-  }
+  private def canExit: Boolean = askUserForExit()
 
   private def askUserForExit(): Boolean = {
     val alert = new Alert(AlertType.Confirmation) {
@@ -68,5 +57,4 @@ class ApplicationController() {
 
 object ApplicationController {
   val configPath = s"${System.getProperty("user.dir")}" // fixme: for debug purposes, change this to dir in user home, e.g. .afternooncommander/ or something
-  val configFile = "afternooncommander.conf"
 }

@@ -128,9 +128,10 @@ class ConfigContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def config(reader: ConfigReader): Config = {
+  def config(reader: ConfigReader, eventBus: EventBus): Config = {
     val config = new Config(reader)
     config.load()
+    eventBus.register(config)
     config
   }
 
