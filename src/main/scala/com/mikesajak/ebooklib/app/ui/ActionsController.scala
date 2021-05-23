@@ -2,27 +2,32 @@ package com.mikesajak.ebooklib.app.ui
 
 import com.mikesajak.ebooklib.app.AppController
 import com.mikesajak.ebooklib.app.model._
+import com.mikesajak.ebooklib.app.reader.BookFormatDataReader
 import com.mikesajak.ebooklib.app.rest.BookServerService
 import com.mikesajak.ebooklib.app.ui.BookChangeType.{BookAdd, BookDelete}
 import com.mikesajak.ebooklib.app.ui.util.{UILoader, UIUtils}
 import com.mikesajak.ebooklib.app.util.EventBus
 import enumeratum.{Enum, EnumEntry}
+import javafx.concurrent.Worker
+import org.controlsfx.dialog.ProgressDialog
 import scalafx.Includes._
 import scalafx.application.Platform
 import scalafx.scene.control.ButtonType
 import scalafx.scene.layout.Region
-import scalafx.stage.FileChooser
+import scalafx.stage.{FileChooser, Modality, Stage, StageStyle}
 import scribe.Logging
 
 import java.io.File
 import scala.collection.immutable
-import scala.concurrent.{CancellationException, ExecutionContextExecutor}
+import scala.concurrent.ExecutionContextExecutor
 import scala.language.implicitConversions
 import scala.util.{Failure, Success}
 
 class ActionsController(appController: AppController,
                         bookServerService: BookServerService,
-                        eventBus: EventBus) extends Logging {
+                        eventBus: EventBus,
+                        bookFormatDataReader: BookFormatDataReader,
+                        bookDataProviderFactory: BookDataProviderFactory) extends Logging {
 
   private implicit val ec: ExecutionContextExecutor = scala.concurrent.ExecutionContext.global
 
@@ -132,27 +137,53 @@ class ActionsController(appController: AppController,
   }
 
   private def loadFilesInProgressDialog(filesToOpen: Seq[File]): Option[Seq[(File, Option[BookDataProvider])]] = {
-    val layout = "/layout/progress_panel.fxml"
+    val task = new ReadBooksTask(filesToOpen, bookFormatDataReader, bookDataProviderFactory)
+    val progressDialog = createProgessDialogForTask(task, appController.mainStage,
+                                                    "Read books", // TODO: i18
+                                                    "Read and parse book files", // TODO: i18
+                                                    "/book-reading-progress.css")
+    progressDialog.showAndWait()
+    Option(task.getValue)
+  }
 
-    val (content, ctrl) = UILoader.loadScene[ProgressPanelController](layout)
-    val dialog = UIUtils.mkModalDialog[Seq[(File, Option[BookDataProvider])]](appController.mainStage, content)
-    dialog.title = s"Progress"
-    dialog.dialogPane.value.buttonTypes = Seq(ButtonType.Close)
-    val service = ctrl.init(filesToOpen, dialog)
+  private def createProgessDialogForTask[A](task: javafx.concurrent.Task[A], owner: Stage,
+                                            title: String, header: String, stylesheet: String): ProgressDialog = {
+    val service = new BackgroundService(task)
+    val progressDialog = new ProgressDialog(task) {
+      initOwner(owner)
+      initModality(Modality.ApplicationModal)
+      initStyle(StageStyle.Utility)
+      getDialogPane.buttonTypes = Seq(ButtonType.Cancel)
 
-    dialog.resizable = false
-    dialog.dialogPane.value.setPrefSize(300, 50)
-    val booksDataDialogResultOpt = dialog.showAndWait()
+      setTitle(title)
+      setHeaderText(header)
 
-    try {
-      logger.debug("Dialog closed, cancelling service.")
-      service.cancel()
-    } catch {
-      case _: CancellationException => logger.debug(s"Background service cancelled")
+      getDialogPane.getStylesheets.clear()
+      getDialogPane.getStylesheets.add(stylesheet)
     }
 
-    booksDataDialogResultOpt.asInstanceOf[Option[Seq[(File, Option[BookDataProvider])]]]
+    progressDialog.onShown = { _ =>
+      service.getState match {
+        case Worker.State.READY =>
+          logger.debug(s"Dialog shown, starting service.")
+          service.start()
+        case state @ _ =>
+          logger.debug(s"Dialog shown, service already started ($state)")
+      }
+    }
+
+    progressDialog.onCloseRequest = { _ =>
+      service.getState match {
+        case Worker.State.SUCCEEDED =>
+        case state @ _ =>
+          logger.debug(s"Dialog closed, cancelling service ($state).")
+          service.cancel()
+      }
+    }
+
+    progressDialog
   }
+
 
   private def openBooksImportTableDialog(parsedBooksData: Seq[(File, Option[BookDataProvider])]): Unit = {
     val layout = "/layout/import_books_panel.fxml"
@@ -169,7 +200,6 @@ class ActionsController(appController: AppController,
 
     dialog.showAndWait()
   }
-
 
 
   def handleRemoveBookAction(book: Book): Unit = {

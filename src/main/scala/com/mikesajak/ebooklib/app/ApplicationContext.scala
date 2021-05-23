@@ -87,8 +87,10 @@ class UIContext extends AbstractModule with ScalaModule {
 
   @Provides
   @Singleton
-  def actionsController(appController: AppController, bookServerService: BookServerService, eventBus: EventBus) =
-    new ActionsController(appController, bookServerService, eventBus)
+  def actionsController(appController: AppController, bookServerService: BookServerService, eventBus: EventBus,
+                        bookFormatDataReader: BookFormatDataReader, bookDataProviderFactory: BookDataProviderFactory,
+                        resourceMgr: ResourceManager) =
+    new ActionsController(appController, bookServerService, eventBus, bookFormatDataReader, bookDataProviderFactory, resourceMgr)
 }
 
 class WebContext extends AbstractModule with ScalaModule {
